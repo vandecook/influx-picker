@@ -54,7 +54,7 @@ Acceptance: existing Grafana queries return the same results with the new data.
 ## M2 – InfluxDB 2 backend and selection (first usable state)
 
 - [ ] **v2 backend** as the first plugin (`/api/v2/write`, token, org, bucket, SSL option, real validation of token/org/bucket during setup).
-- [ ] **Label selection:** two labels (names configurable), resolved through the label registry, effective on registry changes without a restart.
+- [ ] **Label selection:** two labels, chosen in the UI with Home Assistant's label selector and stored by **label ID**, so renaming a label in Home Assistant does not break the selection. Resolved through the label registry, effective on registry changes without a restart.
 - [ ] **Inheritance** from device and area, can be switched off.
 - [ ] **Initial write** for newly labelled entities.
 - [ ] **Heartbeat write cycle** (configurable interval, writes only if the entity wrote nothing during the interval).

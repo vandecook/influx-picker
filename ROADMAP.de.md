@@ -54,7 +54,7 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 ## M2 – InfluxDB-2-Backend und Selektion (erster nutzbarer Stand)
 
 - [ ] **v2-Backend** als erstes Plugin (`/api/v2/write`, Token, Org, Bucket, SSL-Option, echte Prüfung von Token/Org/Bucket beim Einrichten).
-- [ ] **Label-Selektion:** zwei Labels (Namen konfigurierbar), Auflösung über die Label-Registry, Wirkung bei Registry-Änderung ohne Neustart.
+- [ ] **Label-Selektion:** zwei Labels, in der UI mit dem Label-Selector von Home Assistant gewählt und über die **Label-ID** gespeichert, damit das Umbenennen eines Labels in Home Assistant die Auswahl nicht kaputt macht. Auflösung über die Label-Registry, Wirkung bei Registry-Änderung ohne Neustart.
 - [ ] **Vererbung** von Gerät und Bereich, abschaltbar.
 - [ ] **Initialer Schreibvorgang** für neu gelabelte Entitäten.
 - [ ] **Heartbeat-Schreibzyklus** (Intervall konfigurierbar, schreibt nur, wenn die Entität im Intervall nichts geschrieben hat).
