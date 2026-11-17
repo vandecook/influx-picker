@@ -1,6 +1,6 @@
 # Roadmap: Influx Picker (`influx_picker`)
 
-[English](ROADMAP.md)
+[English](ROADMAP.en.md) · [README (Deutsch)](README.de.md)
 
 Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; in einer echten Home-Assistant-Installation lief noch nichts. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
 
