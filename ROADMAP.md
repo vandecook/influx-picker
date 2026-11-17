@@ -65,23 +65,11 @@ Acceptance: existing Grafana queries return the same results with the new data.
 - [ ] **Options flow menu:** "Labels & interval" / "Manual list" / "Overview".
 - [ ] **Two manual lists** (multi-select): "write on change" and "write on change + heartbeat".
 - [ ] **Merging** of label and manual selection (union, heartbeat wins). A hint if a manually chosen entity is already selected through a label.
-- [ ] **Overview:** number of entities by source (label directly, device, area, manual) and mode (change, heartbeat).
+- [ ] **Overview as a list** in the options flow: counts by source (label directly, device, area, manual) and mode (change, heartbeat), plus one line per entity (entity ID, source, mode). Shortened or paged for long lists.
 - [ ] **Status of manual entries:** exists / **no longer exists** / disabled.
 - [ ] **Cleanup:** option "remove missing entries".
 - [ ] **Repairs issue** when manually listed entities have been deleted.
-- [ ] The options flow keeps only a basic overview (counts and missing entries). The full overview lives in the panel (M3b).
-
-## M3b – Overview panel (decided)
-
-Goal: select and deselect entities easily, see at a glance what is exported and why.
-
-- [ ] **WebSocket API** (admin only): list tracked entities with source (label directly, device, area, manual), mode (change, heartbeat), status and last write; add/remove manual entries; clean up missing entries. Per instance.
-- [ ] **Sidebar panel** (admin only): searchable, sortable and filterable table (by source, mode, status, domain, area).
-- [ ] **Switch entities on and off from the table:** toggling assigns or removes the configured label through Home Assistant's registry, or edits the manual list for entities without a unique ID. This is the main use case of the project.
-- [ ] **Bulk actions:** select many rows and enable/disable them, or switch to heartbeat mode.
-- [ ] **Status display:** missing manual entries clearly flagged, entities selected twice (label and manual) marked, write errors per entity if available.
-- [ ] **Frontend kept simple:** a plain web component with as few dependencies and as little build tooling as feasible, so contributors can work on it.
-- [ ] **Tests:** WebSocket API unit tests; manual test checklist for the panel.
+- [ ] Until the panel exists (M9), the list in the options flow is the overview.
 
 ## M4 – Buffering, reliability, diagnostics
 
@@ -123,15 +111,28 @@ Goal: select and deselect entities easily, see at a glance what is exported and 
 - [ ] Translations de/en, documentation, HACS metadata, real repository URLs.
 - [ ] Versioning and changelog.
 
+## M9 – Overview panel (much later, after the first release)
+
+Goal: select and deselect entities easily, see at a glance what is exported and why.
+
+- [ ] **WebSocket API** (admin only): list tracked entities with source (label directly, device, area, manual), mode (change, heartbeat), status and last write; add/remove manual entries; clean up missing entries. Per instance.
+- [ ] **Sidebar panel** (admin only): searchable, sortable and filterable table (by source, mode, status, domain, area).
+- [ ] **Switch entities on and off from the table:** toggling assigns or removes the configured label through Home Assistant's registry, or edits the manual list for entities without a unique ID. This is the main use case of the project.
+- [ ] **Bulk actions:** select many rows and enable/disable them, or switch to heartbeat mode.
+- [ ] **Status display:** missing manual entries clearly flagged, entities selected twice (label and manual) marked, write errors per entity if available.
+- [ ] **Frontend kept simple:** a plain web component with as few dependencies and as little build tooling as feasible, so contributors can work on it.
+- [ ] **Tests:** WebSocket API unit tests; manual test checklist for the panel.
+
 ---
 
 ## Recommended order
 
 1. **M0** and **M1** (foundation and compatibility). The schema must be settled before production data is written.
 2. **M2** (first usable state with InfluxDB 2).
-3. **M3** (manual list, basic overview), **M3b** (panel) and **M4** (buffering, diagnostics).
+3. **M3** (manual list, overview as a list) and **M4** (buffering, diagnostics).
 4. **M5**, **M6** (InfluxDB 1 and 3).
 5. **M7**, **M8** in parallel as needed.
+6. **M9** (panel) much later, after the first release.
 
 ## Decided
 
@@ -139,7 +140,7 @@ Goal: select and deselect entities easily, see at a glance what is exported and 
 - **Multiple instances:** supported by design, one config entry per target (see M0, M7).
 - **Attributes:** like the core integration (see M1).
 - **Heartbeat marking:** field `_heartbeat`, no tag (see M1).
-- **Overview:** a dedicated panel, planned as M3b (the options flow keeps a basic overview).
+- **Overview:** starts as a list in the options flow (M3). The dedicated panel comes much later (M9).
 
 ## Open questions
 

@@ -65,23 +65,11 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [ ] **Options-Flow-Menü:** „Labels & Intervall“ / „Manuelle Liste“ / „Übersicht“.
 - [ ] **Zwei manuelle Listen** (Mehrfachauswahl): „bei Änderung schreiben“ und „bei Änderung + Heartbeat“.
 - [ ] **Zusammenführung** von Label und manueller Selektion (Vereinigung, Heartbeat gewinnt). Hinweis, wenn eine manuell gewählte Entität schon per Label erfasst wird.
-- [ ] **Übersicht:** Anzahl der Entitäten nach Quelle (Label direkt, Gerät, Bereich, manuell) und Modus (Änderung, Heartbeat).
+- [ ] **Übersicht als Liste** im Options-Flow: Anzahl nach Quelle (Label direkt, Gerät, Bereich, manuell) und Modus (Änderung, Heartbeat), dazu eine Zeile pro Entität (Entity-ID, Quelle, Modus). Bei langen Listen gekürzt oder seitenweise.
 - [ ] **Status manueller Einträge:** vorhanden / **nicht mehr vorhanden** / deaktiviert.
 - [ ] **Aufräumen:** Option „fehlende Einträge entfernen“.
 - [ ] **Repairs-Meldung**, wenn manuell gepflegte Entitäten gelöscht wurden.
-- [ ] Der Options-Flow behält nur eine einfache Übersicht (Anzahl und fehlende Einträge). Die vollständige Übersicht liegt im Panel (M3b).
-
-## M3b – Übersichts-Panel (beschlossen)
-
-Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was exportiert wird und warum.
-
-- [ ] **WebSocket-API** (nur Admin): getrackte Entitäten mit Quelle (Label direkt, Gerät, Bereich, manuell), Modus (Änderung, Heartbeat), Status und letztem Schreibzeitpunkt auflisten; manuelle Einträge hinzufügen/entfernen; fehlende Einträge aufräumen. Pro Instanz.
-- [ ] **Seitenleisten-Panel** (nur Admin): durchsuchbare, sortierbare und filterbare Tabelle (nach Quelle, Modus, Status, Domain, Bereich).
-- [ ] **Entitäten direkt in der Tabelle an- und abschalten:** Das Umschalten setzt oder entfernt das konfigurierte Label über die Registry von Home Assistant, oder ändert die manuelle Liste bei Entitäten ohne Unique ID. Das ist der Hauptanwendungsfall des Projekts.
-- [ ] **Sammelaktionen:** viele Zeilen markieren und gemeinsam aktivieren/deaktivieren oder auf Heartbeat-Modus stellen.
-- [ ] **Statusanzeige:** fehlende manuelle Einträge deutlich markiert, doppelt selektierte Entitäten (Label und manuell) gekennzeichnet, Schreibfehler pro Entität, falls verfügbar.
-- [ ] **Frontend schlicht halten:** eine einfache Web-Komponente mit möglichst wenigen Abhängigkeiten und wenig Build-Werkzeug, damit Mitwirkende daran arbeiten können.
-- [ ] **Tests:** Unit-Tests der WebSocket-API; manuelle Testliste für das Panel.
+- [ ] Bis es das Panel gibt (M9), ist die Liste im Options-Flow die Übersicht.
 
 ## M4 – Puffer, Zuverlässigkeit, Diagnose
 
@@ -123,15 +111,28 @@ Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was export
 - [ ] Übersetzungen de/en, Doku, HACS-Metadaten, echte Repo-URLs.
 - [ ] Versionierung und Changelog.
 
+## M9 – Übersichts-Panel (viel später, nach dem ersten Release)
+
+Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was exportiert wird und warum.
+
+- [ ] **WebSocket-API** (nur Admin): getrackte Entitäten mit Quelle (Label direkt, Gerät, Bereich, manuell), Modus (Änderung, Heartbeat), Status und letztem Schreibzeitpunkt auflisten; manuelle Einträge hinzufügen/entfernen; fehlende Einträge aufräumen. Pro Instanz.
+- [ ] **Seitenleisten-Panel** (nur Admin): durchsuchbare, sortierbare und filterbare Tabelle (nach Quelle, Modus, Status, Domain, Bereich).
+- [ ] **Entitäten direkt in der Tabelle an- und abschalten:** Das Umschalten setzt oder entfernt das konfigurierte Label über die Registry von Home Assistant, oder ändert die manuelle Liste bei Entitäten ohne Unique ID. Das ist der Hauptanwendungsfall des Projekts.
+- [ ] **Sammelaktionen:** viele Zeilen markieren und gemeinsam aktivieren/deaktivieren oder auf Heartbeat-Modus stellen.
+- [ ] **Statusanzeige:** fehlende manuelle Einträge deutlich markiert, doppelt selektierte Entitäten (Label und manuell) gekennzeichnet, Schreibfehler pro Entität, falls verfügbar.
+- [ ] **Frontend schlicht halten:** eine einfache Web-Komponente mit möglichst wenigen Abhängigkeiten und wenig Build-Werkzeug, damit Mitwirkende daran arbeiten können.
+- [ ] **Tests:** Unit-Tests der WebSocket-API; manuelle Testliste für das Panel.
+
 ---
 
 ## Empfohlene Reihenfolge
 
 1. **M0** und **M1** (Fundament und Kompatibilität). Das Schema muss feststehen, bevor produktiv Daten geschrieben werden.
 2. **M2** (erster nutzbarer Stand mit InfluxDB 2).
-3. **M3** (manuelle Liste, einfache Übersicht), **M3b** (Panel) und **M4** (Puffer, Diagnose).
+3. **M3** (manuelle Liste, Übersicht als Liste) und **M4** (Puffer, Diagnose).
 4. **M5**, **M6** (InfluxDB 1 und 3).
 5. **M7**, **M8** parallel nach Bedarf.
+6. **M9** (Panel) viel später, nach dem ersten Release.
 
 ## Beschlossen
 
@@ -139,7 +140,7 @@ Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was export
 - **Mehrere Instanzen:** von Anfang an möglich, ein Config-Entry pro Ziel (siehe M0, M7).
 - **Attribute:** wie in der nativen Integration (siehe M1).
 - **Heartbeat-Markierung:** Feld `_heartbeat`, kein Tag (siehe M1).
-- **Übersicht:** eigenes Panel, geplant als M3b (der Options-Flow behält eine einfache Übersicht).
+- **Übersicht:** beginnt als Liste im Options-Flow (M3). Das eigene Panel kommt viel später (M9).
 
 ## Offene Fragen
 
