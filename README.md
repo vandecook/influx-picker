@@ -6,6 +6,15 @@ choice at any time **without restarting Home Assistant**.
 > **Status: early development.** Nothing is released yet. This README describes
 > the goals and the planned design. Feedback and contributions are very welcome.
 
+## How this project is built
+
+This project is developed with the help of AI (Claude by Anthropic): code,
+documentation and tests are largely AI-assisted, and every change is reviewed
+and run by the maintainer before it is merged. Because the integration handles
+your InfluxDB token, please review the code before installing it, and treat early
+versions as experimental. Bug reports, test results from real setups and code
+reviews are especially welcome.
+
 ## Why
 
 The core `influxdb` integration filters entities only through YAML
