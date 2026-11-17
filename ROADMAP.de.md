@@ -46,7 +46,7 @@ Ziel: Grafana-Abfragen laufen unverändert weiter.
 - [ ] **Attribut-Export:** wie in der nativen Integration (beschlossen). Numerische Attribute als Felder, Strings als `*_str`; die genauen Regeln ergibt der Audit.
 - [ ] **Native Optionen nachbilden:** `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [ ] **Puffer-Standardwerte (beschlossen):** Flush nach 1 s Ruhe oder 100 Einträgen (wie nativ), Skip-Regeln für unknown/unavailable/leer, Verwerfen ungültiger Batches. Queue-Begrenzung nach Anzahl (Standard 50.000 Punkte, ca. 10 MB), bei Überlauf werden die ältesten verworfen, kein zusätzliches Alters-Limit. Wiederholung bei Fehler mit Backoff (5 s, steigend bis max. 60 s). Alles konfigurierbar (siehe M4).
-- [ ] **Heartbeat-Tag:** Entscheidung, ob `heartbeat` an allen Punkten steht oder nur an Heartbeat-Punkten, oder ob Heartbeat in ein eigenes Measurement/Feld geht. Ziel: keine Doppellinien oder Zählfehler in bestehenden Panels.
+- [x] **Heartbeat-Markierung (beschlossen):** ein **Feld** `_heartbeat=true`, nur an Heartbeat-Punkten und am Startwert einer neu selektierten Entität. Kein Tag, damit Heartbeat-Punkte in derselben Series wie Änderungspunkte bleiben und bestehende Panels ihre durchgehenden Linien behalten. Änderungspunkte tragen kein Zusatzfeld. Im Audit prüfen, ob bestehende Panels nach `_field` filtern. Optional später: umschaltbare Modi (Tag / aus).
 - [ ] **Vergleichswerkzeug:** native und neue Punkte einer Entität nebeneinander darstellen.
 
 Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebnis.
@@ -106,7 +106,7 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 ## M8 – Qualität und Veröffentlichung
 
 - [ ] Unit-Tests mit `pytest-homeassistant-custom-component`, CI mit InfluxDB 1/2/3 in Docker.
-- [ ] **README** mit Installation, Datenmodell und einem eigenen Abschnitt zum Heartbeat-Tag: Bedeutung von `true`/`false`, dass Zähl-Abfragen Heartbeats herausfiltern müssen (Flux-Beispiel), und dass Altdaten ohne Tag nicht mit dem Filter erfasst werden.
+- [ ] **README** mit Installation, Datenmodell und einem eigenen Abschnitt zum Feld `_heartbeat`: was es markiert und dass Zähl-Abfragen Heartbeat-Punkte ausschließen müssen (Flux-Pivot-Beispiel).
 - [ ] **Markenprüfung:** Markenhinweise in README, Übersetzungen und HACS-Metadaten; Produktnamen nur beschreibend und mit Nennung des Inhabers (InfluxData Inc.).
 - [ ] Übersetzungen de/en, Doku, HACS-Metadaten, echte Repo-URLs.
 - [ ] Versionierung und Changelog.
@@ -126,9 +126,9 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - **Plugins:** vorerst nur intern (siehe M0).
 - **Mehrere Instanzen:** von Anfang an möglich, ein Config-Entry pro Ziel (siehe M0, M7).
 - **Attribute:** wie in der nativen Integration (siehe M1).
+- **Heartbeat-Markierung:** Feld `_heartbeat`, kein Tag (siehe M1).
 
 ## Offene Fragen
 
 1. **Markenrisiko bei Veröffentlichung:** „Influx“ im Namen kann bei öffentlicher Nutzung Probleme mit den Markenrichtlinien von InfluxData machen. Vor dem Veröffentlichen prüfen, nur beschreibend verwenden und auf die fehlende Verbindung zu InfluxData hinweisen. Bei rein privater Nutzung unkritisch.
-2. **Heartbeat-Tag:** an allen Punkten, nur an Heartbeat-Punkten oder getrennt? Hängt von M1 ab.
-3. **Übersicht:** reicht der Options-Flow-Textblock oder wird ein Panel gebraucht?
+2. **Übersicht:** reicht der Options-Flow-Textblock oder wird ein Panel gebraucht?

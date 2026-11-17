@@ -46,7 +46,7 @@ Goal: Grafana queries keep working unchanged.
 - [ ] **Attribute export:** handled like in the core integration (decided). Numeric attributes as fields, strings as `*_str`; the exact rules come from the audit.
 - [ ] **Reproduce the core options:** `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [ ] **Buffer defaults (decided):** flush after 1 s of quiet or 100 points (as in the core integration), skip rules for unknown/unavailable/empty, drop invalid batches. Queue bounded by count (default 50,000 points, about 10 MB), oldest points dropped on overflow, no extra age limit. Retry with backoff (5 s, rising to at most 60 s). Everything configurable (see M4).
-- [ ] **Heartbeat tag:** decide whether `heartbeat` is set on all points, only on heartbeat points, or whether heartbeats go to a separate measurement or field. Goal: no duplicate lines or counting errors in existing panels.
+- [x] **Heartbeat marking (decided):** a **field** `_heartbeat=true`, written only on heartbeat points and on the initial snapshot of a newly selected entity. No tag, so heartbeat points stay in the same series as change points and existing panels keep their continuous lines. Change points carry no extra field. Verify in the audit that existing panels filter by `_field`. Optional later: switchable modes (tag / off).
 - [ ] **Comparison tool:** show core-integration points and new points of an entity side by side.
 
 Acceptance: existing Grafana queries return the same results with the new data.
@@ -106,7 +106,7 @@ Acceptance: existing Grafana queries return the same results with the new data.
 ## M8 – Quality and release
 
 - [ ] Unit tests with `pytest-homeassistant-custom-component`, CI with InfluxDB 1/2/3 in Docker.
-- [ ] **README** with installation, data model and a dedicated section on the heartbeat tag: meaning of `true`/`false`, that queries counting events must filter heartbeats out (Flux example), and that older data without the tag is not matched by the filter.
+- [ ] **README** with installation, data model and a dedicated section on the `_heartbeat` field: what it marks, and that queries counting events must exclude heartbeat points (Flux pivot example).
 - [ ] **Trademark review:** trademark notices in README, translations and HACS metadata; product names only descriptively and with the owner named (InfluxData Inc.).
 - [ ] Translations de/en, documentation, HACS metadata, real repository URLs.
 - [ ] Versioning and changelog.
@@ -126,9 +126,9 @@ Acceptance: existing Grafana queries return the same results with the new data.
 - **Plugins:** internal only for now (see M0).
 - **Multiple instances:** supported by design, one config entry per target (see M0, M7).
 - **Attributes:** like the core integration (see M1).
+- **Heartbeat marking:** field `_heartbeat`, no tag (see M1).
 
 ## Open questions
 
 1. **Trademark risk on publication:** "Influx" in the name may conflict with InfluxData's trademark guidelines when the project is public. Check before publishing, keep to descriptive use only, and state that the project is not affiliated with InfluxData. Not an issue for purely private use.
-2. **Heartbeat tag:** on all points, only on heartbeat points, or separate? Depends on M1.
-3. **Overview:** is the options-flow text block enough, or is a panel needed?
+2. **Overview:** is the options-flow text block enough, or is a panel needed?
