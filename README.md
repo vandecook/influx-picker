@@ -20,6 +20,17 @@ your InfluxDB token, please review the code before installing it and treat all
 versions as experimental. Code reviews, test results from real setups and bug
 reports are not just welcome, they are what this project needs most.
 
+## How this project is built
+
+This project is developed with the help of AI (Claude by Anthropic): code,
+documentation and tests are largely AI-generated. The maintainer does not have
+the time or the expertise to review and test every part in depth, so **do not
+assume the code has been thoroughly reviewed or tested**. Automated tests and
+CI are part of the plan to make up for this. Because the integration handles
+your InfluxDB token, please review the code before installing it and treat all
+versions as experimental. Code reviews, test results from real setups and bug
+reports are not just welcome, they are what this project needs most.
+
 ## Why
 
 The core `influxdb` integration filters entities only through YAML
