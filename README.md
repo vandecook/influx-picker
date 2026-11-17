@@ -9,11 +9,13 @@ choice at any time **without restarting Home Assistant**.
 ## How this project is built
 
 This project is developed with the help of AI (Claude by Anthropic): code,
-documentation and tests are largely AI-assisted, and every change is reviewed
-and run by the maintainer before it is merged. Because the integration handles
-your InfluxDB token, please review the code before installing it, and treat early
-versions as experimental. Bug reports, test results from real setups and code
-reviews are especially welcome.
+documentation and tests are largely AI-generated. The maintainer does not have
+the time or the expertise to review and test every part in depth, so **do not
+assume the code has been thoroughly reviewed or tested**. Automated tests and
+CI are part of the plan to make up for this. Because the integration handles
+your InfluxDB token, please review the code before installing it and treat all
+versions as experimental. Code reviews, test results from real setups and bug
+reports are not just welcome, they are what this project needs most.
 
 ## Why
 
@@ -72,6 +74,8 @@ the tag is set on all points or only on heartbeat points is still open (see the
 roadmap below).
 
 ## Roadmap
+
+Full roadmap: [English](ROADMAP.md) · [Deutsch](ROADMAP.de.md)
 
 | Milestone | Content |
 |---|---|
