@@ -8,7 +8,7 @@ A **Home Assistant custom integration** that writes only selected entities to In
 
 - Repository: https://github.com/vandecook/influx-picker (MIT license, owner `vandecook`)
 - Name: **Influx Picker**, domain `influx_picker`, repo `influx-picker`
-- Open pull request #1 (branch `add-readme`): README.md, ROADMAP.md (en), ROADMAP.de.md (de). No code exists yet.
+- Docs: README.md (en), README.de.md (de), ROADMAP.en.md (en), ROADMAP.de.md (de). Code for M0 exists on branch `m0-foundation`.
 - Language: the maintainer talks to you in **German**. Repository documentation, code comments, commit messages and UI source strings are **English**. German translation files are provided too.
 - The maintainer has little time and no deep expertise to review or test. **Automated tests are therefore the main safety net.** Be honest in docs about what is tested.
 
@@ -123,7 +123,7 @@ Source: Home Assistant Core `homeassistant/components/influxdb/__init__.py` and 
 
 - Talk to the maintainer in German, keep it concise and plain. Docs and code in English.
 - Do not claim anything works unless it has been run. Say plainly what was and was not tested.
-- Keep README, ROADMAP.md and ROADMAP.de.md in sync with decisions. Update all three together.
+- Keep README.md, README.de.md, ROADMAP.en.md and ROADMAP.de.md in sync with decisions. Update all four together.
 - Work on branches and open pull requests; do not push to `main` directly.
 - Commit messages: English, short. Do not commit secrets or tokens.
 - Things Home Assistant objects created by AI (entities, helpers, automations) get a **label** in Home Assistant (not a name suffix). Relevant if you create such objects during testing.

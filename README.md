@@ -1,5 +1,7 @@
 # Influx Picker
 
+**English** · [Deutsch](README.de.md) · [Roadmap](ROADMAP.en.md)
+
 Choose which Home Assistant entities are written to InfluxDB®, and change that
 choice at any time **without restarting Home Assistant**.
 
@@ -27,6 +29,52 @@ The core `influxdb` integration filters entities only through YAML
 Influx Picker lets you select entities the way you already organize Home
 Assistant: with **labels**. Add or remove a label in the UI and the change takes
 effect immediately.
+
+## Installation
+
+> Experimental: read [How this project is built](#how-this-project-is-built)
+> first. There is no release yet, so HACS installs the current state of the
+> default branch (`main`). Requires Home Assistant 2026.10 or newer.
+
+### With HACS (recommended)
+
+1. In Home Assistant, open **HACS**.
+2. Open the menu (three dots, top right) and choose **Custom repositories**.
+3. Enter `https://github.com/vandecook/influx-picker`, type **Integration**,
+   and click **Add**.
+4. Search for **Influx Picker** in HACS, open it and click **Download**.
+5. Restart Home Assistant.
+
+### Manually
+
+1. Download this repository (green **Code** button, **Download ZIP**).
+2. Copy the folder `custom_components/influx_picker` into the
+   `custom_components` folder of your Home Assistant configuration (create it if
+   it does not exist), so you end up with
+   `config/custom_components/influx_picker/manifest.json`.
+3. Restart Home Assistant.
+
+### Set up
+
+1. Create the labels you want to use, for example `influx` and
+   `influx-heartbeat`: **Settings → Areas, labels & zones → Labels**.
+2. Create an API token in InfluxDB with **write** permission for the target
+   bucket.
+3. In Home Assistant, go to **Settings → Devices & services → Add integration**
+   and choose **Influx Picker**.
+4. Choose the database version (currently only InfluxDB 2.x).
+5. Enter URL (for example `http://192.168.1.10:8086`), organization, bucket and
+   token. The connection is checked with a real write request.
+6. Choose the labels and the heartbeat interval.
+7. Put the labels on entities, devices or areas. Changes take effect within
+   about a second, without a restart. Labels and interval can be changed later
+   with **Configure** on the integration.
+
+For a second target (another bucket or server), add the integration again.
+
+**Note:** if the core `influxdb` integration writes to the same bucket, the
+same entities may be written twice. Remove them from the core integration's
+`include` list, or use a separate bucket.
 
 ## Planned features
 
@@ -64,7 +112,7 @@ effect immediately.
 | Skipped states | `unknown`, `unavailable` and empty states are not written. |
 | Persistence | A disk-backed queue is only added if real-world outages show a need. |
 
-## Heartbeat marking (planned)
+## Heartbeat marking
 
 Heartbeat points (periodic writes for idle entities, and the initial snapshot
 written when an entity becomes selected) are marked with a **field**
@@ -91,7 +139,7 @@ Averages, `last()` and graphs usually want all points and need no filter.
 
 ## Roadmap
 
-Full roadmap: [English](ROADMAP.md) · [Deutsch](ROADMAP.de.md)
+Full roadmap: [English](ROADMAP.en.md) · [Deutsch](ROADMAP.de.md)
 
 | Milestone | Content |
 |---|---|
