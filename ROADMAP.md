@@ -2,7 +2,7 @@
 
 [Deutsch](ROADMAP.de.md)
 
-Greenfield project: there is no existing code to build on. Project name: **Influx Picker**, domain `influx_picker`. If the project is published, the trademark question needs to be checked first (see Open questions).
+Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; nothing has run in a real Home Assistant installation yet. Project name: **Influx Picker**, domain `influx_picker`. If the project is published, the trademark question needs to be checked first (see Open questions).
 
 ## Requirements (as of 2026-11-17)
 
@@ -22,30 +22,30 @@ Greenfield project: there is no existing code to build on. Project name: **Influ
 - **Buffer decision:** the queue is bounded by count, not by age. Timestamps are preserved, so buffering longer does not distort data. A disk-backed queue only if needed.
 - **Core integration, buffering:** batches of up to 100 points or 1 s of quiet, unbounded queue, events older than 30 s (plus retries) are dropped, `max_retries` defaults to 0, invalid batches are not retried, unknown/empty/unavailable states are skipped. Source: Home Assistant Core `influxdb/__init__.py` and `const.py`.
 - **Core integration, configuration:** filters are YAML only, and every change needs a restart. This is the reason for this project.
-- **Core integration, schema:** not yet verified (see M1).
+- **Core integration, schema:** audited from the source code, see [docs/core-schema-audit.md](docs/core-schema-audit.md). The check against real data is still open (see M1).
 
 ---
 
 ## M0 – Foundation
 
 - [x] **Project name:** Influx Picker, domain `influx_picker` (changing it later means setting the integration up again).
-- [ ] **Project structure:** HACS-ready repository, config-entry based (`runtime_data`), de/en translations.
-- [ ] **Neutral data model:** `Point` (measurement, tags, fields, timestamp), independent of the InfluxDB version.
-- [ ] **Backend interface** and **registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. A new backend is one file plus a registration.
-- [ ] **Config flow** with a "choose version" step, followed by the backend-specific fields.
-- [ ] **Exporter core:** selection, queue, batching, retry (independent of the backend).
+- [x] **Project structure:** HACS-ready repository, config-entry based (`runtime_data`), de/en translations.
+- [x] **Neutral data model:** `Point` (measurement, tags, fields, timestamp), independent of the InfluxDB version.
+- [x] **Backend interface** and **registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. A new backend is one file plus a registration.
+- [x] **Config flow** with a "choose version" step, followed by the backend-specific fields.
+- [x] **Exporter core:** selection, queue, batching, retry (independent of the backend).
 - [x] **Decision:** internal backends only. They live in this repository and are added through pull requests. The backend interface stays clean so external plugins remain possible later.
-- [ ] **Multiple instances by design:** one config entry per target, no global state, label names configurable per entry.
+- [x] **Multiple instances by design:** one config entry per target, no global state, label names configurable per entry.
 
 ## M1 – Compatibility with the core integration (before any data flows)
 
 Goal: Grafana queries keep working unchanged.
 
-- [ ] **Audit:** check the schema of the current core integration (core source code plus real data from a bucket): measurement names, field names (`value`, `state`, `*_str`), tags, handling of on/off, strings, booleans and attributes.
-- [ ] **Golden tests:** one expected line-protocol example per case (numeric sensor, unit, binary_sensor, switch, text, attributes).
-- [ ] **Attribute export:** handled like in the core integration (decided). Numeric attributes as fields, strings as `*_str`; the exact rules come from the audit.
-- [ ] **Reproduce the core options:** `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
-- [ ] **Buffer defaults (decided):** flush after 1 s of quiet or 100 points (as in the core integration), skip rules for unknown/unavailable/empty, drop invalid batches. Queue bounded by count (default 50,000 points, about 10 MB), oldest points dropped on overflow, no extra age limit. Retry with backoff (5 s, rising to at most 60 s). Everything configurable (see M4).
+- [ ] **Audit:** source part done ([docs/core-schema-audit.md](docs/core-schema-audit.md)); real-data part open. Check the schema of the current core integration (core source code plus real data from a bucket): measurement names, field names (`value`, `state`, `*_str`), tags, handling of on/off, strings, booleans and attributes.
+- [x] **Golden tests:** (plus a test that compares every case with a reference copy of the core algorithm and the official client) one expected line-protocol example per case (numeric sensor, unit, binary_sensor, switch, text, attributes).
+- [x] **Attribute export:** handled like in the core integration (decided). Numeric attributes as fields, strings as `*_str`; the exact rules come from the audit.
+- [ ] **Reproduce the core options:** conversion implemented and tested; not yet settable in the UI. `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
+- [x] **Buffer defaults (decided):** flush after 1 s of quiet or 100 points (as in the core integration), skip rules for unknown/unavailable/empty, drop invalid batches. Queue bounded by count (default 50,000 points, about 10 MB), oldest points dropped on overflow, no extra age limit. Retry with backoff (5 s, rising to at most 60 s). Everything configurable (see M4).
 - [x] **Heartbeat marking (decided):** a **field** `_heartbeat=true`, written only on heartbeat points and on the initial snapshot of a newly selected entity. No tag, so heartbeat points stay in the same series as change points and existing panels keep their continuous lines. Change points carry no extra field. Verify in the audit that existing panels filter by `_field`. Optional later: switchable modes (tag / off).
 - [ ] **Comparison tool:** show core-integration points and new points of an entity side by side.
 
@@ -53,12 +53,12 @@ Acceptance: existing Grafana queries return the same results with the new data.
 
 ## M2 – InfluxDB 2 backend and selection (first usable state)
 
-- [ ] **v2 backend** as the first plugin (`/api/v2/write`, token, org, bucket, SSL option, real validation of token/org/bucket during setup).
-- [ ] **Label selection:** two labels, chosen in the UI with Home Assistant's label selector and stored by **label ID**, so renaming a label in Home Assistant does not break the selection. Resolved through the label registry, effective on registry changes without a restart.
-- [ ] **Inheritance** from device and area, can be switched off.
-- [ ] **Initial write** for newly labelled entities.
-- [ ] **Heartbeat write cycle** (configurable interval, writes only if the entity wrote nothing during the interval).
-- [ ] **Matching tests** (unit, golden, integration against an InfluxDB 2 container).
+- [x] **v2 backend** as the first plugin (`/api/v2/write`, token, org, bucket, SSL option, real validation of token/org/bucket during setup).
+- [x] **Label selection:** two labels, chosen in the UI with Home Assistant's label selector and stored by **label ID**, so renaming a label in Home Assistant does not break the selection. Resolved through the label registry, effective on registry changes without a restart.
+- [x] **Inheritance** from device and area, can be switched off.
+- [x] **Initial write** for newly labelled entities.
+- [x] **Heartbeat write cycle** (configurable interval, writes only if the entity wrote nothing during the interval).
+- [x] **Matching tests** (unit, golden, integration against an InfluxDB 2 container in CI). Pulled forward: CI runs from M0 on.
 
 ## M3 – Manual entity list and overview
 
@@ -77,7 +77,7 @@ Acceptance: existing Grafana queries return the same results with the new data.
 - [ ] **Backoff** on failure (5 s, rising to at most 60 s) instead of a fixed retry.
 - [ ] **Persistent queue** (only if needed): implement only if real-world operation shows losses from longer InfluxDB outages or Home Assistant restarts during an outage.
 - [ ] **Diagnostic sensors:** number of tracked entities, queue size, dropped points, write errors, last successful write.
-- [ ] **Flush on shutdown.**
+- [x] **Flush on shutdown.**
 - [ ] **Load test:** thousands of entities, offline phases, restart behavior.
 
 ## M5 – InfluxDB 1.x backend

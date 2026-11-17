@@ -1,0 +1,5 @@
+# Pulls in a matching Home Assistant version, pytest and pytest-asyncio.
+pytest-homeassistant-custom-component
+# Official client, used only to compare our line protocol with the core integration's.
+influxdb-client
+ruff

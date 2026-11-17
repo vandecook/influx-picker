@@ -2,7 +2,7 @@
 
 [English](ROADMAP.md)
 
-Neustart auf der grünen Wiese: Es gibt keinen bestehenden Code, auf dem aufgebaut wird. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
+Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; in einer echten Home-Assistant-Installation lief noch nichts. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
 
 ## Anforderungen (Stand 17.11.2026)
 
@@ -22,30 +22,30 @@ Neustart auf der grünen Wiese: Es gibt keinen bestehenden Code, auf dem aufgeba
 - **Puffer-Entscheidung:** Queue nach Anzahl statt Alter (die Zeitstempel bleiben erhalten, längeres Puffern verfälscht nichts). Persistenz auf Platte nur bei Bedarf.
 - **Native Integration, Puffer:** Batch bis 100 Einträge oder 1 s Ruhe, unbegrenzte Queue, Events älter als 30 s (plus Retries) werden verworfen, `max_retries` Standard 0, ungültige Batches werden nicht wiederholt, unbekannte/leere/nicht verfügbare Zustände werden übersprungen. Quelle: HA Core `influxdb/__init__.py` und `const.py`.
 - **Native Integration, Konfiguration:** Filter nur per YAML, jede Änderung braucht einen Neustart. Das ist der Grund für dieses Projekt.
-- **Schema der nativen Integration:** noch nicht verifiziert (siehe M1).
+- **Schema der nativen Integration:** anhand des Quellcodes geprüft, siehe [docs/core-schema-audit.md](docs/core-schema-audit.md). Der Abgleich mit echten Daten steht noch aus (siehe M1).
 
 ---
 
 ## M0 – Fundament
 
 - [x] **Projektname:** Influx Picker, Domain `influx_picker` (später nur mit Neueinrichtung änderbar).
-- [ ] **Projektstruktur:** HACS-fähiges Repository, Config-Entry-basiert (`runtime_data`), de/en-Übersetzungen.
-- [ ] **Neutrales Datenmodell:** `Point` (measurement, tags, fields, timestamp), unabhängig von der Influx-Version.
-- [ ] **Backend-Interface** und **Registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. Neues Backend = eine Datei plus Registrierung.
-- [ ] **Config-Flow** mit Schritt „Version wählen“, danach die backend-spezifischen Felder.
-- [ ] **Exporter-Kern:** Selektion, Queue, Batching, Retry (unabhängig vom Backend).
+- [x] **Projektstruktur:** HACS-fähiges Repository, Config-Entry-basiert (`runtime_data`), de/en-Übersetzungen.
+- [x] **Neutrales Datenmodell:** `Point` (measurement, tags, fields, timestamp), unabhängig von der Influx-Version.
+- [x] **Backend-Interface** und **Registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. Neues Backend = eine Datei plus Registrierung.
+- [x] **Config-Flow** mit Schritt „Version wählen“, danach die backend-spezifischen Felder.
+- [x] **Exporter-Kern:** Selektion, Queue, Batching, Retry (unabhängig vom Backend).
 - [x] **Entscheidung:** Nur interne Backends. Sie liegen in diesem Repository und kommen per Pull Request dazu. Das Backend-Interface bleibt sauber, damit externe Plugins später möglich bleiben.
-- [ ] **Mehrere Instanzen von Anfang an:** ein Config-Entry pro Ziel, kein globaler Zustand, Label-Namen pro Entry konfigurierbar.
+- [x] **Mehrere Instanzen von Anfang an:** ein Config-Entry pro Ziel, kein globaler Zustand, Label-Namen pro Entry konfigurierbar.
 
 ## M1 – Kompatibilität zur nativen Integration (vor dem ersten Datenfluss)
 
 Ziel: Grafana-Abfragen laufen unverändert weiter.
 
-- [ ] **Audit:** Schema der aktuellen nativen Integration prüfen (Core-Quellcode plus echte Daten aus einem Bucket): Measurement-Namen, Feldnamen (`value`, `state`, `*_str`), Tags, Behandlung von on/off, Strings, Booleans und Attributen.
-- [ ] **Golden-Tests:** pro Fall (numerischer Sensor, Einheit, binary_sensor, switch, Text, Attribute) ein erwartetes Line-Protocol-Beispiel festschreiben.
-- [ ] **Attribut-Export:** wie in der nativen Integration (beschlossen). Numerische Attribute als Felder, Strings als `*_str`; die genauen Regeln ergibt der Audit.
-- [ ] **Native Optionen nachbilden:** `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
-- [ ] **Puffer-Standardwerte (beschlossen):** Flush nach 1 s Ruhe oder 100 Einträgen (wie nativ), Skip-Regeln für unknown/unavailable/leer, Verwerfen ungültiger Batches. Queue-Begrenzung nach Anzahl (Standard 50.000 Punkte, ca. 10 MB), bei Überlauf werden die ältesten verworfen, kein zusätzliches Alters-Limit. Wiederholung bei Fehler mit Backoff (5 s, steigend bis max. 60 s). Alles konfigurierbar (siehe M4).
+- [ ] **Audit:** Quellcode-Teil erledigt ([docs/core-schema-audit.md](docs/core-schema-audit.md)); Teil mit echten Daten offen. Schema der aktuellen nativen Integration prüfen (Core-Quellcode plus echte Daten aus einem Bucket): Measurement-Namen, Feldnamen (`value`, `state`, `*_str`), Tags, Behandlung von on/off, Strings, Booleans und Attributen.
+- [x] **Golden-Tests:** (dazu ein Test, der jeden Fall mit einer Referenzkopie des Core-Algorithmus und dem offiziellen Client vergleicht) pro Fall (numerischer Sensor, Einheit, binary_sensor, switch, Text, Attribute) ein erwartetes Line-Protocol-Beispiel festschreiben.
+- [x] **Attribut-Export:** wie in der nativen Integration (beschlossen). Numerische Attribute als Felder, Strings als `*_str`; die genauen Regeln ergibt der Audit.
+- [ ] **Native Optionen nachbilden:** Umwandlung umgesetzt und getestet; in der UI noch nicht einstellbar. `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
+- [x] **Puffer-Standardwerte (beschlossen):** Flush nach 1 s Ruhe oder 100 Einträgen (wie nativ), Skip-Regeln für unknown/unavailable/leer, Verwerfen ungültiger Batches. Queue-Begrenzung nach Anzahl (Standard 50.000 Punkte, ca. 10 MB), bei Überlauf werden die ältesten verworfen, kein zusätzliches Alters-Limit. Wiederholung bei Fehler mit Backoff (5 s, steigend bis max. 60 s). Alles konfigurierbar (siehe M4).
 - [x] **Heartbeat-Markierung (beschlossen):** ein **Feld** `_heartbeat=true`, nur an Heartbeat-Punkten und am Startwert einer neu selektierten Entität. Kein Tag, damit Heartbeat-Punkte in derselben Series wie Änderungspunkte bleiben und bestehende Panels ihre durchgehenden Linien behalten. Änderungspunkte tragen kein Zusatzfeld. Im Audit prüfen, ob bestehende Panels nach `_field` filtern. Optional später: umschaltbare Modi (Tag / aus).
 - [ ] **Vergleichswerkzeug:** native und neue Punkte einer Entität nebeneinander darstellen.
 
@@ -53,12 +53,12 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 
 ## M2 – InfluxDB-2-Backend und Selektion (erster nutzbarer Stand)
 
-- [ ] **v2-Backend** als erstes Plugin (`/api/v2/write`, Token, Org, Bucket, SSL-Option, echte Prüfung von Token/Org/Bucket beim Einrichten).
-- [ ] **Label-Selektion:** zwei Labels, in der UI mit dem Label-Selector von Home Assistant gewählt und über die **Label-ID** gespeichert, damit das Umbenennen eines Labels in Home Assistant die Auswahl nicht kaputt macht. Auflösung über die Label-Registry, Wirkung bei Registry-Änderung ohne Neustart.
-- [ ] **Vererbung** von Gerät und Bereich, abschaltbar.
-- [ ] **Initialer Schreibvorgang** für neu gelabelte Entitäten.
-- [ ] **Heartbeat-Schreibzyklus** (Intervall konfigurierbar, schreibt nur, wenn die Entität im Intervall nichts geschrieben hat).
-- [ ] **Zugehörige Tests** (Unit, Golden, Integration gegen InfluxDB 2 im Container).
+- [x] **v2-Backend** als erstes Plugin (`/api/v2/write`, Token, Org, Bucket, SSL-Option, echte Prüfung von Token/Org/Bucket beim Einrichten).
+- [x] **Label-Selektion:** zwei Labels, in der UI mit dem Label-Selector von Home Assistant gewählt und über die **Label-ID** gespeichert, damit das Umbenennen eines Labels in Home Assistant die Auswahl nicht kaputt macht. Auflösung über die Label-Registry, Wirkung bei Registry-Änderung ohne Neustart.
+- [x] **Vererbung** von Gerät und Bereich, abschaltbar.
+- [x] **Initialer Schreibvorgang** für neu gelabelte Entitäten.
+- [x] **Heartbeat-Schreibzyklus** (Intervall konfigurierbar, schreibt nur, wenn die Entität im Intervall nichts geschrieben hat).
+- [x] **Zugehörige Tests** (Unit, Golden, Integration gegen InfluxDB 2 im Container in der CI). Vorgezogen: CI läuft ab M0.
 
 ## M3 – Manuelle Entitätenliste und Übersicht
 
@@ -77,7 +77,7 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [ ] **Backoff** bei Ausfall (5 s, steigend bis max. 60 s) statt fester Wiederholung.
 - [ ] **Persistente Queue** (nur bei Bedarf): erst umsetzen, wenn im Betrieb Verluste durch längere Influx-Ausfälle oder HA-Neustarts im Ausfall auftreten.
 - [ ] **Diagnose-Sensoren:** Zahl der getrackten Entitäten, Queue-Größe, verworfene Punkte, Schreibfehler, letzter erfolgreicher Write.
-- [ ] **Flush beim Herunterfahren.**
+- [x] **Flush beim Herunterfahren.**
 - [ ] **Lasttest:** Tausende Entitäten, Offline-Phasen, Neustart-Verhalten.
 
 ## M5 – InfluxDB 1.x Backend

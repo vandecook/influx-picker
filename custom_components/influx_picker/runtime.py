@@ -1,0 +1,183 @@
+"""Runtime of one config entry: selection, state listener, heartbeat, exporter."""
+
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
+from datetime import datetime, timedelta
+import logging
+import time
+from typing import Any
+
+from homeassistant.const import EVENT_STATE_CHANGED
+from homeassistant.core import (
+    Event,
+    EventStateChangedData,
+    HomeAssistant,
+    State,
+    callback,
+)
+from homeassistant.helpers import (
+    area_registry as ar,
+    device_registry as dr,
+    entity_registry as er,
+    label_registry as lr,
+)
+from homeassistant.helpers.debounce import Debouncer
+from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.state import state_as_number
+from homeassistant.util import dt as dt_util
+
+from .const import (
+    CONF_HEARTBEAT_INTERVAL,
+    CONF_INHERIT,
+    CONF_LABEL_CHANGE,
+    CONF_LABEL_HEARTBEAT,
+    DEFAULT_HEARTBEAT_INTERVAL,
+    DEFAULT_INHERIT,
+)
+from .exporter import Exporter
+from .schema import SchemaOptions, state_to_point
+from .selection import Mode, compute_selection
+
+_LOGGER = logging.getLogger(__name__)
+
+HEARTBEAT_CHECK_INTERVAL = timedelta(seconds=60)
+REBUILD_COOLDOWN = 1.0  # seconds; registry events come in bursts
+
+_REGISTRY_EVENTS = (
+    er.EVENT_ENTITY_REGISTRY_UPDATED,
+    dr.EVENT_DEVICE_REGISTRY_UPDATED,
+    ar.EVENT_AREA_REGISTRY_UPDATED,
+    lr.EVENT_LABEL_REGISTRY_UPDATED,
+)
+
+
+def _number(hass_state: State) -> Callable[[str], float]:
+    """Use Home Assistant's own helper so on/off mapping stays in sync."""
+    return lambda _state: float(state_as_number(hass_state))
+
+
+class PickerRuntime:
+    """Tracks the selected entities of one entry and feeds the exporter."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        options: Mapping[str, Any],
+        exporter: Exporter,
+        schema_options: SchemaOptions | None = None,
+    ) -> None:
+        """Store settings. Call `async_start()` to begin."""
+        self.hass = hass
+        self.exporter = exporter
+        self.schema_options = schema_options or SchemaOptions()
+        self.change_label: str | None = options.get(CONF_LABEL_CHANGE) or None
+        self.heartbeat_label: str | None = options.get(CONF_LABEL_HEARTBEAT) or None
+        self.inherit: bool = options.get(CONF_INHERIT, DEFAULT_INHERIT)
+        self.heartbeat_seconds: float = 60 * float(
+            options.get(CONF_HEARTBEAT_INTERVAL, DEFAULT_HEARTBEAT_INTERVAL)
+        )
+        self.tracked: dict[str, Mode] = {}
+        self._last_write: dict[str, float] = {}  # entity_id -> self._clock()
+        self._clock = time.monotonic  # replaced in tests
+        self._unsubs: list[Callable[[], None]] = []
+        self._debouncer: Debouncer | None = None
+
+    @callback
+    def async_start(self) -> None:
+        """Build the selection and start listening."""
+        self._debouncer = Debouncer(
+            self.hass,
+            _LOGGER,
+            cooldown=REBUILD_COOLDOWN,
+            immediate=False,
+            function=self._async_rebuild,
+        )
+        self._unsubs.append(
+            self.hass.bus.async_listen(
+                EVENT_STATE_CHANGED,
+                self._async_state_changed,
+                event_filter=self._async_filter,
+            )
+        )
+        for event_type in _REGISTRY_EVENTS:
+            self._unsubs.append(
+                self.hass.bus.async_listen(event_type, self._async_registry_changed)
+            )
+        self._unsubs.append(
+            async_track_time_interval(
+                self.hass, self._async_heartbeat, HEARTBEAT_CHECK_INTERVAL
+            )
+        )
+        self._async_rebuild()
+
+    @callback
+    def async_stop(self) -> None:
+        """Stop listening. The exporter is stopped by the caller."""
+        for unsub in self._unsubs:
+            unsub()
+        self._unsubs.clear()
+        if self._debouncer is not None:
+            self._debouncer.async_cancel()
+
+    @callback
+    def _async_filter(self, event_data: EventStateChangedData) -> bool:
+        return event_data["entity_id"] in self.tracked
+
+    @callback
+    def _async_registry_changed(self, _event: Event) -> None:
+        if self._debouncer is not None:
+            self._debouncer.async_schedule_call()
+
+    @callback
+    def _async_rebuild(self) -> None:
+        """Recompute the selection. Newly selected entities get one snapshot."""
+        new = compute_selection(
+            self.hass, self.change_label, self.heartbeat_label, self.inherit
+        )
+        added = new.keys() - self.tracked.keys()
+        removed = self.tracked.keys() - new.keys()
+        self.tracked = new
+        for entity_id in removed:
+            self._last_write.pop(entity_id, None)
+        now = dt_util.utcnow()
+        for entity_id in added:
+            if (state := self.hass.states.get(entity_id)) is not None:
+                self._write(state, now, heartbeat=True)
+        if added or removed:
+            _LOGGER.debug(
+                "Selection: %d entities (+%d, -%d)", len(new), len(added), len(removed)
+            )
+
+    @callback
+    def _async_state_changed(self, event: Event[EventStateChangedData]) -> None:
+        if (state := event.data["new_state"]) is not None:
+            self._write(state, event.time_fired, heartbeat=False)
+
+    @callback
+    def _async_heartbeat(self, _now: datetime) -> None:
+        threshold = self._clock() - self.heartbeat_seconds
+        now = dt_util.utcnow()
+        for entity_id, mode in self.tracked.items():
+            if mode is not Mode.HEARTBEAT:
+                continue
+            last = self._last_write.get(entity_id)
+            if last is not None and last > threshold:
+                continue
+            if (state := self.hass.states.get(entity_id)) is not None:
+                self._write(state, now, heartbeat=True)
+
+    @callback
+    def _write(self, state: State, when: datetime, *, heartbeat: bool) -> None:
+        point = state_to_point(
+            state.entity_id,
+            state.state,
+            state.attributes,
+            when,
+            self.schema_options,
+            heartbeat=heartbeat,
+            number=_number(state),
+        )
+        if point is not None:
+            self.exporter.add(point)
+            self._last_write[state.entity_id] = self._clock()

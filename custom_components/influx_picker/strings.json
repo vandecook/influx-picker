@@ -1,0 +1,70 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Database version",
+        "description": "Choose the version of the InfluxDB server to write to.",
+        "data": {
+          "backend": "Version"
+        }
+      },
+      "connection": {
+        "title": "Connection",
+        "description": "The connection is tested with a real write request. The token needs write permission for the bucket.",
+        "data": {
+          "url": "URL",
+          "organization": "Organization",
+          "bucket": "Bucket",
+          "token": "API token",
+          "verify_ssl": "Verify SSL certificate"
+        }
+      },
+      "selection": {
+        "title": "Entity selection",
+        "description": "Entities with one of these labels are written. The heartbeat label also writes the current state again when nothing was written during the interval.",
+        "data": {
+          "label_change": "Label: write on change",
+          "label_heartbeat": "Label: write on change and heartbeat",
+          "heartbeat_interval": "Heartbeat interval",
+          "inherit_labels": "Include labels of the device and area"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the server.",
+      "invalid_auth": "The token is invalid or has no write permission.",
+      "not_found": "Organization or bucket not found.",
+      "no_label": "Choose at least one label.",
+      "same_label": "Choose two different labels.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This bucket is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Entity selection",
+        "description": "Entities with one of these labels are written. The heartbeat label also writes the current state again when nothing was written during the interval.",
+        "data": {
+          "label_change": "Label: write on change",
+          "label_heartbeat": "Label: write on change and heartbeat",
+          "heartbeat_interval": "Heartbeat interval",
+          "inherit_labels": "Include labels of the device and area"
+        }
+      }
+    },
+    "error": {
+      "no_label": "Choose at least one label.",
+      "same_label": "Choose two different labels."
+    }
+  },
+  "selector": {
+    "backend": {
+      "options": {
+        "v2": "InfluxDB 2.x"
+      }
+    }
+  }
+}

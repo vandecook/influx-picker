@@ -3,8 +3,11 @@
 Choose which Home Assistant entities are written to InfluxDB®, and change that
 choice at any time **without restarting Home Assistant**.
 
-> **Status: early development.** Nothing is released yet. This README describes
-> the goals and the planned design. Feedback and contributions are very welcome.
+> **Status: early development.** Nothing is released yet. A first version of the
+> code exists (InfluxDB 2.x, label selection, heartbeat). It is covered by
+> automated tests only and has **not yet run in a real Home Assistant
+> installation**. This README describes the goals and the planned design.
+> Feedback and contributions are very welcome.
 
 ## How this project is built
 
@@ -52,7 +55,7 @@ effect immediately.
 | Topic | Decision |
 |---|---|
 | Backends | Backend interface and registry from the start; InfluxDB 2.x is the first plugin. |
-| Compatibility | Verify the core integration's exact schema before writing any data (measurement, field and tag names, attribute handling). |
+| Compatibility | Same schema as the core integration. Audited from its source code ([audit](docs/core-schema-audit.md)) and checked by tests against a copy of the core algorithm; the check against real data is still open. |
 | Batching | Flush after 1 s of quiet or 100 points, like the core integration. |
 | Buffer | Bounded by **count** (default 50,000 points), oldest points dropped on overflow, no age limit. Timestamps are preserved, so buffering longer does not distort data. |
 | Retry | Backoff from 5 s up to 60 s. Invalid batches are dropped, not retried. |
@@ -104,6 +107,17 @@ Full roadmap: [English](ROADMAP.md) · [Deutsch](ROADMAP.de.md)
 | M9 Overview panel (much later) | Sidebar panel with a searchable table, switching entities on and off, bulk actions |
 
 Open question: the trademark check before a public release (see the roadmap).
+
+## Development
+
+```bash
+pip install -r requirements_test.txt
+pytest
+```
+
+Tests that need a real InfluxDB 2 server are skipped unless `INFLUXDB_V2_URL`,
+`INFLUXDB_V2_TOKEN`, `INFLUXDB_V2_ORG` and `INFLUXDB_V2_BUCKET` are set. CI
+starts a server in a container and runs them on every pull request.
 
 ## Contributing
 
