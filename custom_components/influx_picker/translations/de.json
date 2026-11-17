@@ -1,0 +1,70 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Datenbankversion",
+        "description": "Wähle die Version des InfluxDB-Servers, in den geschrieben wird.",
+        "data": {
+          "backend": "Version"
+        }
+      },
+      "connection": {
+        "title": "Verbindung",
+        "description": "Die Verbindung wird mit einer echten Schreibanfrage geprüft. Das Token braucht Schreibrechte auf den Bucket.",
+        "data": {
+          "url": "URL",
+          "organization": "Organisation",
+          "bucket": "Bucket",
+          "token": "API-Token",
+          "verify_ssl": "SSL-Zertifikat prüfen"
+        }
+      },
+      "selection": {
+        "title": "Auswahl der Entitäten",
+        "description": "Entitäten mit einem dieser Labels werden geschrieben. Das Heartbeat-Label schreibt den aktuellen Zustand zusätzlich erneut, wenn im Intervall nichts geschrieben wurde.",
+        "data": {
+          "label_change": "Label: bei Änderung schreiben",
+          "label_heartbeat": "Label: bei Änderung und als Heartbeat schreiben",
+          "heartbeat_interval": "Heartbeat-Intervall",
+          "inherit_labels": "Labels von Gerät und Bereich einbeziehen"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Keine Verbindung zum Server.",
+      "invalid_auth": "Das Token ist ungültig oder hat keine Schreibrechte.",
+      "not_found": "Organisation oder Bucket nicht gefunden.",
+      "no_label": "Wähle mindestens ein Label.",
+      "same_label": "Wähle zwei verschiedene Labels.",
+      "unknown": "Unerwarteter Fehler."
+    },
+    "abort": {
+      "already_configured": "Dieser Bucket ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Auswahl der Entitäten",
+        "description": "Entitäten mit einem dieser Labels werden geschrieben. Das Heartbeat-Label schreibt den aktuellen Zustand zusätzlich erneut, wenn im Intervall nichts geschrieben wurde.",
+        "data": {
+          "label_change": "Label: bei Änderung schreiben",
+          "label_heartbeat": "Label: bei Änderung und als Heartbeat schreiben",
+          "heartbeat_interval": "Heartbeat-Intervall",
+          "inherit_labels": "Labels von Gerät und Bereich einbeziehen"
+        }
+      }
+    },
+    "error": {
+      "no_label": "Wähle mindestens ein Label.",
+      "same_label": "Wähle zwei verschiedene Labels."
+    }
+  },
+  "selector": {
+    "backend": {
+      "options": {
+        "v2": "InfluxDB 2.x"
+      }
+    }
+  }
+}
