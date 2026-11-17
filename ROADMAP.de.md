@@ -12,6 +12,10 @@ Neustart auf der grünen Wiese: Es gibt keinen bestehenden Code, auf dem aufgeba
 4. **Zwei Labels** (z. B. `influx` und `influx-heartbeat`). Änderungen wirken sofort, ohne Neustart.
 5. Für Entitäten, die keine Labels tragen können, eine **eigene Liste** im Config-/Options-Flow.
 6. **Übersicht** der selektierten (Label) und manuell gepflegten Entitäten. Bei manuellen Einträgen wird angezeigt, ob die Entität noch existiert.
+7. **Mehrere Instanzen** von Anfang an möglich: ein Config-Entry pro Ziel, jeweils mit eigenen Labels (z. B. InfluxDB 2 und 3 parallel oder getrennte Buckets mit unterschiedlicher Aufbewahrung).
+8. **Markenhygiene:** Wo InfluxDB oder andere InfluxData-Produktnamen vorkommen (Doku, UI-Texte, Code-Kommentare, Repository-Metadaten), werden sie nur beschreibend verwendet, bei Bedarf als Marken der InfluxData Inc. gekennzeichnet und nie so, dass eine Verbindung oder Billigung durch InfluxData nahegelegt wird.
+9. **Attribute** werden wie in der nativen Integration behandelt.
+10. **Plugins** vorerst nur intern: Backends liegen in diesem Repository.
 
 ## Erkenntnisse, die das Design bestimmen
 
@@ -30,7 +34,8 @@ Neustart auf der grünen Wiese: Es gibt keinen bestehenden Code, auf dem aufgeba
 - [ ] **Backend-Interface** und **Registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. Neues Backend = eine Datei plus Registrierung.
 - [ ] **Config-Flow** mit Schritt „Version wählen“, danach die backend-spezifischen Felder.
 - [ ] **Exporter-Kern:** Selektion, Queue, Batching, Retry (unabhängig vom Backend).
-- [ ] **Entscheidung:** Nur interne Backends oder auch externe Plugins? Zunächst intern.
+- [x] **Entscheidung:** Nur interne Backends. Sie liegen in diesem Repository und kommen per Pull Request dazu. Das Backend-Interface bleibt sauber, damit externe Plugins später möglich bleiben.
+- [ ] **Mehrere Instanzen von Anfang an:** ein Config-Entry pro Ziel, kein globaler Zustand, Label-Namen pro Entry konfigurierbar.
 
 ## M1 – Kompatibilität zur nativen Integration (vor dem ersten Datenfluss)
 
@@ -38,7 +43,7 @@ Ziel: Grafana-Abfragen laufen unverändert weiter.
 
 - [ ] **Audit:** Schema der aktuellen nativen Integration prüfen (Core-Quellcode plus echte Daten aus einem Bucket): Measurement-Namen, Feldnamen (`value`, `state`, `*_str`), Tags, Behandlung von on/off, Strings, Booleans und Attributen.
 - [ ] **Golden-Tests:** pro Fall (numerischer Sensor, Einheit, binary_sensor, switch, Text, Attribute) ein erwartetes Line-Protocol-Beispiel festschreiben.
-- [ ] **Attribut-Export:** numerische Attribute als Felder, Strings als `*_str`, wie nativ.
+- [ ] **Attribut-Export:** wie in der nativen Integration (beschlossen). Numerische Attribute als Felder, Strings als `*_str`; die genauen Regeln ergibt der Audit.
 - [ ] **Native Optionen nachbilden:** `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [ ] **Puffer-Standardwerte (beschlossen):** Flush nach 1 s Ruhe oder 100 Einträgen (wie nativ), Skip-Regeln für unknown/unavailable/leer, Verwerfen ungültiger Batches. Queue-Begrenzung nach Anzahl (Standard 50.000 Punkte, ca. 10 MB), bei Überlauf werden die ältesten verworfen, kein zusätzliches Alters-Limit. Wiederholung bei Fehler mit Backoff (5 s, steigend bis max. 60 s). Alles konfigurierbar (siehe M4).
 - [ ] **Heartbeat-Tag:** Entscheidung, ob `heartbeat` an allen Punkten steht oder nur an Heartbeat-Punkten, oder ob Heartbeat in ein eigenes Measurement/Feld geht. Ziel: keine Doppellinien oder Zählfehler in bestehenden Panels.
@@ -96,12 +101,13 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [ ] **Label-Schnellvergabe** aus dem Import.
 - [ ] **Warnung**, wenn die native Integration parallel läuft (doppelte Writes).
 - [ ] **Options-Flow für Verbindungsdaten** (Token ändern ohne Neuanlage).
-- [ ] Mehrere Instanzen (z. B. Influx 2 und 3 parallel) mit eigenen Labels pro Instanz prüfen.
+- [ ] Mehrere Instanzen parallel testen (z. B. Influx 2 und 3), inklusive eigener Labels pro Instanz und einer Warnung, wenn zwei Instanzen versehentlich dieselben Entitäten selektieren.
 
 ## M8 – Qualität und Veröffentlichung
 
 - [ ] Unit-Tests mit `pytest-homeassistant-custom-component`, CI mit InfluxDB 1/2/3 in Docker.
 - [ ] **README** mit Installation, Datenmodell und einem eigenen Abschnitt zum Heartbeat-Tag: Bedeutung von `true`/`false`, dass Zähl-Abfragen Heartbeats herausfiltern müssen (Flux-Beispiel), und dass Altdaten ohne Tag nicht mit dem Filter erfasst werden.
+- [ ] **Markenprüfung:** Markenhinweise in README, Übersetzungen und HACS-Metadaten; Produktnamen nur beschreibend und mit Nennung des Inhabers (InfluxData Inc.).
 - [ ] Übersetzungen de/en, Doku, HACS-Metadaten, echte Repo-URLs.
 - [ ] Versionierung und Changelog.
 
@@ -115,11 +121,14 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 4. **M5**, **M6** (InfluxDB 1 und 3).
 5. **M7**, **M8** parallel nach Bedarf.
 
+## Beschlossen
+
+- **Plugins:** vorerst nur intern (siehe M0).
+- **Mehrere Instanzen:** von Anfang an möglich, ein Config-Entry pro Ziel (siehe M0, M7).
+- **Attribute:** wie in der nativen Integration (siehe M1).
+
 ## Offene Fragen
 
-1. **Markenrisiko bei Veröffentlichung:** „Influx“ im Namen kann bei öffentlicher Nutzung Probleme mit den Markenrichtlinien von InfluxData machen. Vor dem Veröffentlichen prüfen (Nennung von InfluxDB nur beschreibend, Hinweis auf fehlende Verbindung zu InfluxData). Bei rein privater Nutzung unkritisch.
+1. **Markenrisiko bei Veröffentlichung:** „Influx“ im Namen kann bei öffentlicher Nutzung Probleme mit den Markenrichtlinien von InfluxData machen. Vor dem Veröffentlichen prüfen, nur beschreibend verwenden und auf die fehlende Verbindung zu InfluxData hinweisen. Bei rein privater Nutzung unkritisch.
 2. **Heartbeat-Tag:** an allen Punkten, nur an Heartbeat-Punkten oder getrennt? Hängt von M1 ab.
-3. **Plugins:** nur intern oder auch extern?
-4. **Übersicht:** reicht der Options-Flow-Textblock oder wird ein Panel gebraucht?
-5. **Attribute:** alle numerischen schreiben oder nur nach Konfiguration (wie nativ)?
-6. **Mehrere Instanzen:** sinnvoll oder unnötig?
+3. **Übersicht:** reicht der Options-Flow-Textblock oder wird ein Panel gebraucht?

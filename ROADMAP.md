@@ -12,6 +12,10 @@ Greenfield project: there is no existing code to build on. Project name: **Influ
 4. **Two labels** (for example `influx` and `influx-heartbeat`). Changes take effect immediately, without a restart.
 5. A **manual list** in the config/options flow for entities that cannot carry labels.
 6. An **overview** of selected (by label) and manually listed entities. For manual entries it shows whether the entity still exists.
+7. **Multiple instances** by design: one config entry per target, each with its own labels (for example InfluxDB 2 and 3 in parallel, or separate buckets for different retention).
+8. **Trademark hygiene:** wherever InfluxDB or other InfluxData product names appear (documentation, UI strings, code comments, repository metadata), they are used descriptively only, marked as trademarks of InfluxData Inc. where required, and never in a way that suggests affiliation or endorsement.
+9. **Attributes** are handled like in the core integration.
+10. **Plugins** are internal only for now: backends live in this repository.
 
 ## Findings that shape the design
 
@@ -30,7 +34,8 @@ Greenfield project: there is no existing code to build on. Project name: **Influ
 - [ ] **Backend interface** and **registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. A new backend is one file plus a registration.
 - [ ] **Config flow** with a "choose version" step, followed by the backend-specific fields.
 - [ ] **Exporter core:** selection, queue, batching, retry (independent of the backend).
-- [ ] **Decision:** internal backends only, or external plugins too? Internal first.
+- [x] **Decision:** internal backends only. They live in this repository and are added through pull requests. The backend interface stays clean so external plugins remain possible later.
+- [ ] **Multiple instances by design:** one config entry per target, no global state, label names configurable per entry.
 
 ## M1 – Compatibility with the core integration (before any data flows)
 
@@ -38,7 +43,7 @@ Goal: Grafana queries keep working unchanged.
 
 - [ ] **Audit:** check the schema of the current core integration (core source code plus real data from a bucket): measurement names, field names (`value`, `state`, `*_str`), tags, handling of on/off, strings, booleans and attributes.
 - [ ] **Golden tests:** one expected line-protocol example per case (numeric sensor, unit, binary_sensor, switch, text, attributes).
-- [ ] **Attribute export:** numeric attributes as fields, strings as `*_str`, as in the core integration.
+- [ ] **Attribute export:** handled like in the core integration (decided). Numeric attributes as fields, strings as `*_str`; the exact rules come from the audit.
 - [ ] **Reproduce the core options:** `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [ ] **Buffer defaults (decided):** flush after 1 s of quiet or 100 points (as in the core integration), skip rules for unknown/unavailable/empty, drop invalid batches. Queue bounded by count (default 50,000 points, about 10 MB), oldest points dropped on overflow, no extra age limit. Retry with backoff (5 s, rising to at most 60 s). Everything configurable (see M4).
 - [ ] **Heartbeat tag:** decide whether `heartbeat` is set on all points, only on heartbeat points, or whether heartbeats go to a separate measurement or field. Goal: no duplicate lines or counting errors in existing panels.
@@ -96,12 +101,13 @@ Acceptance: existing Grafana queries return the same results with the new data.
 - [ ] **Quick label assignment** from the import.
 - [ ] **Warning** if the core integration is running in parallel (double writes).
 - [ ] **Options flow for connection data** (change the token without setting up again).
-- [ ] Evaluate multiple instances (for example InfluxDB 2 and 3 in parallel) with separate labels per instance.
+- [ ] Test multiple instances in parallel (for example InfluxDB 2 and 3), including separate labels per instance and a warning when two instances select the same entities by accident.
 
 ## M8 – Quality and release
 
 - [ ] Unit tests with `pytest-homeassistant-custom-component`, CI with InfluxDB 1/2/3 in Docker.
 - [ ] **README** with installation, data model and a dedicated section on the heartbeat tag: meaning of `true`/`false`, that queries counting events must filter heartbeats out (Flux example), and that older data without the tag is not matched by the filter.
+- [ ] **Trademark review:** trademark notices in README, translations and HACS metadata; product names only descriptively and with the owner named (InfluxData Inc.).
 - [ ] Translations de/en, documentation, HACS metadata, real repository URLs.
 - [ ] Versioning and changelog.
 
@@ -115,11 +121,14 @@ Acceptance: existing Grafana queries return the same results with the new data.
 4. **M5**, **M6** (InfluxDB 1 and 3).
 5. **M7**, **M8** in parallel as needed.
 
+## Decided
+
+- **Plugins:** internal only for now (see M0).
+- **Multiple instances:** supported by design, one config entry per target (see M0, M7).
+- **Attributes:** like the core integration (see M1).
+
 ## Open questions
 
-1. **Trademark risk on publication:** "Influx" in the name may conflict with InfluxData's trademark guidelines when the project is public. Check before publishing (mention InfluxDB only descriptively, state that the project is not affiliated with InfluxData). Not an issue for purely private use.
+1. **Trademark risk on publication:** "Influx" in the name may conflict with InfluxData's trademark guidelines when the project is public. Check before publishing, keep to descriptive use only, and state that the project is not affiliated with InfluxData. Not an issue for purely private use.
 2. **Heartbeat tag:** on all points, only on heartbeat points, or separate? Depends on M1.
-3. **Plugins:** internal only, or external too?
-4. **Overview:** is the options-flow text block enough, or is a panel needed?
-5. **Attributes:** write all numeric attributes, or only configured ones (like the core integration)?
-6. **Multiple instances:** useful or unnecessary?
+3. **Overview:** is the options-flow text block enough, or is a panel needed?

@@ -1,6 +1,6 @@
 # Influx Picker
 
-Choose which Home Assistant entities are written to InfluxDB, and change that
+Choose which Home Assistant entities are written to InfluxDB®, and change that
 choice at any time **without restarting Home Assistant**.
 
 > **Status: early development.** Nothing is released yet. This README describes
@@ -41,7 +41,9 @@ effect immediately.
 - **Reliable delivery.** Batched writes, a bounded buffer, retry with backoff,
   and the same defaults as the core integration where it makes sense.
 - **Pluggable backends.** InfluxDB 2.x first. 1.x and 3.x are added as backend
-  plugins.
+  plugins. Backends are internal to this repository for now.
+- **Multiple instances.** One config entry per target, each with its own
+  labels, for example InfluxDB 2 and 3 in parallel.
 
 ## Design decisions so far
 
@@ -52,6 +54,7 @@ effect immediately.
 | Batching | Flush after 1 s of quiet or 100 points, like the core integration. |
 | Buffer | Bounded by **count** (default 50,000 points), oldest points dropped on overflow, no age limit. Timestamps are preserved, so buffering longer does not distort data. |
 | Retry | Backoff from 5 s up to 60 s. Invalid batches are dropped, not retried. |
+| Attributes | Handled like in the core integration. |
 | Skipped states | `unknown`, `unavailable` and empty states are not written. |
 | Persistence | A disk-backed queue is only added if real-world outages show a need. |
 
@@ -93,11 +96,7 @@ Open questions:
 
 1. Should the `heartbeat` tag be on all points, only on heartbeat points, or
    should heartbeats go to a separate measurement or field?
-2. Internal backends only, or support external backend plugins?
-3. Is the options-flow overview enough, or is a dedicated panel needed?
-4. Write all numeric attributes, or only configured ones (like the core
-   integration)?
-5. Multiple instances, for example InfluxDB 2 and 3 in parallel?
+2. Is the options-flow overview enough, or is a dedicated panel needed?
 
 ## Contributing
 
@@ -109,6 +108,11 @@ Contributions are welcome, especially:
 
 Please open an issue to discuss larger changes first.
 
+When you mention InfluxDB or other InfluxData products in documentation, UI
+texts or code, use the names descriptively only, name InfluxData Inc. as the
+owner where a trademark notice is needed, and never use them in a way that
+suggests affiliation or endorsement.
+
 ## License
 
 [MIT](LICENSE)
@@ -116,5 +120,7 @@ Please open an issue to discuss larger changes first.
 ## Disclaimer
 
 This is an independent community project. It is not affiliated with, endorsed
-by, or sponsored by InfluxData Inc. "InfluxDB" is a trademark of InfluxData Inc.
-and is used here only to describe compatibility.
+by, or sponsored by InfluxData Inc. InfluxDB® and InfluxData® are registered
+trademarks of InfluxData Inc. Telegraf™, Kapacitor™ and Chronograf™ are
+trademarks of InfluxData Inc. The names are used here only to describe
+compatibility.
