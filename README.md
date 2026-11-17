@@ -32,8 +32,9 @@ effect immediately.
   Label names are configurable. Labels on a device or area can be inherited.
 - **Manual list.** For entities that cannot carry labels (for example entities
   without a unique ID), maintained in the integration's options.
-- **Overview.** See which entities are exported and why, and spot manually
-  listed entities that no longer exist.
+- **Overview panel.** A sidebar panel shows which entities are exported and why,
+  lets you switch entities on and off from a table, and flags manually listed
+  entities that no longer exist.
 - **Compatible by design.** Same measurement, tag and field layout as the core
   integration, so existing Grafana queries and dashboards keep working.
 - **Heartbeat.** Optional periodic writes for entities that rarely change, so
@@ -94,16 +95,15 @@ Full roadmap: [English](ROADMAP.md) · [Deutsch](ROADMAP.de.md)
 | M0 Foundation | Project structure, neutral point model, backend interface and registry, config flow, exporter core |
 | M1 Compatibility | Audit of the core integration's schema, golden tests, attribute export, native options, heartbeat marking |
 | M2 InfluxDB 2 | First backend, label selection with inheritance, heartbeat writes |
-| M3 Manual list & overview | Manual entity lists, overview, status of missing entities, repairs |
+| M3 Manual list & overview | Manual entity lists, basic overview, status of missing entities, repairs |
+| M3b Overview panel | Sidebar panel with a searchable table, switching entities on and off, bulk actions |
 | M4 Buffering & diagnostics | Configurable buffer, backoff, diagnostic sensors, load tests |
 | M5 InfluxDB 1.x | Backend plugin |
 | M6 InfluxDB 3 | Backend plugin |
 | M7 Migration | Import from the core integration's YAML, parallel-run warning |
 | M8 Quality & release | CI against InfluxDB 1/2/3, documentation, translations, HACS metadata |
 
-Open questions:
-
-1. Is the options-flow overview enough, or is a dedicated panel needed?
+Open question: the trademark check before a public release (see the roadmap).
 
 ## Contributing
 

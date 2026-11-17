@@ -69,7 +69,19 @@ Acceptance: existing Grafana queries return the same results with the new data.
 - [ ] **Status of manual entries:** exists / **no longer exists** / disabled.
 - [ ] **Cleanup:** option "remove missing entries".
 - [ ] **Repairs issue** when manually listed entities have been deleted.
-- [ ] **Later (optional):** a dedicated panel with a searchable list, if the options-flow text block no longer suffices for many entities.
+- [ ] The options flow keeps only a basic overview (counts and missing entries). The full overview lives in the panel (M3b).
+
+## M3b – Overview panel (decided)
+
+Goal: select and deselect entities easily, see at a glance what is exported and why.
+
+- [ ] **WebSocket API** (admin only): list tracked entities with source (label directly, device, area, manual), mode (change, heartbeat), status and last write; add/remove manual entries; clean up missing entries. Per instance.
+- [ ] **Sidebar panel** (admin only): searchable, sortable and filterable table (by source, mode, status, domain, area).
+- [ ] **Switch entities on and off from the table:** toggling assigns or removes the configured label through Home Assistant's registry, or edits the manual list for entities without a unique ID. This is the main use case of the project.
+- [ ] **Bulk actions:** select many rows and enable/disable them, or switch to heartbeat mode.
+- [ ] **Status display:** missing manual entries clearly flagged, entities selected twice (label and manual) marked, write errors per entity if available.
+- [ ] **Frontend kept simple:** a plain web component with as few dependencies and as little build tooling as feasible, so contributors can work on it.
+- [ ] **Tests:** WebSocket API unit tests; manual test checklist for the panel.
 
 ## M4 – Buffering, reliability, diagnostics
 
@@ -117,7 +129,7 @@ Acceptance: existing Grafana queries return the same results with the new data.
 
 1. **M0** and **M1** (foundation and compatibility). The schema must be settled before production data is written.
 2. **M2** (first usable state with InfluxDB 2).
-3. **M3** (manual list, overview) and **M4** (buffering, diagnostics).
+3. **M3** (manual list, basic overview), **M3b** (panel) and **M4** (buffering, diagnostics).
 4. **M5**, **M6** (InfluxDB 1 and 3).
 5. **M7**, **M8** in parallel as needed.
 
@@ -127,8 +139,8 @@ Acceptance: existing Grafana queries return the same results with the new data.
 - **Multiple instances:** supported by design, one config entry per target (see M0, M7).
 - **Attributes:** like the core integration (see M1).
 - **Heartbeat marking:** field `_heartbeat`, no tag (see M1).
+- **Overview:** a dedicated panel, planned as M3b (the options flow keeps a basic overview).
 
 ## Open questions
 
 1. **Trademark risk on publication:** "Influx" in the name may conflict with InfluxData's trademark guidelines when the project is public. Check before publishing, keep to descriptive use only, and state that the project is not affiliated with InfluxData. Not an issue for purely private use.
-2. **Overview:** is the options-flow text block enough, or is a panel needed?

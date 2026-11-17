@@ -69,7 +69,19 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [ ] **Status manueller Einträge:** vorhanden / **nicht mehr vorhanden** / deaktiviert.
 - [ ] **Aufräumen:** Option „fehlende Einträge entfernen“.
 - [ ] **Repairs-Meldung**, wenn manuell gepflegte Entitäten gelöscht wurden.
-- [ ] **Später (optional):** eigenes Panel mit durchsuchbarer Liste, falls der Options-Flow-Textblock bei vielen Entitäten nicht mehr reicht.
+- [ ] Der Options-Flow behält nur eine einfache Übersicht (Anzahl und fehlende Einträge). Die vollständige Übersicht liegt im Panel (M3b).
+
+## M3b – Übersichts-Panel (beschlossen)
+
+Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was exportiert wird und warum.
+
+- [ ] **WebSocket-API** (nur Admin): getrackte Entitäten mit Quelle (Label direkt, Gerät, Bereich, manuell), Modus (Änderung, Heartbeat), Status und letztem Schreibzeitpunkt auflisten; manuelle Einträge hinzufügen/entfernen; fehlende Einträge aufräumen. Pro Instanz.
+- [ ] **Seitenleisten-Panel** (nur Admin): durchsuchbare, sortierbare und filterbare Tabelle (nach Quelle, Modus, Status, Domain, Bereich).
+- [ ] **Entitäten direkt in der Tabelle an- und abschalten:** Das Umschalten setzt oder entfernt das konfigurierte Label über die Registry von Home Assistant, oder ändert die manuelle Liste bei Entitäten ohne Unique ID. Das ist der Hauptanwendungsfall des Projekts.
+- [ ] **Sammelaktionen:** viele Zeilen markieren und gemeinsam aktivieren/deaktivieren oder auf Heartbeat-Modus stellen.
+- [ ] **Statusanzeige:** fehlende manuelle Einträge deutlich markiert, doppelt selektierte Entitäten (Label und manuell) gekennzeichnet, Schreibfehler pro Entität, falls verfügbar.
+- [ ] **Frontend schlicht halten:** eine einfache Web-Komponente mit möglichst wenigen Abhängigkeiten und wenig Build-Werkzeug, damit Mitwirkende daran arbeiten können.
+- [ ] **Tests:** Unit-Tests der WebSocket-API; manuelle Testliste für das Panel.
 
 ## M4 – Puffer, Zuverlässigkeit, Diagnose
 
@@ -117,7 +129,7 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 
 1. **M0** und **M1** (Fundament und Kompatibilität). Das Schema muss feststehen, bevor produktiv Daten geschrieben werden.
 2. **M2** (erster nutzbarer Stand mit InfluxDB 2).
-3. **M3** (manuelle Liste, Übersicht) und **M4** (Puffer, Diagnose).
+3. **M3** (manuelle Liste, einfache Übersicht), **M3b** (Panel) und **M4** (Puffer, Diagnose).
 4. **M5**, **M6** (InfluxDB 1 und 3).
 5. **M7**, **M8** parallel nach Bedarf.
 
@@ -127,8 +139,8 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - **Mehrere Instanzen:** von Anfang an möglich, ein Config-Entry pro Ziel (siehe M0, M7).
 - **Attribute:** wie in der nativen Integration (siehe M1).
 - **Heartbeat-Markierung:** Feld `_heartbeat`, kein Tag (siehe M1).
+- **Übersicht:** eigenes Panel, geplant als M3b (der Options-Flow behält eine einfache Übersicht).
 
 ## Offene Fragen
 
 1. **Markenrisiko bei Veröffentlichung:** „Influx“ im Namen kann bei öffentlicher Nutzung Probleme mit den Markenrichtlinien von InfluxData machen. Vor dem Veröffentlichen prüfen, nur beschreibend verwenden und auf die fehlende Verbindung zu InfluxData hinweisen. Bei rein privater Nutzung unkritisch.
-2. **Übersicht:** reicht der Options-Flow-Textblock oder wird ein Panel gebraucht?
