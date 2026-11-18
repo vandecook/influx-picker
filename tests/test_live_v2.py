@@ -31,8 +31,10 @@ ENV = {
 pytestmark = [
     pytest.mark.live,
     pytest.mark.skipif(not all(ENV.values()), reason="no InfluxDB 2 server configured"),
-    pytest.mark.enable_socket,
-    pytest.mark.allow_hosts(["127.0.0.1", "::1", "localhost"]),
+    # The Home Assistant test harness blocks sockets in its own setup hook and
+    # ignores the enable_socket marker. The socket_enabled fixture runs after
+    # that hook and allows them again (connections stay limited to 127.0.0.1).
+    pytest.mark.usefixtures("socket_enabled"),
 ]
 
 
