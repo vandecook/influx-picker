@@ -41,6 +41,11 @@ class Backend(ABC):
     #: Registry key, for example "v2". Stored in the config entry.
     version: ClassVar[str]
 
+    #: Fields that hold secrets (token, password). When the connection is
+    #: changed later, an empty secret field keeps the stored value, and the
+    #: re-authentication step asks only for these fields.
+    secret_fields: ClassVar[tuple[str, ...]] = ()
+
     def __init__(self, session: aiohttp.ClientSession, config: Mapping[str, Any]):
         """Store the HTTP session and the backend part of the entry data."""
         self._session = session
@@ -48,8 +53,14 @@ class Backend(ABC):
 
     @staticmethod
     @abstractmethod
-    def schema(defaults: Mapping[str, Any] | None = None) -> Any:
-        """Return the config flow schema for the backend-specific fields."""
+    def schema(
+        defaults: Mapping[str, Any] | None = None, *, keep_secrets: bool = False
+    ) -> Any:
+        """Return the config flow schema for the backend-specific fields.
+
+        With `keep_secrets`, the secret fields are optional (empty keeps the
+        stored value); used when the connection of an entry is changed.
+        """
 
     @staticmethod
     @abstractmethod

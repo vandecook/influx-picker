@@ -388,12 +388,65 @@ async def test_setup_retries_when_server_is_down(hass: HomeAssistant, labels) ->
 
 
 async def test_setup_fails_on_bad_token(hass: HomeAssistant, labels) -> None:
-    """A rejected token is a permanent setup error."""
+    """A rejected token stops setup and asks the user for a new one."""
     with patch(f"{BACKEND}.validate", AsyncMock(side_effect=BackendAuthError("x"))):
         entry = MockConfigEntry(domain=DOMAIN, data=DATA, options={})
         entry.add_to_hass(hass)
         await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
     assert entry.state is ConfigEntryState.SETUP_ERROR
+    flows = hass.config_entries.flow.async_progress_by_handler(DOMAIN)
+    assert [f["context"]["source"] for f in flows] == ["reauth"]
+
+
+async def test_token_rejected_while_running(
+    hass: HomeAssistant, written: Written, labels
+) -> None:
+    """A 401 while running starts re-authentication.
+
+    Queued points survive the reload and are written with the new token.
+    """
+    c = _entity(hass, "c")
+    er.async_get(hass).async_update_entity(c.entity_id, labels={labels[0]})
+    hass.states.async_set("sensor.c", "1")
+
+    async def write(self, points):
+        # Only the new token is accepted.
+        if self._config["token"] != "new-token":
+            raise BackendAuthError("HTTP 401")
+        await written(points)
+
+    with patch(f"{BACKEND}.write", write):
+        entry = await _setup(hass, labels, startup_snapshot="off")
+        hass.states.async_set("sensor.c", "2")
+        await hass.async_block_till_done()
+        assert not await entry.runtime_data.exporter._write_one_batch()
+        await hass.async_block_till_done()
+        flows = hass.config_entries.flow.async_progress_by_handler(DOMAIN)
+        assert [f["context"]["source"] for f in flows] == ["reauth"]
+
+        # The user enters a new token; the entry reloads. The flush during
+        # unload still uses the old token and fails, so the point is kept
+        # for the next setup.
+        result = await hass.config_entries.flow.async_configure(
+            flows[0]["flow_id"], {"token": "new-token"}
+        )
+        assert result["reason"] == "reauth_successful"
+        await hass.async_block_till_done()
+
+        assert entry.data["token"] == "new-token"
+        await _flush(hass)
+    assert [p.fields["value"] for p in written.points] == [2.0]
+
+
+async def test_removed_entry_forgets_kept_points(
+    hass: HomeAssistant, written: Written, labels
+) -> None:
+    """Points kept for a reload are dropped when the entry is removed."""
+    entry = await _setup(hass, labels)
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = ["x"]
+    await hass.config_entries.async_remove(entry.entry_id)
+    assert entry.entry_id not in hass.data[DOMAIN]
 
 
 async def test_two_instances(hass: HomeAssistant, written: Written, labels) -> None:

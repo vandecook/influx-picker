@@ -6,6 +6,7 @@ import asyncio
 from datetime import UTC, datetime
 
 from custom_components.influx_picker.backends import (
+    BackendAuthError,
     BackendConnectionError,
     BackendInvalidDataError,
 )
@@ -173,3 +174,26 @@ async def test_stop_gives_up_when_server_is_down() -> None:
     exp.add(_point(1))
     await exp.stop(0.1)
     assert exp.queue_size == 1
+
+
+async def test_auth_error_reported_once_per_streak() -> None:
+    """A rejected token calls on_auth_error once, again only after a success."""
+    writer = FakeWriter()
+    calls: list[int] = []
+    exp = _exporter(writer, on_auth_error=lambda: calls.append(1))
+    writer.fail_with = [
+        BackendConnectionError("down"),
+        BackendAuthError("401"),
+        BackendAuthError("401"),
+    ]
+    exp.add(_point(0))
+    for _ in range(3):
+        assert not await exp._write_one_batch()
+    assert calls == [1]
+    assert await exp._write_one_batch()  # works again
+    writer.fail_with = [BackendAuthError("401")]
+    exp.add(_point(1))
+    assert not await exp._write_one_batch()
+    assert calls == [1, 1]
+    assert exp.take_queue() == [_point(1)]
+    assert exp.queue_size == 0

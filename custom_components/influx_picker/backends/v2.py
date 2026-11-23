@@ -44,11 +44,15 @@ class InfluxDB2Backend(Backend):
     """Write to InfluxDB 2.x with a token, an organization and a bucket."""
 
     version = "v2"
+    secret_fields = (CONF_TOKEN,)
 
     @staticmethod
-    def schema(defaults: Mapping[str, Any] | None = None) -> vol.Schema:
+    def schema(
+        defaults: Mapping[str, Any] | None = None, *, keep_secrets: bool = False
+    ) -> vol.Schema:
         """Fields: URL, organization, bucket, token, certificate check."""
         d = defaults or {}
+        token = vol.Optional if keep_secrets else vol.Required
         text = TextSelector(TextSelectorConfig(type=TextSelectorType.TEXT))
         return vol.Schema(
             {
@@ -59,7 +63,7 @@ class InfluxDB2Backend(Backend):
                 vol.Required(
                     CONF_BUCKET, default=d.get(CONF_BUCKET, vol.UNDEFINED)
                 ): text,
-                vol.Required(CONF_TOKEN): TextSelector(
+                token(CONF_TOKEN): TextSelector(
                     TextSelectorConfig(type=TextSelectorType.PASSWORD)
                 ),
                 vol.Required(

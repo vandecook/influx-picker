@@ -63,8 +63,8 @@ Acceptance: existing Grafana queries return the same results with the new data. 
 
 ## M3 – Change connection data, manual entity list and overview
 
-- [ ] **Change connection data** (pulled forward from M7, decided 2026-11-23): "Reconfigure" in the entry's menu for URL, token, organization, bucket and SSL. The new data is checked for real before saving (as during setup); labels and data format are kept.
-- [ ] **Re-authenticate:** if InfluxDB rejects the token (401/403), Home Assistant offers "Re-authenticate" by itself and asks only for the new token.
+- [x] **Change connection data** (pulled forward from M7, decided 2026-11-23): "Reconfigure" in the entry's menu for URL, token, organization, bucket and SSL. The new data is checked for real before saving (as during setup); labels and data format are kept.
+- [x] **Re-authenticate:** if InfluxDB rejects the token (401/403), Home Assistant offers "Re-authenticate" by itself and asks only for the new token. Points collected meanwhile stay in memory and are written after the reload.
 - [ ] **Options flow menu:** "Labels & interval" / "Manual list" / "Overview". The menu exists (entity selection, data format); manual list and overview are added here.
 - [ ] **Two manual lists** (multi-select): "write on change" and "write on change + heartbeat".
 - [ ] **Merging** of label and manual selection (union, heartbeat wins). A hint if a manually chosen entity is already selected through a label.

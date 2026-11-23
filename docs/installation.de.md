@@ -155,8 +155,22 @@ nötig. Nach dem Neuladen bekommt jede ausgewählte Entität wieder einen
 Startwert, je nach **Startwert beim Start von Home Assistant** (siehe
 [Abschnitt 6.1](#61-auswahl-der-entitäten)).
 
-Die Verbindung (URL, Token, …) lässt sich noch nicht ändern (geplant für M3).
-Dafür die Integration entfernen und neu hinzufügen.
+### Verbindung ändern (URL, Token, …)
+
+**Einstellungen → Geräte & Dienste → Influx Picker → ⋮ → Neu konfigurieren.**
+Dort lassen sich URL, Organisation, Bucket, Token und die Zertifikatsprüfung
+ändern. Token leer lassen, um das bisherige zu behalten. Die neue Verbindung
+wird vor dem Speichern mit einer echten Schreibanfrage geprüft; Labels und
+Datenformat bleiben, wie sie sind. Wird der Bucket geändert, schreibt die
+Integration ab dann in den neuen Bucket (es wird nichts kopiert).
+
+**Token abgelehnt:** Lehnt InfluxDB das Token ab (zum Beispiel weil es gelöscht
+oder ersetzt wurde), zeigt Home Assistant unter Einstellungen → Geräte & Dienste
+den Hinweis **Erneut authentifizieren**. Gefragt wird nur nach dem neuen Token.
+Das passiert beim Start und im laufenden Betrieb. Punkte, die gesammelt wurden,
+während das Token abgelehnt wurde, bleiben im Speicher (bis zur Puffergrenze)
+und werden geschrieben, sobald das neue Token funktioniert, außer Home Assistant
+wird in der Zwischenzeit neu gestartet.
 
 ## 6. Alle Einstellungen
 
@@ -318,6 +332,7 @@ Dashboards weiter funktionieren.
 | Einrichtung: "Das Token ist ungültig oder hat keine Schreibrechte." | Token falsch oder ohne Schreibrecht auf den Bucket. |
 | Einrichtung: "Organisation oder Bucket nicht gefunden." | Schreibweise prüfen. Darf das Token keine Organisationen auflisten, die **ID** der Organisation eintragen. |
 | Einrichtung: "Keine Verbindung zum Server." | URL und Port prüfen, und ob Home Assistant den Server erreicht. |
+| Hinweis "Erneut authentifizieren" / "Neues Token" | InfluxDB hat das gespeicherte Token abgelehnt. Ein Token mit Schreibrecht auf den Bucket anlegen und eintragen ([Abschnitt 5](#5-einstellungen-später-ändern)). |
 | Punkte landen in Measurements mit der Entity-ID als Namen (`switch.kitchen`) | Kein **Standard-Measurement** gesetzt. Beim Umstieg von der nativen Integration `default_measurement` übernehmen ([Abschnitt 7](#7-umstieg-von-der-nativen-influxdb-integration)). |
 | `friendly_name` ist ein Feld (`friendly_name_str`) statt eines Tags | `friendly_name` bei **Attribute als Tags schreiben** eintragen. |
 | Eine Entität wird nicht geschrieben | Hat sie eine Unique-ID (sonst keine Labels)? Ist sie deaktiviert? Ist ihr Zustand `unknown`/`unavailable`? Hängt das Label an Entität, Gerät oder Bereich, und ist bei Geräte-/Bereichslabels die Vererbung an? |

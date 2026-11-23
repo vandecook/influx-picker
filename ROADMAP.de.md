@@ -63,8 +63,8 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 
 ## M3 – Verbindungsdaten ändern, manuelle Entitätenliste und Übersicht
 
-- [ ] **Verbindungsdaten ändern** (vorgezogen aus M7, entschieden 2026-11-23): „Neu konfigurieren“ im Menü des Eintrags für URL, Token, Organisation, Bucket und SSL. Die neuen Daten werden vor dem Speichern echt geprüft (wie beim Einrichten); Labels und Datenformat bleiben erhalten.
-- [ ] **Neu anmelden:** Lehnt InfluxDB den Token ab (401/403), bietet Home Assistant von selbst „Erneut authentifizieren“ an und fragt nur nach dem neuen Token.
+- [x] **Verbindungsdaten ändern** (vorgezogen aus M7, entschieden 2026-11-23): „Neu konfigurieren“ im Menü des Eintrags für URL, Token, Organisation, Bucket und SSL. Die neuen Daten werden vor dem Speichern echt geprüft (wie beim Einrichten); Labels und Datenformat bleiben erhalten.
+- [x] **Neu anmelden:** Lehnt InfluxDB den Token ab (401/403), bietet Home Assistant von selbst „Erneut authentifizieren“ an und fragt nur nach dem neuen Token. In der Zwischenzeit gesammelte Punkte bleiben im Speicher und werden nach dem Neuladen geschrieben.
 - [ ] **Options-Flow-Menü:** „Labels & Intervall“ / „Manuelle Liste“ / „Übersicht“. Das Menü gibt es schon (Auswahl der Entitäten, Datenformat); manuelle Liste und Übersicht kommen hier dazu.
 - [ ] **Zwei manuelle Listen** (Mehrfachauswahl): „bei Änderung schreiben“ und „bei Änderung + Heartbeat“.
 - [ ] **Zusammenführung** von Label und manueller Selektion (Vereinigung, Heartbeat gewinnt). Hinweis, wenn eine manuell gewählte Entität schon per Label erfasst wird.

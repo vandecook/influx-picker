@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Change the connection (URL, organization, bucket, token, certificate check)
+  with "Reconfigure", without setting the integration up again. An empty
+  token keeps the current one.
+- If InfluxDB rejects the token, Home Assistant asks for a new one
+  ("Re-authenticate"), at start and while running. Points collected meanwhile
+  are kept in memory and written after the new token works.
+
 ## 0.1.0 (2026-11-23)
 
 First release. InfluxDB 2.x only.
