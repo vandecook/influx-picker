@@ -16,6 +16,8 @@ Changes take effect immediately, **without restarting Home Assistant**.
 - **Selection by label:** one label for "write on change", one for "write on
   change plus heartbeat". Labels on a device or area count too (can be switched
   off).
+- **Manual list** for entities that cannot carry labels (for example without a
+  unique ID), and an **overview** of everything that is written.
 - **Compatible with the core `influxdb` integration:** same measurements, tags
   and fields. Its YAML options (`default_measurement`, `tags`,
   `tags_attributes`, `ignore_attributes`, `component_config`, …) are set in the
@@ -74,8 +76,7 @@ Graphs, averages and `last()` can use all points.
 
 ## Roadmap
 
-Next: a manual list for entities without labels and an overview (M3),
-diagnostics and buffer settings (M4), InfluxDB 1.x and 3.x (M5, M6), import
+Next: diagnostics and buffer settings (M4), InfluxDB 1.x and 3.x (M5, M6), import
 from the core YAML (M7). Details: [ROADMAP.en.md](ROADMAP.en.md).
 
 ## Development

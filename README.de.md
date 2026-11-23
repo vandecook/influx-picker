@@ -17,6 +17,9 @@ Schreibt ausgewählte Home-Assistant-Entitäten nach InfluxDB®, ausgewählt üb
 - **Auswahl per Label:** ein Label für "bei Änderung schreiben", eines für "bei
   Änderung und als Heartbeat schreiben". Labels an Gerät oder Bereich zählen
   mit (abschaltbar).
+- **Manuelle Liste** für Entitäten, die keine Labels tragen können (zum
+  Beispiel ohne Unique-ID), und eine **Übersicht** über alles, was geschrieben
+  wird.
 - **Kompatibel mit der nativen `influxdb`-Integration:** gleiche Measurements,
   Tags und Felder. Ihre YAML-Optionen (`default_measurement`, `tags`,
   `tags_attributes`, `ignore_attributes`, `component_config`, …) werden in der
@@ -77,8 +80,7 @@ Graphen, Mittelwerte und `last()` können alle Punkte verwenden.
 
 ## Roadmap
 
-Als Nächstes: manuelle Liste für Entitäten ohne Labels und eine Übersicht (M3),
-Diagnose und Puffer-Einstellungen (M4), InfluxDB 1.x und 3.x (M5, M6), Import
+Als Nächstes: Diagnose und Puffer-Einstellungen (M4), InfluxDB 1.x und 3.x (M5, M6), Import
 aus dem nativen YAML (M7). Details: [ROADMAP.de.md](ROADMAP.de.md).
 
 ## Entwicklung

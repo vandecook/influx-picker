@@ -2,7 +2,7 @@
 
 [English](ROADMAP.en.md) · [README (Deutsch)](README.de.md)
 
-Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; ein erster Praxistest lief am 23.11.2026 (eine Installation, InfluxDB 2). Release v0.1.0 enthält M0, M1 und M2. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
+Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; ein erster Praxistest lief am 23.11.2026 (eine Installation, InfluxDB 2). Release v0.1.0 enthält M0, M1 und M2; M3 ist umgesetzt, aber noch nicht veröffentlicht. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
 
 ## Anforderungen (Stand 17.11.2026)
 
@@ -65,14 +65,14 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 
 - [x] **Verbindungsdaten ändern** (vorgezogen aus M7, entschieden 2026-11-23): „Neu konfigurieren“ im Menü des Eintrags für URL, Token, Organisation, Bucket und SSL. Die neuen Daten werden vor dem Speichern echt geprüft (wie beim Einrichten); Labels und Datenformat bleiben erhalten.
 - [x] **Neu anmelden:** Lehnt InfluxDB den Token ab (401/403), bietet Home Assistant von selbst „Erneut authentifizieren“ an und fragt nur nach dem neuen Token. In der Zwischenzeit gesammelte Punkte bleiben im Speicher und werden nach dem Neuladen geschrieben.
-- [ ] **Options-Flow-Menü:** „Labels & Intervall“ / „Manuelle Liste“ / „Übersicht“. Das Menü gibt es schon (Auswahl der Entitäten, Datenformat); manuelle Liste und Übersicht kommen hier dazu.
-- [ ] **Zwei manuelle Listen** (Mehrfachauswahl): „bei Änderung schreiben“ und „bei Änderung + Heartbeat“.
-- [ ] **Zusammenführung** von Label und manueller Selektion (Vereinigung, Heartbeat gewinnt). Hinweis, wenn eine manuell gewählte Entität schon per Label erfasst wird.
-- [ ] **Übersicht als Liste** im Options-Flow: Anzahl nach Quelle (Label direkt, Gerät, Bereich, manuell) und Modus (Änderung, Heartbeat), dazu eine Zeile pro Entität (Entity-ID, Quelle, Modus). Bei langen Listen gekürzt oder seitenweise.
-- [ ] **Status manueller Einträge:** vorhanden / **nicht mehr vorhanden** / deaktiviert.
-- [ ] **Aufräumen:** Option „fehlende Einträge entfernen“.
-- [ ] **Repairs-Meldung**, wenn manuell gepflegte Entitäten gelöscht wurden.
-- [ ] Bis es das Panel gibt (M9), ist die Liste im Options-Flow die Übersicht.
+- [x] **Options-Flow-Menü:** „Labels & Intervall“ / „Manuelle Liste“ / „Übersicht“. Menü jetzt: „Labels und Intervall“ / „Manuelle Liste“ / „Übersicht“ / „Datenformat“.
+- [x] **Zwei manuelle Listen** (Mehrfachauswahl): „bei Änderung schreiben“ und „bei Änderung + Heartbeat“.
+- [x] **Zusammenführung** von Label und manueller Selektion (Vereinigung, Heartbeat gewinnt). Hinweis, wenn eine manuell gewählte Entität schon per Label erfasst wird.
+- [x] **Übersicht als Liste** im Options-Flow: Anzahl nach Quelle (Label direkt, Gerät, Bereich, manuell) und Modus (Änderung, Heartbeat), dazu eine Zeile pro Entität (Entity-ID, Quelle, Modus). Bei langen Listen gekürzt oder seitenweise.
+- [x] **Status manueller Einträge:** vorhanden / **nicht mehr vorhanden** / deaktiviert. Einträge, die es (noch) nicht gibt, bleiben ausgewählt und werden geschrieben, sobald sie auftauchen. Umbenannte Entity-IDs werden automatisch nachgezogen.
+- [x] **Aufräumen:** Option „fehlende Einträge entfernen“.
+- [x] **Repairs-Meldung**, wenn manuell gepflegte Entitäten gelöscht wurden (geprüft, sobald Home Assistant gestartet ist), mit einer Reparatur, die sie entfernt.
+- [x] Bis es das Panel gibt (M9), ist die Liste im Options-Flow die Übersicht.
 
 ## M4 – Puffer, Zuverlässigkeit, Diagnose
 

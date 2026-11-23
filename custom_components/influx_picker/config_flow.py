@@ -13,6 +13,8 @@ from homeassistant.config_entries import (
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.selector import (
+    EntitySelector,
+    EntitySelectorConfig,
     LabelSelector,
     LabelSelectorConfig,
     NumberSelector,
@@ -46,6 +48,8 @@ from .const import (
     CONF_INHERIT,
     CONF_LABEL_CHANGE,
     CONF_LABEL_HEARTBEAT,
+    CONF_MANUAL_CHANGE,
+    CONF_MANUAL_HEARTBEAT,
     CONF_MEASUREMENT_ATTR,
     CONF_OVERRIDE_MEASUREMENT,
     CONF_STARTUP_SNAPSHOT,
@@ -58,12 +62,22 @@ from .const import (
     STARTUP_SNAPSHOT_MODES,
     SUGGESTED_DATA_FORMAT,
 )
+from .overview import build_overview
 from .schema import (
     MEASUREMENT_ATTR_DOMAIN_DEVICE_CLASS,
     MEASUREMENT_ATTR_UNIT,
     MEASUREMENT_ATTRS,
     parse_customizations,
 )
+from .selection import (
+    Source,
+    compute_details,
+    manual_lists,
+    missing_manual,
+    without_entities,
+)
+
+CONF_REMOVE_MISSING = "remove_missing"
 
 _CUSTOMIZATIONS = (
     CONF_COMPONENT_CONFIG,
@@ -237,8 +251,13 @@ def selection_schema(defaults: Mapping[str, Any]) -> vol.Schema:
     )
 
 
-def _clean_selection(user_input: Mapping[str, Any]) -> tuple[dict[str, Any], dict]:
-    """Normalize the selection step. Returns (options, errors)."""
+def _clean_selection(
+    user_input: Mapping[str, Any], *, has_manual: bool = False
+) -> tuple[dict[str, Any], dict]:
+    """Normalize the selection step. Returns (options, errors).
+
+    Without manual entries at least one label is needed.
+    """
     options = {
         CONF_LABEL_CHANGE: user_input.get(CONF_LABEL_CHANGE) or None,
         CONF_LABEL_HEARTBEAT: user_input.get(CONF_LABEL_HEARTBEAT) or None,
@@ -250,12 +269,34 @@ def _clean_selection(user_input: Mapping[str, Any]) -> tuple[dict[str, Any], dic
     }
     errors: dict[str, str] = {}
     if not options[CONF_LABEL_CHANGE] and not options[CONF_LABEL_HEARTBEAT]:
-        errors["base"] = "no_label"
+        if not has_manual:
+            errors["base"] = "no_label"
     elif options[CONF_LABEL_CHANGE] == options[CONF_LABEL_HEARTBEAT]:
         errors["base"] = "same_label"
     if options[CONF_STARTUP_SNAPSHOT] not in STARTUP_SNAPSHOT_MODES:
         errors[CONF_STARTUP_SNAPSHOT] = "invalid_startup_snapshot"
     return options, errors
+
+
+def manual_schema(defaults: Mapping[str, Any], *, offer_cleanup: bool) -> vol.Schema:
+    """The two manual lists (and the cleanup switch when entries are missing)."""
+    change, heartbeat = manual_lists(defaults)
+    entities = EntitySelector(EntitySelectorConfig(multiple=True))
+    schema: dict[Any, Any] = {
+        vol.Optional(
+            CONF_MANUAL_CHANGE, description={"suggested_value": change}
+        ): entities,
+        vol.Optional(
+            CONF_MANUAL_HEARTBEAT, description={"suggested_value": heartbeat}
+        ): entities,
+    }
+    if offer_cleanup:
+        schema[vol.Optional(CONF_REMOVE_MISSING, default=False)] = bool
+    return vol.Schema(schema)
+
+
+def _inline(entity_ids: list[str]) -> str:
+    return ", ".join(f"`{e}`" for e in entity_ids) if entity_ids else "–"
 
 
 async def _validate(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, str]:
@@ -455,14 +496,73 @@ class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class InfluxPickerOptionsFlow(OptionsFlow):
-    """Menu: entity selection or data format."""
+    """Menu: labels, manual lists, overview, data format."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Show the menu. Manual lists and the overview join it in M3."""
+        """Show the menu."""
         return self.async_show_menu(
-            step_id="init", menu_options=["selection", "data_format"]
+            step_id="init",
+            menu_options=["selection", "manual", "overview", "data_format"],
+        )
+
+    async def async_step_manual(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Two manual lists for entities that cannot carry labels."""
+        options = self.config_entry.options
+        missing = missing_manual(self.hass, options)
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            new = {
+                **options,
+                CONF_MANUAL_CHANGE: list(user_input.get(CONF_MANUAL_CHANGE) or []),
+                CONF_MANUAL_HEARTBEAT: list(
+                    user_input.get(CONF_MANUAL_HEARTBEAT) or []
+                ),
+            }
+            if user_input.get(CONF_REMOVE_MISSING):
+                new = without_entities(new, missing)
+            change, heartbeat = manual_lists(new)
+            if set(change) & set(heartbeat):
+                errors["base"] = "manual_in_both"
+            elif not (change or heartbeat) and not (
+                options.get(CONF_LABEL_CHANGE) or options.get(CONF_LABEL_HEARTBEAT)
+            ):
+                errors["base"] = "nothing_selected"
+            else:
+                return self.async_create_entry(data=new)
+        # Manual entries that a label selects anyway (a hint, not an error).
+        by_label = sorted(
+            e
+            for e, sel in compute_details(self.hass, options).items()
+            if Source.MANUAL in sel.sources and len(sel.sources) > 1
+        )
+        return self.async_show_form(
+            step_id="manual",
+            data_schema=manual_schema(
+                user_input or options, offer_cleanup=bool(missing)
+            ),
+            errors=errors,
+            description_placeholders={
+                "missing": _inline(missing),
+                "by_label": _inline(by_label),
+            },
+        )
+
+    async def async_step_overview(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Read-only list of the selected entities; submit goes back."""
+        if user_input is not None:
+            return await self.async_step_init()
+        return self.async_show_form(
+            step_id="overview",
+            data_schema=vol.Schema({}),
+            description_placeholders=build_overview(
+                self.hass, self.config_entry.options
+            ),
         )
 
     async def async_step_selection(
@@ -471,7 +571,9 @@ class InfluxPickerOptionsFlow(OptionsFlow):
         """Change labels, heartbeat interval and inheritance."""
         errors: dict[str, str] = {}
         if user_input is not None:
-            options, errors = _clean_selection(user_input)
+            options, errors = _clean_selection(
+                user_input, has_manual=any(manual_lists(self.config_entry.options))
+            )
             if not errors:
                 return self.async_create_entry(
                     data={**self.config_entry.options, **options}

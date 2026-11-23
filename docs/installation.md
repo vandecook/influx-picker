@@ -130,17 +130,43 @@ heartbeat, see [section 6.1](#61-entity-selection)).
 **Limits:**
 
 - Only entities with a **unique ID** can carry labels. Some entities have none
-  (for example `sun.sun` or entities from YAML without `unique_id`). A manual
-  list for these is planned (roadmap M3).
+  (for example `sun.sun` or entities from YAML without `unique_id`). Use the
+  **manual list** for these (see below).
 - **Disabled** entities are not written.
 - States `unknown`, `unavailable` and empty states are never written (same as
   the core integration).
+
+### Manual list
+
+**Settings → Devices & services → Influx Picker → Configure → Manual list.**
+Two lists: **Write on change** and **Write on change and heartbeat**. They work
+in addition to the labels. If an entity is selected twice, heartbeat wins. The
+form shows which listed entities no longer exist and which a label selects
+anyway.
+
+- An entity that does not exist (yet) stays in the list and is written as soon
+  as it appears.
+- If a listed entity is gone after Home Assistant has started, a **repairs
+  notice** appears (Settings → System → Repairs). Its fix removes the missing
+  entries. The manual list form offers the same with **Remove entries that no
+  longer exist**.
+- If you rename an entity ID, the list follows automatically.
+- With entries in the manual list, the labels may be left empty.
+
+### Overview
+
+**Configure → Overview** lists everything that is written: counts by source
+(label on the entity, device, area, manual list) and mode (on change,
+heartbeat), then one line per entity. Manual entries that no longer exist or
+are disabled are marked. Long lists are cut after 100 lines.
 
 ## 5. Change settings later
 
 **Settings → Devices & services → Influx Picker → Configure.** A menu opens:
 
-- **Entity selection:** labels, heartbeat interval, inheritance.
+- **Labels and interval:** labels, heartbeat interval, inheritance, snapshot.
+- **Manual list:** see [section 4](#4-select-entities).
+- **Overview:** what is written and why (read only).
 - **Data format:** all data format options.
 
 Saving reloads the integration, no Home Assistant restart needed. After the
