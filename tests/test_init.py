@@ -192,6 +192,66 @@ async def test_invalid_stored_data_format_fails_setup(
     assert entry.state is ConfigEntryState.SETUP_ERROR
 
 
+async def test_startup_snapshot_last_updated(
+    hass: HomeAssistant, written: Written, labels
+) -> None:
+    """Option "last_updated": own timestamp, marked _startup, not heartbeat."""
+    a = _entity(hass, "a")
+    er.async_get(hass).async_update_entity(a.entity_id, labels={labels[1]})
+    hass.states.async_set("sensor.a", "1")
+    last_updated = hass.states.get("sensor.a").last_updated
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(minutes=5))
+
+    await _setup(hass, labels, startup_snapshot="last_updated")
+    await _flush(hass)
+    assert len(written.points) == 1
+    point = written.points[0]
+    assert point.time == last_updated
+    assert point.fields["_startup"] is True
+    assert "_heartbeat" not in point.fields
+
+    # Entities selected later still get the normal heartbeat snapshot.
+    written.clear()
+    b = _entity(hass, "b")
+    hass.states.async_set("sensor.b", "2")
+    er.async_get(hass).async_update_entity(b.entity_id, labels={labels[0]})
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=2))
+    await _flush(hass)
+    assert written.entities() == [("b", True)]
+    assert "_startup" not in written.points[0].fields
+
+
+async def test_startup_snapshot_off(
+    hass: HomeAssistant, written: Written, labels
+) -> None:
+    """Option "off": nothing at start, changes and later selections still work."""
+    a = _entity(hass, "a")
+    er.async_get(hass).async_update_entity(a.entity_id, labels={labels[1]})
+    hass.states.async_set("sensor.a", "1")
+
+    await _setup(hass, labels, startup_snapshot="off")
+    await _flush(hass)
+    assert written.points == []
+
+    # The heartbeat clock starts at setup: no heartbeat before the interval.
+    entry = hass.config_entries.async_entries(DOMAIN)[0]
+    entry.runtime_data.runtime._async_heartbeat(dt_util.utcnow())
+    await _flush(hass)
+    assert written.points == []
+
+    hass.states.async_set("sensor.a", "2")
+    await _flush(hass)
+    assert written.entities() == [("a", False)]
+
+    written.clear()
+    b = _entity(hass, "b")
+    hass.states.async_set("sensor.b", "2")
+    er.async_get(hass).async_update_entity(b.entity_id, labels={labels[0]})
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=2))
+    await _flush(hass)
+    assert written.entities() == [("b", True)]
+
+
 async def test_label_added_at_runtime(
     hass: HomeAssistant, written: Written, labels
 ) -> None:

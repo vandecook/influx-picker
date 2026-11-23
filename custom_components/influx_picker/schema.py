@@ -28,6 +28,7 @@ MEASUREMENT_ATTRS = (
 )
 
 HEARTBEAT_FIELD = "_heartbeat"
+STARTUP_FIELD = "_startup"
 
 SKIPPED_STATES = frozenset({"unknown", "unavailable", ""})
 
@@ -171,6 +172,7 @@ def state_to_point(
     options: SchemaOptions,
     *,
     heartbeat: bool = False,
+    startup: bool = False,
     number: Callable[[str], float] = state_as_number,
 ) -> Point | None:
     """Build the point for one state, or None if the state is not written."""
@@ -260,6 +262,8 @@ def state_to_point(
 
     if heartbeat:
         fields[HEARTBEAT_FIELD] = True
+    if startup:
+        fields[STARTUP_FIELD] = True
 
     return Point(
         measurement=str(measurement),

@@ -48,11 +48,15 @@ from .const import (
     CONF_LABEL_HEARTBEAT,
     CONF_MEASUREMENT_ATTR,
     CONF_OVERRIDE_MEASUREMENT,
+    CONF_STARTUP_SNAPSHOT,
     CONF_TAGS,
     CONF_TAGS_ATTRIBUTES,
     DEFAULT_HEARTBEAT_INTERVAL,
     DEFAULT_INHERIT,
+    DEFAULT_STARTUP_SNAPSHOT,
     DOMAIN,
+    STARTUP_SNAPSHOT_MODES,
+    SUGGESTED_DATA_FORMAT,
 )
 from .schema import (
     MEASUREMENT_ATTR_DOMAIN_DEVICE_CLASS,
@@ -219,6 +223,16 @@ def selection_schema(defaults: Mapping[str, Any]) -> vol.Schema:
             vol.Required(
                 CONF_INHERIT, default=defaults.get(CONF_INHERIT, DEFAULT_INHERIT)
             ): bool,
+            vol.Required(
+                CONF_STARTUP_SNAPSHOT,
+                default=defaults.get(CONF_STARTUP_SNAPSHOT) or DEFAULT_STARTUP_SNAPSHOT,
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=list(STARTUP_SNAPSHOT_MODES),
+                    translation_key=CONF_STARTUP_SNAPSHOT,
+                    mode=SelectSelectorMode.DROPDOWN,
+                )
+            ),
         }
     )
 
@@ -230,12 +244,17 @@ def _clean_selection(user_input: Mapping[str, Any]) -> tuple[dict[str, Any], dic
         CONF_LABEL_HEARTBEAT: user_input.get(CONF_LABEL_HEARTBEAT) or None,
         CONF_HEARTBEAT_INTERVAL: int(user_input[CONF_HEARTBEAT_INTERVAL]),
         CONF_INHERIT: bool(user_input[CONF_INHERIT]),
+        CONF_STARTUP_SNAPSHOT: user_input.get(
+            CONF_STARTUP_SNAPSHOT, DEFAULT_STARTUP_SNAPSHOT
+        ),
     }
     errors: dict[str, str] = {}
     if not options[CONF_LABEL_CHANGE] and not options[CONF_LABEL_HEARTBEAT]:
         errors["base"] = "no_label"
     elif options[CONF_LABEL_CHANGE] == options[CONF_LABEL_HEARTBEAT]:
         errors["base"] = "same_label"
+    if options[CONF_STARTUP_SNAPSHOT] not in STARTUP_SNAPSHOT_MODES:
+        errors[CONF_STARTUP_SNAPSHOT] = "invalid_startup_snapshot"
     return options, errors
 
 
@@ -336,7 +355,7 @@ class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
         return self.async_show_form(
             step_id="data_format",
-            data_schema=data_format_schema(user_input or {}),
+            data_schema=data_format_schema(user_input or SUGGESTED_DATA_FORMAT),
             errors=errors,
         )
 

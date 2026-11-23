@@ -32,8 +32,12 @@ from .const import (
     CONF_INHERIT,
     CONF_LABEL_CHANGE,
     CONF_LABEL_HEARTBEAT,
+    CONF_STARTUP_SNAPSHOT,
     DEFAULT_HEARTBEAT_INTERVAL,
     DEFAULT_INHERIT,
+    DEFAULT_STARTUP_SNAPSHOT,
+    STARTUP_SNAPSHOT_LAST_UPDATED,
+    STARTUP_SNAPSHOT_OFF,
 )
 from .exporter import Exporter
 from .schema import SchemaOptions, state_to_point
@@ -77,6 +81,10 @@ class PickerRuntime:
         self.heartbeat_seconds: float = 60 * float(
             options.get(CONF_HEARTBEAT_INTERVAL, DEFAULT_HEARTBEAT_INTERVAL)
         )
+        self.startup_snapshot: str = (
+            options.get(CONF_STARTUP_SNAPSHOT) or DEFAULT_STARTUP_SNAPSHOT
+        )
+        self._started = False
         self.tracked: dict[str, Mode] = {}
         self._last_write: dict[str, float] = {}  # entity_id -> self._clock()
         self._clock = time.monotonic  # replaced in tests
@@ -131,7 +139,10 @@ class PickerRuntime:
 
     @callback
     def _async_rebuild(self) -> None:
-        """Recompute the selection. Newly selected entities get one snapshot."""
+        """Recompute the selection. Newly selected entities get one snapshot.
+
+        The first run after start follows the startup snapshot option.
+        """
         new = compute_selection(
             self.hass, self.change_label, self.heartbeat_label, self.inherit
         )
@@ -140,9 +151,22 @@ class PickerRuntime:
         self.tracked = new
         for entity_id in removed:
             self._last_write.pop(entity_id, None)
+        startup, self._started = not self._started, True
+        if startup and self.startup_snapshot == STARTUP_SNAPSHOT_OFF:
+            # No write now; the first heartbeat comes after a full interval.
+            started_at = self._clock()
+            self._last_write.update(dict.fromkeys(added, started_at))
+            added = set()
         now = dt_util.utcnow()
         for entity_id in added:
-            if (state := self.hass.states.get(entity_id)) is not None:
+            if (state := self.hass.states.get(entity_id)) is None:
+                continue
+            if startup and self.startup_snapshot == STARTUP_SNAPSHOT_LAST_UPDATED:
+                # Same timestamp as the change point the state came from, so an
+                # existing point is overwritten with the same values (plus the
+                # marker) and a missing one is filled in at the right time.
+                self._write(state, state.last_updated, heartbeat=False, startup=True)
+            else:
                 self._write(state, now, heartbeat=True)
         if added or removed:
             _LOGGER.debug(
@@ -168,7 +192,14 @@ class PickerRuntime:
                 self._write(state, now, heartbeat=True)
 
     @callback
-    def _write(self, state: State, when: datetime, *, heartbeat: bool) -> None:
+    def _write(
+        self,
+        state: State,
+        when: datetime,
+        *,
+        heartbeat: bool,
+        startup: bool = False,
+    ) -> None:
         point = state_to_point(
             state.entity_id,
             state.state,
@@ -176,6 +207,7 @@ class PickerRuntime:
             when,
             self.schema_options,
             heartbeat=heartbeat,
+            startup=startup,
             number=_number(state),
         )
         if point is not None:
