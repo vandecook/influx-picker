@@ -28,6 +28,32 @@
           "heartbeat_interval": "Heartbeat interval",
           "inherit_labels": "Include labels of the device and area"
         }
+      },
+      "data_format": {
+        "title": "Data format",
+        "description": "Same options as the YAML configuration of the core InfluxDB integration. Copy your values from there so existing queries keep working. Leave a field empty for the core default.",
+        "data": {
+          "measurement_attr": "Measurement from",
+          "default_measurement": "Default measurement",
+          "override_measurement": "Override measurement",
+          "tags": "Static tags",
+          "tags_attributes": "Attributes written as tags",
+          "ignore_attributes": "Attributes to ignore",
+          "component_config": "Per entity",
+          "component_config_domain": "Per domain",
+          "component_config_glob": "Per entity pattern"
+        },
+        "data_description": {
+          "measurement_attr": "core: measurement_attr",
+          "default_measurement": "core: default_measurement. Used when the entity has no value for the option above. Empty: the entity ID.",
+          "override_measurement": "core: override_measurement. Writes every point to this measurement.",
+          "tags": "core: tags. One key=value per line, for example source=HA.",
+          "tags_attributes": "core: tags_attributes, for example friendly_name.",
+          "ignore_attributes": "core: ignore_attributes.",
+          "component_config": "core: component_config. Entity ID mapped to override_measurement and/or ignore_attributes.",
+          "component_config_domain": "core: component_config_domain. Domain mapped to override_measurement and/or ignore_attributes.",
+          "component_config_glob": "core: component_config_glob. Pattern such as sensor.*_temp mapped to override_measurement and/or ignore_attributes."
+        }
       }
     },
     "error": {
@@ -36,7 +62,10 @@
       "not_found": "Organization or bucket not found.",
       "no_label": "Choose at least one label.",
       "same_label": "Choose two different labels.",
-      "unknown": "Unexpected error."
+      "unknown": "Unexpected error.",
+      "invalid_tags": "Use one key=value per line.",
+      "invalid_component_config": "Expected a mapping to override_measurement (text) and/or ignore_attributes (list).",
+      "invalid_measurement_attr": "Unknown choice."
     },
     "abort": {
       "already_configured": "This bucket is already configured."
@@ -45,6 +74,13 @@
   "options": {
     "step": {
       "init": {
+        "title": "Options",
+        "menu_options": {
+          "selection": "Entity selection",
+          "data_format": "Data format"
+        }
+      },
+      "selection": {
         "title": "Entity selection",
         "description": "Entities with one of these labels are written. The heartbeat label also writes the current state again when nothing was written during the interval.",
         "data": {
@@ -53,17 +89,53 @@
           "heartbeat_interval": "Heartbeat interval",
           "inherit_labels": "Include labels of the device and area"
         }
+      },
+      "data_format": {
+        "title": "Data format",
+        "description": "Same options as the YAML configuration of the core InfluxDB integration. Copy your values from there so existing queries keep working. Leave a field empty for the core default.",
+        "data": {
+          "measurement_attr": "Measurement from",
+          "default_measurement": "Default measurement",
+          "override_measurement": "Override measurement",
+          "tags": "Static tags",
+          "tags_attributes": "Attributes written as tags",
+          "ignore_attributes": "Attributes to ignore",
+          "component_config": "Per entity",
+          "component_config_domain": "Per domain",
+          "component_config_glob": "Per entity pattern"
+        },
+        "data_description": {
+          "measurement_attr": "core: measurement_attr",
+          "default_measurement": "core: default_measurement. Used when the entity has no value for the option above. Empty: the entity ID.",
+          "override_measurement": "core: override_measurement. Writes every point to this measurement.",
+          "tags": "core: tags. One key=value per line, for example source=HA.",
+          "tags_attributes": "core: tags_attributes, for example friendly_name.",
+          "ignore_attributes": "core: ignore_attributes.",
+          "component_config": "core: component_config. Entity ID mapped to override_measurement and/or ignore_attributes.",
+          "component_config_domain": "core: component_config_domain. Domain mapped to override_measurement and/or ignore_attributes.",
+          "component_config_glob": "core: component_config_glob. Pattern such as sensor.*_temp mapped to override_measurement and/or ignore_attributes."
+        }
       }
     },
     "error": {
       "no_label": "Choose at least one label.",
-      "same_label": "Choose two different labels."
+      "same_label": "Choose two different labels.",
+      "invalid_tags": "Use one key=value per line.",
+      "invalid_component_config": "Expected a mapping to override_measurement (text) and/or ignore_attributes (list).",
+      "invalid_measurement_attr": "Unknown choice."
     }
   },
   "selector": {
     "backend": {
       "options": {
         "v2": "InfluxDB 2.x"
+      }
+    },
+    "measurement_attr": {
+      "options": {
+        "unit_of_measurement": "Unit of measurement (default)",
+        "domain_device_class": "Domain and device class",
+        "entity_id": "Entity ID"
       }
     }
   }

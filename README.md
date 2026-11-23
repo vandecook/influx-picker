@@ -77,9 +77,13 @@ effect immediately.
 5. Enter URL (for example `http://192.168.1.10:8086`), organization, bucket and
    token. The connection is checked with a real write request.
 6. Choose the labels and the heartbeat interval.
-7. Put the labels on entities, devices or areas. Changes take effect within
-   about a second, without a restart. Labels and interval can be changed later
-   with **Configure** on the integration.
+7. **Data format:** if you used the core `influxdb` integration, copy the
+   values of `default_measurement`, `tags`, `tags_attributes`,
+   `ignore_attributes` and the other options from its YAML, so existing queries
+   keep working. Otherwise keep the defaults.
+8. Put the labels on entities, devices or areas. Changes take effect within
+   about a second, without a restart. Labels, interval and data format can be
+   changed later with **Configure** on the integration.
 
 For a second target (another bucket or server), add the integration again.
 
@@ -114,7 +118,7 @@ same entities may be written twice. Remove them from the core integration's
 | Topic | Decision |
 |---|---|
 | Backends | Backend interface and registry from the start; InfluxDB 2.x is the first plugin. |
-| Compatibility | Same schema as the core integration. Audited from its source code ([audit](docs/core-schema-audit.md)) and checked by tests against a copy of the core algorithm; the check against real data is still open. |
+| Compatibility | Same schema as the core integration. Audited from its source code ([audit](docs/core-schema-audit.md)) checked by tests against a copy of the core algorithm, and compared with real data written by the core integration (10 entity types identical, kept as golden tests). The core YAML options (`default_measurement`, `tags`, `tags_attributes`, …) are set in the UI. |
 | Batching | Flush after 1 s of quiet or 100 points, like the core integration. |
 | Buffer | Bounded by **count** (default 50,000 points), oldest points dropped on overflow, no age limit. Timestamps are preserved, so buffering longer does not distort data. |
 | Retry | Backoff from 5 s up to 60 s. Invalid batches are dropped, not retried. |

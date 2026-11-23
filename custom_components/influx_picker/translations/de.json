@@ -28,6 +28,32 @@
           "heartbeat_interval": "Heartbeat-Intervall",
           "inherit_labels": "Labels von Gerät und Bereich einbeziehen"
         }
+      },
+      "data_format": {
+        "title": "Datenformat",
+        "description": "Dieselben Optionen wie in der YAML-Konfiguration der nativen InfluxDB-Integration. Übernimm deine Werte von dort, damit bestehende Abfragen weiter funktionieren. Ein leeres Feld bedeutet den Standard der nativen Integration.",
+        "data": {
+          "measurement_attr": "Measurement aus",
+          "default_measurement": "Standard-Measurement",
+          "override_measurement": "Measurement überschreiben",
+          "tags": "Feste Tags",
+          "tags_attributes": "Attribute als Tags schreiben",
+          "ignore_attributes": "Attribute ignorieren",
+          "component_config": "Pro Entität",
+          "component_config_domain": "Pro Domain",
+          "component_config_glob": "Pro Entitätsmuster"
+        },
+        "data_description": {
+          "measurement_attr": "nativ: measurement_attr",
+          "default_measurement": "nativ: default_measurement. Gilt, wenn die Entität für die Option oben keinen Wert hat. Leer: die Entity-ID.",
+          "override_measurement": "nativ: override_measurement. Schreibt jeden Punkt in dieses Measurement.",
+          "tags": "nativ: tags. Ein Schlüssel=Wert pro Zeile, zum Beispiel source=HA.",
+          "tags_attributes": "nativ: tags_attributes, zum Beispiel friendly_name.",
+          "ignore_attributes": "nativ: ignore_attributes.",
+          "component_config": "nativ: component_config. Entity-ID mit override_measurement und/oder ignore_attributes.",
+          "component_config_domain": "nativ: component_config_domain. Domain mit override_measurement und/oder ignore_attributes.",
+          "component_config_glob": "nativ: component_config_glob. Muster wie sensor.*_temp mit override_measurement und/oder ignore_attributes."
+        }
       }
     },
     "error": {
@@ -36,7 +62,10 @@
       "not_found": "Organisation oder Bucket nicht gefunden.",
       "no_label": "Wähle mindestens ein Label.",
       "same_label": "Wähle zwei verschiedene Labels.",
-      "unknown": "Unerwarteter Fehler."
+      "unknown": "Unerwarteter Fehler.",
+      "invalid_tags": "Ein Schlüssel=Wert pro Zeile.",
+      "invalid_component_config": "Erwartet wird eine Zuordnung zu override_measurement (Text) und/oder ignore_attributes (Liste).",
+      "invalid_measurement_attr": "Unbekannte Auswahl."
     },
     "abort": {
       "already_configured": "Dieser Bucket ist bereits eingerichtet."
@@ -45,6 +74,13 @@
   "options": {
     "step": {
       "init": {
+        "title": "Optionen",
+        "menu_options": {
+          "selection": "Auswahl der Entitäten",
+          "data_format": "Datenformat"
+        }
+      },
+      "selection": {
         "title": "Auswahl der Entitäten",
         "description": "Entitäten mit einem dieser Labels werden geschrieben. Das Heartbeat-Label schreibt den aktuellen Zustand zusätzlich erneut, wenn im Intervall nichts geschrieben wurde.",
         "data": {
@@ -53,17 +89,53 @@
           "heartbeat_interval": "Heartbeat-Intervall",
           "inherit_labels": "Labels von Gerät und Bereich einbeziehen"
         }
+      },
+      "data_format": {
+        "title": "Datenformat",
+        "description": "Dieselben Optionen wie in der YAML-Konfiguration der nativen InfluxDB-Integration. Übernimm deine Werte von dort, damit bestehende Abfragen weiter funktionieren. Ein leeres Feld bedeutet den Standard der nativen Integration.",
+        "data": {
+          "measurement_attr": "Measurement aus",
+          "default_measurement": "Standard-Measurement",
+          "override_measurement": "Measurement überschreiben",
+          "tags": "Feste Tags",
+          "tags_attributes": "Attribute als Tags schreiben",
+          "ignore_attributes": "Attribute ignorieren",
+          "component_config": "Pro Entität",
+          "component_config_domain": "Pro Domain",
+          "component_config_glob": "Pro Entitätsmuster"
+        },
+        "data_description": {
+          "measurement_attr": "nativ: measurement_attr",
+          "default_measurement": "nativ: default_measurement. Gilt, wenn die Entität für die Option oben keinen Wert hat. Leer: die Entity-ID.",
+          "override_measurement": "nativ: override_measurement. Schreibt jeden Punkt in dieses Measurement.",
+          "tags": "nativ: tags. Ein Schlüssel=Wert pro Zeile, zum Beispiel source=HA.",
+          "tags_attributes": "nativ: tags_attributes, zum Beispiel friendly_name.",
+          "ignore_attributes": "nativ: ignore_attributes.",
+          "component_config": "nativ: component_config. Entity-ID mit override_measurement und/oder ignore_attributes.",
+          "component_config_domain": "nativ: component_config_domain. Domain mit override_measurement und/oder ignore_attributes.",
+          "component_config_glob": "nativ: component_config_glob. Muster wie sensor.*_temp mit override_measurement und/oder ignore_attributes."
+        }
       }
     },
     "error": {
       "no_label": "Wähle mindestens ein Label.",
-      "same_label": "Wähle zwei verschiedene Labels."
+      "same_label": "Wähle zwei verschiedene Labels.",
+      "invalid_tags": "Ein Schlüssel=Wert pro Zeile.",
+      "invalid_component_config": "Erwartet wird eine Zuordnung zu override_measurement (Text) und/oder ignore_attributes (Liste).",
+      "invalid_measurement_attr": "Unbekannte Auswahl."
     }
   },
   "selector": {
     "backend": {
       "options": {
         "v2": "InfluxDB 2.x"
+      }
+    },
+    "measurement_attr": {
+      "options": {
+        "unit_of_measurement": "Maßeinheit (Standard)",
+        "domain_device_class": "Domain und Geräteklasse",
+        "entity_id": "Entity-ID"
       }
     }
   }

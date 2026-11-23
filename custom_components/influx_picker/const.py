@@ -17,6 +17,17 @@ CONF_LABEL_HEARTBEAT = "label_heartbeat"
 CONF_HEARTBEAT_INTERVAL = "heartbeat_interval"
 CONF_INHERIT = "inherit_labels"
 
+# Entry options: data format, same names and meaning as the core integration
+CONF_MEASUREMENT_ATTR = "measurement_attr"
+CONF_DEFAULT_MEASUREMENT = "default_measurement"
+CONF_OVERRIDE_MEASUREMENT = "override_measurement"
+CONF_TAGS = "tags"
+CONF_TAGS_ATTRIBUTES = "tags_attributes"
+CONF_IGNORE_ATTRIBUTES = "ignore_attributes"
+CONF_COMPONENT_CONFIG = "component_config"
+CONF_COMPONENT_CONFIG_DOMAIN = "component_config_domain"
+CONF_COMPONENT_CONFIG_GLOB = "component_config_glob"
+
 DEFAULT_PRECISION = "ns"  # same as the core integration
 DEFAULT_HEARTBEAT_INTERVAL = 15  # minutes
 DEFAULT_INHERIT = True
