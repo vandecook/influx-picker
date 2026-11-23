@@ -6,21 +6,12 @@ Choose which Home Assistant entities are written to InfluxDB®, and change that
 choice at any time **without restarting Home Assistant**.
 
 > **Status: early development.** Nothing is released yet. A first version of the
-> code exists (InfluxDB 2.x, label selection, heartbeat). It is covered by
-> automated tests only and has **not yet run in a real Home Assistant
-> installation**. This README describes the goals and the planned design.
-> Feedback and contributions are very welcome.
-
-## How this project is built
-
-This project is developed with the help of AI (Claude by Anthropic): code,
-documentation and tests are largely AI-generated. The maintainer does not have
-the time or the expertise to review and test every part in depth, so **do not
-assume the code has been thoroughly reviewed or tested**. Automated tests and
-CI are part of the plan to make up for this. Because the integration handles
-your InfluxDB token, please review the code before installing it and treat all
-versions as experimental. Code reviews, test results from real setups and bug
-reports are not just welcome, they are what this project needs most.
+> code exists (InfluxDB 2.x, label selection, heartbeat, data format options).
+> Besides automated tests it has run **once, briefly, in one real Home
+> Assistant installation** (the maintainer's, 2026-11-23, 19 entities against a
+> test bucket; the points matched those of the core integration). That is far
+> from thorough testing. This README describes the goals and the planned
+> design. Feedback and contributions are very welcome.
 
 ## How this project is built
 
@@ -42,6 +33,9 @@ Assistant: with **labels**. Add or remove a label in the UI and the change takes
 effect immediately.
 
 ## Installation
+
+Step-by-step guide with every setting and troubleshooting:
+**[docs/installation.md](docs/installation.md)**. Short version:
 
 > Experimental: read [How this project is built](#how-this-project-is-built)
 > first. There is no release yet, so HACS installs the current state of the

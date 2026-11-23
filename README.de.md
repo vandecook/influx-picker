@@ -6,10 +6,13 @@ Wähle aus, welche Home-Assistant-Entitäten in InfluxDB® geschrieben werden, u
 ändere die Auswahl jederzeit **ohne Neustart von Home Assistant**.
 
 > **Status: frühe Entwicklung.** Es gibt noch kein Release. Eine erste Version
-> des Codes existiert (InfluxDB 2.x, Auswahl per Label, Heartbeat). Sie ist nur
-> durch automatische Tests abgedeckt und lief **noch nicht in einer echten
-> Home-Assistant-Installation**. Dieses README beschreibt die Ziele und das
-> geplante Design. Rückmeldungen und Beiträge sind sehr willkommen.
+> des Codes existiert (InfluxDB 2.x, Auswahl per Label, Heartbeat,
+> Datenformat-Optionen). Neben automatischen Tests lief sie **einmal kurz in
+> einer echten Home-Assistant-Installation** (beim Maintainer, 2026-11-23,
+> 19 Entitäten gegen einen Test-Bucket; die Punkte stimmten mit denen der
+> nativen Integration überein). Das ist weit entfernt von gründlichem Testen.
+> Dieses README beschreibt die Ziele und das geplante Design. Rückmeldungen und
+> Beiträge sind sehr willkommen.
 
 ## Wie dieses Projekt entsteht
 
@@ -32,6 +35,9 @@ ohnehin organisierst: mit **Labels**. Label in der Oberfläche setzen oder
 entfernen, und die Änderung wirkt sofort.
 
 ## Installation
+
+Schritt-für-Schritt-Anleitung mit allen Einstellungen und Fehlersuche:
+**[docs/installation.de.md](docs/installation.de.md)**. Kurzfassung:
 
 > Experimentell: Lies zuerst [Wie dieses Projekt entsteht](#wie-dieses-projekt-entsteht).
 > Es gibt noch kein Release, HACS installiert daher den aktuellen Stand des
