@@ -97,14 +97,19 @@ has four steps.
 The connection is checked with a **real write request**, so a wrong token,
 organization or bucket is reported right here.
 
-**Step 3: Entity selection.** Choose the two labels, the heartbeat interval and
-whether labels of devices and areas count. Details in
+**Step 3: Entity selection.** Choose the two labels, the heartbeat interval,
+whether labels of devices and areas count, and what is written at start. Details in
 [section 6.1](#61-entity-selection).
 
 **Step 4: Data format.** Decides how points look in InfluxDB.
 
-- **New to InfluxDB:** keep the defaults.
+The form comes **pre-filled** with `default_measurement: units`, the static
+tag `source=HA` and `friendly_name` as a tag. These are common settings, **not**
+the core defaults (the core integration leaves all three empty).
+
+- **New to InfluxDB:** keep the pre-filled values or clear them.
 - **Coming from the core `influxdb` integration:** copy your YAML values here
+  and clear pre-filled fields that are not in your YAML
   (see [section 7](#7-coming-from-the-core-influxdb-integration)).
   **Do this now**, before data flows. Otherwise the first points use the
   defaults and end up in different measurements than your existing data.
@@ -139,8 +144,8 @@ heartbeat, see [section 6.1](#61-entity-selection)).
 - **Data format:** all data format options.
 
 Saving reloads the integration, no Home Assistant restart needed. After the
-reload every selected entity gets one snapshot again (see
-[section 6.1](#61-entity-selection)).
+reload every selected entity gets one snapshot again, depending on
+**Snapshot when Home Assistant starts** (see [section 6.1](#61-entity-selection)).
 
 The connection (URL, token, …) cannot be changed yet (planned for M7). To
 change it, remove the integration and add it again.
@@ -155,6 +160,7 @@ change it, remove the integration and add it again.
 | Label: write on change and heartbeat | – | Like above, plus a heartbeat write when nothing was written during the interval. If an entity has both labels, heartbeat wins. |
 | Heartbeat interval | 15 min | 1 to 1440 minutes. Checked once per minute, so a heartbeat comes up to one minute late. |
 | Include labels of the device and area | on | Off: only labels on the entity itself count. |
+| Snapshot when Home Assistant starts | Current time, marked as heartbeat | See below. |
 
 At least one label is required. Both labels must be different.
 
@@ -162,18 +168,38 @@ At least one label is required. Both labels must be different.
 Change points do not. Points marked like this are written:
 
 - by the heartbeat timer,
-- once for each entity that becomes selected,
+- once for each entity that becomes selected while the integration runs,
 - once for every selected entity after Home Assistant starts and after the
-  integration is reloaded (for example after saving options).
+  integration is reloaded (for example after saving options), unless
+  **Snapshot when Home Assistant starts** says otherwise.
 
 Graphs, averages and `last()` can use all points. Queries that **count
 changes** must leave out points with `_heartbeat`; see
 [Heartbeat marking](../README.md#heartbeat-marking) for a Flux example.
 
+**Snapshot when Home Assistant starts** decides what is written for every
+selected entity when Home Assistant starts or the integration is reloaded:
+
+| Choice | Timestamp | Marker | Use |
+|---|---|---|---|
+| Current time, marked as heartbeat (default) | now | `_heartbeat=true` | A fresh point right after the start; behaves like a heartbeat. |
+| Time of the last state change, marked with `_startup` | the state's `last_updated` | `_startup=true` | Fills a change that was lost around a restart at the **right** time. If the point already exists (same time), it is overwritten with the same values plus `_startup`. |
+| Do not write | – | – | Nothing at start. Only real changes (and heartbeats) are written. |
+
+Entities that become selected **later**, while the integration runs, always
+get the normal heartbeat snapshot. `_startup` is a field, not a tag, for the
+same reason as `_heartbeat`: a tag would split the series. A `_startup` point
+usually stands for a real change, so **do not** leave it out when counting
+changes. If the state is older than the bucket's retention period, InfluxDB
+rejects the point.
+
 ### 6.2 Data format
 
 Same names, meaning and defaults as the YAML options of the core `influxdb`
-integration.
+integration. In a **new** setup, default measurement, static tags and
+attributes written as tags come pre-filled (see
+[step 4](#32-add-the-integration)); the "Default" column shows the value of an
+empty field.
 
 | Setting | Core YAML option | Default | Meaning |
 |---|---|---|---|
@@ -244,7 +270,8 @@ working.
    | `component_config_domain:` | Per domain |
    | `component_config_glob:` | Per entity pattern |
 
-   Options not in your YAML stay empty: the defaults are the same.
+   Options not in your YAML stay empty: the defaults are the same. Clear the
+   pre-filled fields if your YAML does not have them.
 3. **Test first** with a separate bucket and a few entities, compare with your
    existing data ([section 8](#8-check-that-it-works)).
 4. **Avoid double writes:** as long as both integrations write the **same

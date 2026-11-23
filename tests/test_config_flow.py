@@ -32,6 +32,7 @@ SELECTION = {
     "label_heartbeat": "influx_heartbeat",
     "heartbeat_interval": 15,
     "inherit_labels": True,
+    "startup_snapshot": "now",
 }
 # Data format step left as suggested: core defaults.
 DEFAULT_FORMAT = {
@@ -282,6 +283,67 @@ async def test_data_format_domain_device_class(hass: HomeAssistant) -> None:
         )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["options"]["measurement_attr"] == "domain__device_class"
+
+
+async def test_new_setup_suggests_maintainer_format(hass: HomeAssistant) -> None:
+    """A new setup pre-fills the maintainer's usual data format values."""
+    flow_id = await _to_connection_step(hass)
+    with patch(VALIDATE, AsyncMock()):
+        await hass.config_entries.flow.async_configure(flow_id, CONNECTION)
+    result = await hass.config_entries.flow.async_configure(flow_id, SELECTION)
+    assert result["step_id"] == "data_format"
+    suggested = {
+        str(key): key.description["suggested_value"]
+        for key in result["data_schema"].schema
+        if key.description and "suggested_value" in key.description
+    }
+    assert suggested == {
+        "default_measurement": "units",
+        "tags": "source=HA",
+        "tags_attributes": ["friendly_name"],
+    }
+
+
+async def test_options_flow_does_not_suggest_for_existing(
+    hass: HomeAssistant,
+) -> None:
+    """An existing entry with empty data format options shows them empty."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={"backend": "v2", **CONNECTION},
+        options={**SELECTION, **DEFAULT_FORMAT},
+    )
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"next_step_id": "data_format"}
+    )
+    assert not any(
+        key.description and "suggested_value" in key.description
+        for key in result["data_schema"].schema
+    )
+
+
+@pytest.mark.parametrize(
+    ("submitted", "stored"),
+    [(None, "now"), ("last_updated", "last_updated"), ("off", "off")],
+)
+async def test_startup_snapshot_option(
+    hass: HomeAssistant, submitted: str | None, stored: str
+) -> None:
+    """The startup snapshot defaults to "now" and can be changed."""
+    flow_id = await _to_connection_step(hass)
+    with patch(VALIDATE, AsyncMock()):
+        await hass.config_entries.flow.async_configure(flow_id, CONNECTION)
+    selection = {k: v for k, v in SELECTION.items() if k != "startup_snapshot"}
+    if submitted:
+        selection["startup_snapshot"] = submitted
+    result = await hass.config_entries.flow.async_configure(flow_id, selection)
+    with patch(SETUP, return_value=True):
+        result = await hass.config_entries.flow.async_configure(
+            flow_id, {"measurement_attr": "unit_of_measurement"}
+        )
+    assert result["options"]["startup_snapshot"] == stored
 
 
 def test_translation_keys_valid() -> None:

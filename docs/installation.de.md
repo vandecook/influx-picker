@@ -102,15 +102,21 @@ Die Verbindung wird mit einer **echten Schreibanfrage** geprüft. Ein falsches
 Token, eine falsche Organisation oder ein falscher Bucket fällt also schon hier
 auf.
 
-**Schritt 3: Auswahl der Entitäten.** Die beiden Labels, das Heartbeat-Intervall
-und ob Labels von Geräten und Bereichen mitzählen. Details in
+**Schritt 3: Auswahl der Entitäten.** Die beiden Labels, das Heartbeat-Intervall,
+ob Labels von Geräten und Bereichen mitzählen und was beim Start geschrieben
+wird. Details in
 [Abschnitt 6.1](#61-auswahl-der-entitäten).
 
 **Schritt 4: Datenformat.** Legt fest, wie die Punkte in InfluxDB aussehen.
 
-- **Neu bei InfluxDB:** Standardwerte lassen.
+Das Formular ist **vorausgefüllt** mit `default_measurement: units`, dem
+festen Tag `source=HA` und `friendly_name` als Tag. Das sind übliche
+Einstellungen, **nicht** die nativen Standardwerte (die native Integration lässt
+alle drei leer).
+
+- **Neu bei InfluxDB:** die vorausgefüllten Werte lassen oder leeren.
 - **Umstieg von der nativen `influxdb`-Integration:** deine YAML-Werte hier
-  übernehmen (siehe [Abschnitt 7](#7-umstieg-von-der-nativen-influxdb-integration)).
+  übernehmen und vorausgefüllte Felder leeren, die nicht in deinem YAML stehen (siehe [Abschnitt 7](#7-umstieg-von-der-nativen-influxdb-integration)).
   **Mach das gleich jetzt**, bevor Daten fließen. Sonst landen die ersten
   Punkte mit den Standardwerten in anderen Measurements als deine bestehenden
   Daten.
@@ -147,7 +153,8 @@ sich ein Menü:
 
 Speichern lädt die Integration neu, ein Neustart von Home Assistant ist nicht
 nötig. Nach dem Neuladen bekommt jede ausgewählte Entität wieder einen
-Startwert (siehe [Abschnitt 6.1](#61-auswahl-der-entitäten)).
+Startwert, je nach **Startwert beim Start von Home Assistant** (siehe
+[Abschnitt 6.1](#61-auswahl-der-entitäten)).
 
 Die Verbindung (URL, Token, …) lässt sich noch nicht ändern (geplant für M7).
 Dafür die Integration entfernen und neu hinzufügen.
@@ -162,6 +169,7 @@ Dafür die Integration entfernen und neu hinzufügen.
 | Label: bei Änderung und als Heartbeat schreiben | – | Wie oben, plus ein Heartbeat-Schreibvorgang, wenn im Intervall nichts geschrieben wurde. Hat eine Entität beide Labels, gewinnt Heartbeat. |
 | Heartbeat-Intervall | 15 min | 1 bis 1440 Minuten. Wird einmal pro Minute geprüft, ein Heartbeat kommt also bis zu einer Minute später. |
 | Labels von Gerät und Bereich einbeziehen | an | Aus: nur Labels an der Entität selbst zählen. |
+| Startwert beim Start von Home Assistant | Aktuelle Zeit, als Heartbeat markiert | Siehe unten. |
 
 Mindestens ein Label ist nötig. Die beiden Labels müssen verschieden sein.
 
@@ -169,19 +177,40 @@ Mindestens ein Label ist nötig. Die beiden Labels müssen verschieden sein.
 `_heartbeat=true`. Änderungspunkte nicht. So markierte Punkte entstehen:
 
 - durch den Heartbeat-Timer,
-- einmal für jede Entität, die neu ausgewählt wird,
+- einmal für jede Entität, die im laufenden Betrieb neu ausgewählt wird,
 - einmal für jede ausgewählte Entität nach dem Start von Home Assistant und nach
-  dem Neuladen der Integration (zum Beispiel nach dem Speichern der Optionen).
+  dem Neuladen der Integration (zum Beispiel nach dem Speichern der Optionen),
+  außer **Startwert beim Start von Home Assistant** ist anders eingestellt.
 
 Graphen, Mittelwerte und `last()` können alle Punkte verwenden. Abfragen, die
 **Änderungen zählen**, müssen Punkte mit `_heartbeat` weglassen; ein
 Flux-Beispiel steht unter
 [Heartbeat-Markierung](../README.de.md#heartbeat-markierung).
 
+**Startwert beim Start von Home Assistant** legt fest, was beim Start von Home
+Assistant oder beim Neuladen der Integration für jede ausgewählte Entität
+geschrieben wird:
+
+| Auswahl | Zeitstempel | Markierung | Wofür |
+|---|---|---|---|
+| Aktuelle Zeit, als Heartbeat markiert (Standard) | jetzt | `_heartbeat=true` | Ein frischer Punkt direkt nach dem Start; verhält sich wie ein Heartbeat. |
+| Zeit der letzten Zustandsänderung, mit `_startup` markiert | `last_updated` des Zustands | `_startup=true` | Ergänzt eine Änderung, die rund um einen Neustart verloren ging, zum **richtigen** Zeitpunkt. Gibt es den Punkt schon (gleiche Zeit), wird er mit denselben Werten plus `_startup` überschrieben. |
+| Nicht schreiben | – | – | Beim Start nichts. Nur echte Änderungen (und Heartbeats) werden geschrieben. |
+
+Entitäten, die **später** im laufenden Betrieb ausgewählt werden, bekommen immer
+den normalen Heartbeat-Startwert. `_startup` ist aus demselben Grund ein Feld
+und kein Tag wie `_heartbeat`: Ein Tag würde die Series aufteilen. Ein
+`_startup`-Punkt steht meist für eine echte Änderung, beim Zählen von
+Änderungen also **nicht** weglassen. Ist der Zustand älter als die
+Aufbewahrungsdauer (Retention) des Buckets, lehnt InfluxDB den Punkt ab.
+
 ### 6.2 Datenformat
 
 Gleiche Namen, Bedeutung und Standardwerte wie die YAML-Optionen der nativen
-`influxdb`-Integration.
+`influxdb`-Integration. Bei einer **neuen** Einrichtung sind Standard-Measurement,
+feste Tags und Attribute als Tags vorausgefüllt (siehe
+[Schritt 4](#32-integration-hinzufügen)); die Spalte "Standard" zeigt den Wert
+eines leeren Felds.
 
 | Einstellung | Native YAML-Option | Standard | Bedeutung |
 |---|---|---|---|

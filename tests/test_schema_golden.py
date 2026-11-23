@@ -226,6 +226,18 @@ def test_heartbeat_field() -> None:
     )
 
 
+def test_startup_field() -> None:
+    """Startup snapshot points (option "last_updated") carry `_startup=true`."""
+    attrs = {"friendly_name": "Counter"}
+    point = state_to_point(
+        "sensor.counter", "42", attrs, T, SchemaOptions(), startup=True
+    )
+    assert to_line(point) == (
+        "sensor.counter,domain=sensor,entity_id=counter "
+        f'_startup=true,friendly_name_str="Counter",value=42 {TS}'
+    )
+
+
 @pytest.mark.parametrize("state", ["unknown", "unavailable", "", None])
 def test_skipped_states(state) -> None:
     """These states are never written."""

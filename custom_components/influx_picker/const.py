@@ -16,6 +16,18 @@ CONF_LABEL_CHANGE = "label_change"
 CONF_LABEL_HEARTBEAT = "label_heartbeat"
 CONF_HEARTBEAT_INTERVAL = "heartbeat_interval"
 CONF_INHERIT = "inherit_labels"
+CONF_STARTUP_SNAPSHOT = "startup_snapshot"
+
+# What is written for every selected entity when the entry starts
+# (Home Assistant start or reload of the entry).
+STARTUP_SNAPSHOT_NOW = "now"  # current time, marked as heartbeat
+STARTUP_SNAPSHOT_LAST_UPDATED = "last_updated"  # own time, marked _startup
+STARTUP_SNAPSHOT_OFF = "off"
+STARTUP_SNAPSHOT_MODES = (
+    STARTUP_SNAPSHOT_NOW,
+    STARTUP_SNAPSHOT_LAST_UPDATED,
+    STARTUP_SNAPSHOT_OFF,
+)
 
 # Entry options: data format, same names and meaning as the core integration
 CONF_MEASUREMENT_ATTR = "measurement_attr"
@@ -31,6 +43,16 @@ CONF_COMPONENT_CONFIG_GLOB = "component_config_glob"
 DEFAULT_PRECISION = "ns"  # same as the core integration
 DEFAULT_HEARTBEAT_INTERVAL = 15  # minutes
 DEFAULT_INHERIT = True
+DEFAULT_STARTUP_SNAPSHOT = STARTUP_SNAPSHOT_NOW
+
+# Pre-filled in the data format step of a new setup. These are not the core
+# defaults but the maintainer's usual settings; the user can clear them.
+# Stored options are never filled in from here.
+SUGGESTED_DATA_FORMAT = {
+    CONF_DEFAULT_MEASUREMENT: "units",
+    CONF_TAGS: {"source": "HA"},
+    CONF_TAGS_ATTRIBUTES: ["friendly_name"],
+}
 
 # Exporter defaults (see ROADMAP.md, M1 buffer defaults)
 BATCH_SIZE = 100

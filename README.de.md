@@ -72,12 +72,14 @@ Schritt-für-Schritt-Anleitung mit allen Einstellungen und Fehlersuche:
 4. Die Datenbankversion wählen (derzeit nur InfluxDB 2.x).
 5. URL (zum Beispiel `http://192.168.1.10:8086`), Organisation, Bucket und
    Token eintragen. Die Verbindung wird mit einer echten Schreibanfrage geprüft.
-6. Die Labels und das Heartbeat-Intervall wählen.
-7. **Datenformat:** Wenn du bisher die native `influxdb`-Integration genutzt
-   hast, übernimm die Werte von `default_measurement`, `tags`,
-   `tags_attributes`, `ignore_attributes` und den anderen Optionen aus ihrem
-   YAML, damit bestehende Abfragen weiter funktionieren. Sonst die
-   Standardwerte lassen.
+6. Die Labels, das Heartbeat-Intervall und den Startwert beim Start von Home
+   Assistant wählen.
+7. **Datenformat:** vorausgefüllt mit `default_measurement: units`, Tag
+   `source=HA` und `friendly_name` als Tag (nicht die nativen Standardwerte).
+   Wenn du bisher die native `influxdb`-Integration genutzt hast, übernimm die
+   Werte von `default_measurement`, `tags`, `tags_attributes`,
+   `ignore_attributes` und den anderen Optionen aus ihrem YAML, damit
+   bestehende Abfragen weiter funktionieren.
 8. Die Labels an Entitäten, Geräte oder Bereiche hängen. Änderungen wirken nach
    etwa einer Sekunde, ohne Neustart. Labels, Intervall und Datenformat lassen
    sich später über **Konfigurieren** bei der Integration ändern.
@@ -134,7 +136,10 @@ der `include`-Liste der nativen Integration oder nutze einen eigenen Bucket.
 
 Heartbeat-Punkte (regelmäßige Schreibvorgänge für ruhende Entitäten sowie der
 Startwert, der beim Aufnehmen einer Entität geschrieben wird) tragen ein
-**Feld** `_heartbeat=true`. Änderungspunkte haben kein Zusatzfeld.
+**Feld** `_heartbeat=true`. Änderungspunkte haben kein Zusatzfeld. Wahlweise
+kann der Startwert beim Start von Home Assistant stattdessen mit dem eigenen
+Zeitstempel des Zustands und einem Feld `_startup=true` geschrieben werden, oder
+gar nicht (siehe [Installationsanleitung](docs/installation.de.md#61-auswahl-der-entitäten)).
 
 Ein Feld statt eines Tags ist Absicht: Ein Tag würde Heartbeat-Punkte in eine
 eigene Series legen, und bestehende Flux-Panels zeigten dann eine zweite Linie

@@ -26,7 +26,11 @@
           "label_change": "Label: bei Änderung schreiben",
           "label_heartbeat": "Label: bei Änderung und als Heartbeat schreiben",
           "heartbeat_interval": "Heartbeat-Intervall",
-          "inherit_labels": "Labels von Gerät und Bereich einbeziehen"
+          "inherit_labels": "Labels von Gerät und Bereich einbeziehen",
+          "startup_snapshot": "Startwert beim Start von Home Assistant"
+        },
+        "data_description": {
+          "startup_snapshot": "Was beim Start von Home Assistant oder beim Neuladen der Integration für jede ausgewählte Entität geschrieben wird."
         }
       },
       "data_format": {
@@ -65,7 +69,8 @@
       "unknown": "Unerwarteter Fehler.",
       "invalid_tags": "Ein Schlüssel=Wert pro Zeile.",
       "invalid_component_config": "Erwartet wird eine Zuordnung zu override_measurement (Text) und/oder ignore_attributes (Liste).",
-      "invalid_measurement_attr": "Unbekannte Auswahl."
+      "invalid_measurement_attr": "Unbekannte Auswahl.",
+      "invalid_startup_snapshot": "Ungültige Auswahl."
     },
     "abort": {
       "already_configured": "Dieser Bucket ist bereits eingerichtet."
@@ -87,7 +92,11 @@
           "label_change": "Label: bei Änderung schreiben",
           "label_heartbeat": "Label: bei Änderung und als Heartbeat schreiben",
           "heartbeat_interval": "Heartbeat-Intervall",
-          "inherit_labels": "Labels von Gerät und Bereich einbeziehen"
+          "inherit_labels": "Labels von Gerät und Bereich einbeziehen",
+          "startup_snapshot": "Startwert beim Start von Home Assistant"
+        },
+        "data_description": {
+          "startup_snapshot": "Was beim Start von Home Assistant oder beim Neuladen der Integration für jede ausgewählte Entität geschrieben wird."
         }
       },
       "data_format": {
@@ -122,7 +131,8 @@
       "same_label": "Wähle zwei verschiedene Labels.",
       "invalid_tags": "Ein Schlüssel=Wert pro Zeile.",
       "invalid_component_config": "Erwartet wird eine Zuordnung zu override_measurement (Text) und/oder ignore_attributes (Liste).",
-      "invalid_measurement_attr": "Unbekannte Auswahl."
+      "invalid_measurement_attr": "Unbekannte Auswahl.",
+      "invalid_startup_snapshot": "Ungültige Auswahl."
     }
   },
   "selector": {
@@ -136,6 +146,13 @@
         "unit_of_measurement": "Maßeinheit (Standard)",
         "domain_device_class": "Domain und Geräteklasse",
         "entity_id": "Entity-ID"
+      }
+    },
+    "startup_snapshot": {
+      "options": {
+        "now": "Aktuelle Zeit, als Heartbeat markiert (Standard)",
+        "last_updated": "Zeit der letzten Zustandsänderung, mit _startup markiert",
+        "off": "Nicht schreiben"
       }
     }
   }
