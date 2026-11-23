@@ -1,6 +1,7 @@
 # Audit: data schema of the core `influxdb` integration
 
-Status: **source audit done, real-data check still open.**
+Status: **source audit done, real-data check done (2026-11-23, see section 10).
+Check of the maintainer's Grafana queries still open.**
 
 This document records how the Home Assistant core `influxdb` integration turns a
 state change into an InfluxDB® point. Influx Picker reproduces these rules so
@@ -17,9 +18,8 @@ Sources read on 2026-11-17:
   integration passes its dicts to this client for InfluxDB 2, so this file
   decides the exact line protocol.
 
-**Not yet done:** comparison with real data from the maintainer's bucket and
-with real Grafana queries. Until then the rules are "as the source says", not
-"as observed".
+The rules were then compared with real data from the maintainer's bucket
+(section 10). **Not yet done:** a check of real Grafana queries.
 
 ## 1. Skipped states
 
@@ -119,13 +119,78 @@ because InfluxDB reserves it.
 - Buffering: queue bounded by count (50,000), backoff 5 s to 60 s, no age limit.
   HTTP 400, 413 and 422 drop the batch.
 
-## 9. Open points for the real-data check
+## 9. Open points
 
-1. Do the maintainer's points match section 3 to 6 (especially `entity_id`
-   without domain and measurement = unit)?
-2. Which YAML options does the maintainer use (`measurement_attr`,
-   `default_measurement`, `tags`, `tags_attributes`, `ignore_attributes`,
-   `precision`)?
+1. ~~Do the maintainer's points match sections 3 to 6?~~ Yes, see section 10.
+2. ~~Which YAML options does the maintainer use?~~ Derived from the data, see
+   section 10.
 3. Do the existing Grafana panels filter by `_field`? If not, the extra
    `_heartbeat` field shows up as its own series in those panels, and the
-   heartbeat decision must be revisited with the maintainer.
+   heartbeat decision must be revisited with the maintainer. **Still open:**
+   needs example queries from the maintainer.
+
+## 10. Real-data check (2026-11-23)
+
+Data: the maintainer's InfluxDB 2.7 bucket, written by the core integration of
+Home Assistant 2026.11.2. Read-only access.
+
+### Method
+
+1. Schema overview with Flux (`schema.measurements`, `schema.tagKeys`,
+   `schema.tagValues`, `schema.fieldKeys`) and the latest point per domain.
+2. `tools/compare_with_influx.py`: for a set of entities, take the current state
+   from Home Assistant, build the point with `schema.state_to_point`, and read
+   the point the core integration wrote **at exactly the same timestamp**
+   (`last_updated`, ±1 µs). Measurement, tags, field names, values and field
+   types are compared.
+3. The result was saved as a golden fixture
+   (`tests/fixtures/real_data_2026-11-23.json`, written by the tool's `--dump`
+   option, not by the code under test) and is checked by
+   `tests/test_schema_real_data.py`.
+
+### Options the maintainer uses (derived from the data)
+
+- `default_measurement: units` (no measurement named after an entity ID exists;
+  entities without a unit are in `units`).
+- `tags: {source: HA}` (every Home Assistant point has the tag `source=HA`).
+- `tags_attributes: [friendly_name]` (`friendly_name` is a tag, never a field).
+- `measurement_attr` is the default (measurements are units such as `W`, `°C`).
+- No `ignore_attributes` visible in the compared entities.
+- An `include`/`exclude` filter is in use: for example `device_tracker`,
+  `automation`, `script` and `update` entities are not in the bucket.
+
+### Result
+
+All 10 compared entities are identical (measurement, tags, every field, every
+field type): `switch`, `cover`, `binary_sensor` with many attributes, `sensor`
+without unit, `sensor` with unit, `weather`, `input_datetime`, `counter`,
+`media_player`, `sun`.
+
+This confirms in particular:
+
+- Tag `entity_id` is the object ID without the domain.
+- `value` is always a float; on/off-like states also get `state` as a string.
+- Numeric attributes (including booleans) become float fields; other values
+  become `<key>_str`, and digit-containing strings additionally get the
+  digits-only float (for example `device_id` and timestamps).
+- Datetime attributes are written with `str()` (space between date and time),
+  not in ISO form with `T`. The Home Assistant REST API shows them with `T`, so
+  test inputs must use the real datetime object.
+- `None` attributes become the string `"None"`, empty strings stay empty string
+  fields, lists and tuples use their Python `str()` form.
+- Timestamps are the state's `last_updated` with microsecond resolution.
+
+### Observations that are not schema questions
+
+- **States set during a Home Assistant restart are missing.** One compared
+  entity (`input_number`, state set at 19:02:33 UTC on 2026-11-17) has no point
+  at all. The bucket has no Home Assistant points between 19:02:00 and
+  19:02:30 that day: the core integration was not listening yet. Influx Picker
+  writes an initial snapshot for newly tracked entities; whether it should also
+  write one after every restart is a question for M2.
+- The bucket also holds InfluxDB's own metrics (`go_*`, `storage_*`, …), not
+  from Home Assistant. They have no `domain` tag and do not affect this audit.
+- Measurements mix float and string fields (for example `value` and `state`
+  in `units`). Flux queries without a `_field` filter fail with "schema
+  collision" in some functions (seen with `limit()` after `group()`). This is
+  existing behaviour of the core data, not caused by Influx Picker.

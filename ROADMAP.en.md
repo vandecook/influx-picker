@@ -22,7 +22,7 @@ Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemen
 - **Buffer decision:** the queue is bounded by count, not by age. Timestamps are preserved, so buffering longer does not distort data. A disk-backed queue only if needed.
 - **Core integration, buffering:** batches of up to 100 points or 1 s of quiet, unbounded queue, events older than 30 s (plus retries) are dropped, `max_retries` defaults to 0, invalid batches are not retried, unknown/empty/unavailable states are skipped. Source: Home Assistant Core `influxdb/__init__.py` and `const.py`.
 - **Core integration, configuration:** filters are YAML only, and every change needs a restart. This is the reason for this project.
-- **Core integration, schema:** audited from the source code, see [docs/core-schema-audit.md](docs/core-schema-audit.md). The check against real data is still open (see M1).
+- **Core integration, schema:** audited from the source code and checked against real data from a bucket (10 entity types identical), see [docs/core-schema-audit.md](docs/core-schema-audit.md). The check of real Grafana queries is still open (see M1).
 
 ---
 
@@ -41,13 +41,13 @@ Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemen
 
 Goal: Grafana queries keep working unchanged.
 
-- [ ] **Audit:** source part done ([docs/core-schema-audit.md](docs/core-schema-audit.md)); real-data part open. Check the schema of the current core integration (core source code plus real data from a bucket): measurement names, field names (`value`, `state`, `*_str`), tags, handling of on/off, strings, booleans and attributes.
+- [ ] **Audit:** source part and real-data part done ([docs/core-schema-audit.md](docs/core-schema-audit.md)), with golden tests from real data; check of real Grafana queries open. Check the schema of the current core integration (core source code plus real data from a bucket): measurement names, field names (`value`, `state`, `*_str`), tags, handling of on/off, strings, booleans and attributes.
 - [x] **Golden tests:** (plus a test that compares every case with a reference copy of the core algorithm and the official client) one expected line-protocol example per case (numeric sensor, unit, binary_sensor, switch, text, attributes).
 - [x] **Attribute export:** handled like in the core integration (decided). Numeric attributes as fields, strings as `*_str`; the exact rules come from the audit.
 - [ ] **Reproduce the core options:** conversion implemented and tested; not yet settable in the UI. `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [x] **Buffer defaults (decided):** flush after 1 s of quiet or 100 points (as in the core integration), skip rules for unknown/unavailable/empty, drop invalid batches. Queue bounded by count (default 50,000 points, about 10 MB), oldest points dropped on overflow, no extra age limit. Retry with backoff (5 s, rising to at most 60 s). Everything configurable (see M4).
 - [x] **Heartbeat marking (decided):** a **field** `_heartbeat=true`, written only on heartbeat points and on the initial snapshot of a newly selected entity. No tag, so heartbeat points stay in the same series as change points and existing panels keep their continuous lines. Change points carry no extra field. Verify in the audit that existing panels filter by `_field`. Optional later: switchable modes (tag / off).
-- [ ] **Comparison tool:** show core-integration points and new points of an entity side by side.
+- [x] **Comparison tool:** `tools/compare_with_influx.py` compares the points the core integration wrote with the points Influx Picker would write for the same states (read-only), and can save the result as a golden fixture.
 
 Acceptance: existing Grafana queries return the same results with the new data.
 

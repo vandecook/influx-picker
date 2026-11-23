@@ -1,0 +1,362 @@
+{
+  "options": {
+    "default_measurement": "units",
+    "tags": {
+      "source": "HA"
+    },
+    "tags_attributes": [
+      "friendly_name"
+    ]
+  },
+  "states": [
+    {
+      "entity_id": "switch.bedroom_left_tuya_plug_01",
+      "state": "off",
+      "attributes": {
+        "friendly_name": "bedroom_left_TuYa_plug_01"
+      },
+      "last_updated": "2026-11-23T06:54:16.699532+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "switch",
+          "entity_id": "bedroom_left_tuya_plug_01",
+          "friendly_name": "bedroom_left_TuYa_plug_01",
+          "source": "HA"
+        },
+        "fields": {
+          "state": "off",
+          "value": 0.0
+        }
+      }
+    },
+    {
+      "entity_id": "cover.bedroom_cover",
+      "state": "open",
+      "attributes": {
+        "is_closed": false,
+        "current_position": 99,
+        "friendly_name": "bedroom_cover",
+        "supported_features": 15
+      },
+      "last_updated": "2026-11-23T12:26:24.466515+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "cover",
+          "entity_id": "bedroom_cover",
+          "friendly_name": "bedroom_cover",
+          "source": "HA"
+        },
+        "fields": {
+          "current_position": 99.0,
+          "is_closed": 0.0,
+          "state": "open",
+          "supported_features": 15.0,
+          "value": 1.0
+        }
+      }
+    },
+    {
+      "entity_id": "binary_sensor.0000021d2706341b_battery_plus_low",
+      "state": "off",
+      "attributes": {
+        "battery_increase_threshold": 25,
+        "battery_low_threshold": 10,
+        "battery_quantity": 1,
+        "battery_type": "CR2450",
+        "battery_type_and_quantity": "CR2450",
+        "battery_last_reported": {
+          "__datetime__": "2026-11-23T13:52:07.845078+00:00"
+        },
+        "note": "",
+        "battery_last_replaced": {
+          "__datetime__": "2025-10-10T08:42:51.835175+00:00"
+        },
+        "device_id": "9363c9e8d4f5f625ea7462340ccdda77",
+        "source_entity_id": "",
+        "device_name": "0000021D2706341B",
+        "device_class": "battery",
+        "friendly_name": "0000021D2706341B Batterie fast leer"
+      },
+      "last_updated": "2026-11-23T14:52:07.845242+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "binary_sensor",
+          "entity_id": "0000021d2706341b_battery_plus_low",
+          "friendly_name": "0000021D2706341B Batterie fast leer",
+          "source": "HA"
+        },
+        "fields": {
+          "battery_increase_threshold": 25.0,
+          "battery_last_replaced": 20251010084251.836,
+          "battery_last_replaced_str": "2025-10-10 08:42:51.835175+00:00",
+          "battery_last_reported": 20261123135207.844,
+          "battery_last_reported_str": "2026-11-23 13:52:07.845078+00:00",
+          "battery_low_threshold": 10.0,
+          "battery_quantity": 1.0,
+          "battery_type": 2450.0,
+          "battery_type_and_quantity": 2450.0,
+          "battery_type_and_quantity_str": "CR2450",
+          "battery_type_str": "CR2450",
+          "device_class_str": "battery",
+          "device_id": 9.363984562574623e+19,
+          "device_id_str": "9363c9e8d4f5f625ea7462340ccdda77",
+          "device_name": 212706341.0,
+          "device_name_str": "0000021D2706341B",
+          "note_str": "",
+          "source_entity_id_str": "",
+          "state": "off",
+          "value": 0.0
+        }
+      }
+    },
+    {
+      "entity_id": "sensor.0000021d2706341b_block_requests",
+      "state": "0",
+      "attributes": {
+        "state_class": "total",
+        "friendly_name": "0000021D2706341B Blockübertragungsanforderungen"
+      },
+      "last_updated": "2026-11-23T04:27:54.727830+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "sensor",
+          "entity_id": "0000021d2706341b_block_requests",
+          "friendly_name": "0000021D2706341B Blockübertragungsanforderungen",
+          "source": "HA"
+        },
+        "fields": {
+          "state_class_str": "total",
+          "value": 0.0
+        }
+      }
+    },
+    {
+      "entity_id": "weather.forecast_home",
+      "state": "partlycloudy",
+      "attributes": {
+        "temperature": 3.7,
+        "dew_point": -4.8,
+        "temperature_unit": "°C",
+        "humidity": 54,
+        "cloud_coverage": 60.2,
+        "uv_index": 0.2,
+        "pressure": 1022.7,
+        "pressure_unit": "hPa",
+        "wind_bearing": 280.7,
+        "wind_speed": 19.8,
+        "wind_speed_unit": "km/h",
+        "visibility_unit": "km",
+        "precipitation_unit": "mm",
+        "attribution": "Weather forecast from met.no, delivered by the Norwegian Meteorological Institute.",
+        "friendly_name": "Home",
+        "supported_features": 3
+      },
+      "last_updated": "2026-11-23T15:15:32.229860+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "weather",
+          "entity_id": "forecast_home",
+          "friendly_name": "Home",
+          "source": "HA"
+        },
+        "fields": {
+          "attribution_str": "Weather forecast from met.no, delivered by the Norwegian Meteorological Institute.",
+          "cloud_coverage": 60.2,
+          "dew_point": -4.8,
+          "humidity": 54.0,
+          "precipitation_unit_str": "mm",
+          "pressure": 1022.7,
+          "pressure_unit_str": "hPa",
+          "state": "partlycloudy",
+          "supported_features": 3.0,
+          "temperature": 3.7,
+          "temperature_unit_str": "°C",
+          "uv_index": 0.2,
+          "visibility_unit_str": "km",
+          "wind_bearing": 280.7,
+          "wind_speed": 19.8,
+          "wind_speed_unit_str": "km/h"
+        }
+      }
+    },
+    {
+      "entity_id": "input_datetime.saugbert_startzeit",
+      "state": "06:30:00",
+      "attributes": {
+        "has_date": false,
+        "has_time": true,
+        "editable": true,
+        "hour": 6,
+        "minute": 30,
+        "second": 0,
+        "timestamp": 23400,
+        "icon": "mdi:clock-start",
+        "friendly_name": "Saugbert Startzeit"
+      },
+      "last_updated": "2026-11-17T20:02:38.558568+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "input_datetime",
+          "entity_id": "saugbert_startzeit",
+          "friendly_name": "Saugbert Startzeit",
+          "source": "HA"
+        },
+        "fields": {
+          "editable": 1.0,
+          "has_date": 0.0,
+          "has_time": 1.0,
+          "hour": 6.0,
+          "icon_str": "mdi:clock-start",
+          "minute": 30.0,
+          "second": 0.0,
+          "state": "06:30:00",
+          "timestamp": 23400.0
+        }
+      }
+    },
+    {
+      "entity_id": "counter.verdichter_starts_total",
+      "state": "843",
+      "attributes": {
+        "editable": true,
+        "initial": 0,
+        "step": 1,
+        "friendly_name": "Verdichter Starts Total"
+      },
+      "last_updated": "2026-11-23T14:05:49.226106+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "counter",
+          "entity_id": "verdichter_starts_total",
+          "friendly_name": "Verdichter Starts Total",
+          "source": "HA"
+        },
+        "fields": {
+          "editable": 1.0,
+          "initial": 0.0,
+          "step": 1.0,
+          "value": 843.0
+        }
+      }
+    },
+    {
+      "entity_id": "media_player.samsung_soundbar_q800a",
+      "state": "off",
+      "attributes": {
+        "sound_mode_list": [
+          "standard",
+          "surround",
+          "game",
+          "adaptive_sound"
+        ],
+        "device_class": "speaker",
+        "friendly_name": "Samsung Soundbar Q800A",
+        "supported_features": 87437
+      },
+      "last_updated": "2026-11-23T15:05:58.490745+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "media_player",
+          "entity_id": "samsung_soundbar_q800a",
+          "friendly_name": "Samsung Soundbar Q800A",
+          "source": "HA"
+        },
+        "fields": {
+          "device_class_str": "speaker",
+          "sound_mode_list_str": "['standard', 'surround', 'game', 'adaptive_sound']",
+          "state": "off",
+          "supported_features": 87437.0,
+          "value": 0.0
+        }
+      }
+    },
+    {
+      "entity_id": "sensor.lwz_umwalzpumpe_5m",
+      "state": "0",
+      "attributes": {
+        "state_class": "total_increasing",
+        "status": "waiting for condition",
+        "prev_period": "0",
+        "sensor_last_reset": "2026-11-23T15:20:00+01:00",
+        "sensor_next_reset": "2026-11-23T15:25:00+01:00",
+        "unit_of_measurement": "s",
+        "device_class": "duration",
+        "friendly_name": "LWZ Umwälzpumpe_5m"
+      },
+      "last_updated": "2026-11-23T15:20:00.001275+01:00",
+      "observed": {
+        "measurement": "s",
+        "tags": {
+          "domain": "sensor",
+          "entity_id": "lwz_umwalzpumpe_5m",
+          "friendly_name": "LWZ Umwälzpumpe_5m",
+          "source": "HA"
+        },
+        "fields": {
+          "device_class_str": "duration",
+          "prev_period": 0.0,
+          "sensor_last_reset": 2.026112315200001e+17,
+          "sensor_last_reset_str": "2026-11-23T15:20:00+01:00",
+          "sensor_next_reset": 2.026112315250001e+17,
+          "sensor_next_reset_str": "2026-11-23T15:25:00+01:00",
+          "state_class_str": "total_increasing",
+          "status_str": "waiting for condition",
+          "value": 0.0
+        }
+      }
+    },
+    {
+      "entity_id": "sun.sun",
+      "state": "above_horizon",
+      "attributes": {
+        "next_dawn": "2026-11-24T05:43:39.798797+00:00",
+        "next_dusk": "2026-11-23T15:54:52.562299+00:00",
+        "next_midnight": "2026-11-23T22:49:08+00:00",
+        "next_noon": "2026-11-24T10:48:59+00:00",
+        "next_rising": "2026-11-24T06:19:49.270570+00:00",
+        "next_setting": "2026-11-23T15:18:50.487580+00:00",
+        "elevation": 6.61,
+        "azimuth": 229.17,
+        "rising": false,
+        "friendly_name": "Sun"
+      },
+      "last_updated": "2026-11-23T15:22:16.972428+01:00",
+      "observed": {
+        "measurement": "units",
+        "tags": {
+          "domain": "sun",
+          "entity_id": "sun",
+          "friendly_name": "Sun",
+          "source": "HA"
+        },
+        "fields": {
+          "azimuth": 229.17,
+          "elevation": 6.61,
+          "next_dawn": 20261124054339.797,
+          "next_dawn_str": "2026-11-24T05:43:39.798797+00:00",
+          "next_dusk": 20261123155452.562,
+          "next_dusk_str": "2026-11-23T15:54:52.562299+00:00",
+          "next_midnight": 2.0261123224908e+17,
+          "next_midnight_str": "2026-11-23T22:49:08+00:00",
+          "next_noon": 2.0261124104859e+17,
+          "next_noon_str": "2026-11-24T10:48:59+00:00",
+          "next_rising": 20261124061949.27,
+          "next_rising_str": "2026-11-24T06:19:49.270570+00:00",
+          "next_setting": 20261123151850.49,
+          "next_setting_str": "2026-11-23T15:18:50.487580+00:00",
+          "rising": 0.0,
+          "state": "above_horizon",
+          "value": 1.0
+        }
+      }
+    }
+  ]
+}

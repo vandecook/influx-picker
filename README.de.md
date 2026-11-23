@@ -110,7 +110,7 @@ der `include`-Liste der nativen Integration oder nutze einen eigenen Bucket.
 | Thema | Entscheidung |
 |---|---|
 | Backends | Backend-Interface und Registry von Anfang an; InfluxDB 2.x ist das erste Plugin. |
-| Kompatibilität | Gleiches Schema wie die native Integration. Anhand ihres Quellcodes geprüft ([Audit](docs/core-schema-audit.md), englisch) und per Test gegen eine Kopie des Core-Algorithmus abgesichert; der Abgleich mit echten Daten steht noch aus. |
+| Kompatibilität | Gleiches Schema wie die native Integration. Anhand ihres Quellcodes geprüft ([Audit](docs/core-schema-audit.md), englisch) per Test gegen eine Kopie des Core-Algorithmus abgesichert und mit echten Daten der nativen Integration abgeglichen (10 Entitätstypen identisch, als Golden-Tests hinterlegt). Echte Grafana-Abfragen sind noch nicht geprüft. |
 | Bündelung | Flush nach 1 s Ruhe oder 100 Punkten, wie die native Integration. |
 | Puffer | Begrenzt nach **Anzahl** (Standard 50.000 Punkte), bei Überlauf werden die ältesten verworfen, kein Alters-Limit. Die Zeitstempel bleiben erhalten, längeres Puffern verfälscht also nichts. |
 | Wiederholung | Backoff von 5 s bis 60 s. Ungültige Batches werden verworfen, nicht wiederholt. |

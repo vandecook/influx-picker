@@ -103,7 +103,7 @@ same entities may be written twice. Remove them from the core integration's
 | Topic | Decision |
 |---|---|
 | Backends | Backend interface and registry from the start; InfluxDB 2.x is the first plugin. |
-| Compatibility | Same schema as the core integration. Audited from its source code ([audit](docs/core-schema-audit.md)) and checked by tests against a copy of the core algorithm; the check against real data is still open. |
+| Compatibility | Same schema as the core integration. Audited from its source code ([audit](docs/core-schema-audit.md)) checked by tests against a copy of the core algorithm, and compared with real data written by the core integration (10 entity types identical, kept as golden tests). Real Grafana queries are not checked yet. |
 | Batching | Flush after 1 s of quiet or 100 points, like the core integration. |
 | Buffer | Bounded by **count** (default 50,000 points), oldest points dropped on overflow, no age limit. Timestamps are preserved, so buffering longer does not distort data. |
 | Retry | Backoff from 5 s up to 60 s. Invalid batches are dropped, not retried. |

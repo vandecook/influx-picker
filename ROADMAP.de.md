@@ -22,7 +22,7 @@ Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt un
 - **Puffer-Entscheidung:** Queue nach Anzahl statt Alter (die Zeitstempel bleiben erhalten, längeres Puffern verfälscht nichts). Persistenz auf Platte nur bei Bedarf.
 - **Native Integration, Puffer:** Batch bis 100 Einträge oder 1 s Ruhe, unbegrenzte Queue, Events älter als 30 s (plus Retries) werden verworfen, `max_retries` Standard 0, ungültige Batches werden nicht wiederholt, unbekannte/leere/nicht verfügbare Zustände werden übersprungen. Quelle: HA Core `influxdb/__init__.py` und `const.py`.
 - **Native Integration, Konfiguration:** Filter nur per YAML, jede Änderung braucht einen Neustart. Das ist der Grund für dieses Projekt.
-- **Schema der nativen Integration:** anhand des Quellcodes geprüft, siehe [docs/core-schema-audit.md](docs/core-schema-audit.md). Der Abgleich mit echten Daten steht noch aus (siehe M1).
+- **Schema der nativen Integration:** anhand des Quellcodes geprüft und mit echten Daten aus einem Bucket abgeglichen (10 Entitätstypen identisch), siehe [docs/core-schema-audit.md](docs/core-schema-audit.md). Die Prüfung echter Grafana-Abfragen steht noch aus (siehe M1).
 
 ---
 
@@ -41,13 +41,13 @@ Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt un
 
 Ziel: Grafana-Abfragen laufen unverändert weiter.
 
-- [ ] **Audit:** Quellcode-Teil erledigt ([docs/core-schema-audit.md](docs/core-schema-audit.md)); Teil mit echten Daten offen. Schema der aktuellen nativen Integration prüfen (Core-Quellcode plus echte Daten aus einem Bucket): Measurement-Namen, Feldnamen (`value`, `state`, `*_str`), Tags, Behandlung von on/off, Strings, Booleans und Attributen.
+- [ ] **Audit:** Quellcode-Teil und Teil mit echten Daten erledigt ([docs/core-schema-audit.md](docs/core-schema-audit.md)), mit Golden-Tests aus echten Daten; Prüfung echter Grafana-Abfragen offen. Schema der aktuellen nativen Integration prüfen (Core-Quellcode plus echte Daten aus einem Bucket): Measurement-Namen, Feldnamen (`value`, `state`, `*_str`), Tags, Behandlung von on/off, Strings, Booleans und Attributen.
 - [x] **Golden-Tests:** (dazu ein Test, der jeden Fall mit einer Referenzkopie des Core-Algorithmus und dem offiziellen Client vergleicht) pro Fall (numerischer Sensor, Einheit, binary_sensor, switch, Text, Attribute) ein erwartetes Line-Protocol-Beispiel festschreiben.
 - [x] **Attribut-Export:** wie in der nativen Integration (beschlossen). Numerische Attribute als Felder, Strings als `*_str`; die genauen Regeln ergibt der Audit.
 - [ ] **Native Optionen nachbilden:** Umwandlung umgesetzt und getestet; in der UI noch nicht einstellbar. `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [x] **Puffer-Standardwerte (beschlossen):** Flush nach 1 s Ruhe oder 100 Einträgen (wie nativ), Skip-Regeln für unknown/unavailable/leer, Verwerfen ungültiger Batches. Queue-Begrenzung nach Anzahl (Standard 50.000 Punkte, ca. 10 MB), bei Überlauf werden die ältesten verworfen, kein zusätzliches Alters-Limit. Wiederholung bei Fehler mit Backoff (5 s, steigend bis max. 60 s). Alles konfigurierbar (siehe M4).
 - [x] **Heartbeat-Markierung (beschlossen):** ein **Feld** `_heartbeat=true`, nur an Heartbeat-Punkten und am Startwert einer neu selektierten Entität. Kein Tag, damit Heartbeat-Punkte in derselben Series wie Änderungspunkte bleiben und bestehende Panels ihre durchgehenden Linien behalten. Änderungspunkte tragen kein Zusatzfeld. Im Audit prüfen, ob bestehende Panels nach `_field` filtern. Optional später: umschaltbare Modi (Tag / aus).
-- [ ] **Vergleichswerkzeug:** native und neue Punkte einer Entität nebeneinander darstellen.
+- [x] **Vergleichswerkzeug:** `tools/compare_with_influx.py` vergleicht die Punkte der nativen Integration mit den Punkten, die Influx Picker für dieselben Zustände schreiben würde (nur lesend), und kann das Ergebnis als Golden-Fixture speichern.
 
 Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebnis.
 
