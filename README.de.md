@@ -1,154 +1,68 @@
 # Influx Picker
 
-[English](README.md) · **Deutsch** · [Roadmap](ROADMAP.de.md)
+[English](README.md) · **Deutsch** · [Installationsanleitung](docs/installation.de.md) · [Roadmap](ROADMAP.de.md)
 
-Wähle aus, welche Home-Assistant-Entitäten in InfluxDB® geschrieben werden, und
-ändere die Auswahl jederzeit **ohne Neustart von Home Assistant**.
+Schreibt ausgewählte Home-Assistant-Entitäten nach InfluxDB®, ausgewählt über
+**Labels**. Änderungen wirken sofort, **ohne Neustart von Home Assistant**.
 
-> **Status: frühe Entwicklung.** Es gibt noch kein Release. Eine erste Version
-> des Codes existiert (InfluxDB 2.x, Auswahl per Label, Heartbeat,
-> Datenformat-Optionen). Neben automatischen Tests lief sie **einmal kurz in
-> einer echten Home-Assistant-Installation** (beim Maintainer, 2026-11-23,
-> 19 Entitäten gegen einen Test-Bucket; die Punkte stimmten mit denen der
-> nativen Integration überein). Das ist weit entfernt von gründlichem Testen.
-> Dieses README beschreibt die Ziele und das geplante Design. Rückmeldungen und
-> Beiträge sind sehr willkommen.
+> **Status: v0.1, frühe Version.** Mit automatischen Tests abgedeckt und in
+> einer echten Installation getestet; dort stimmten die Punkte mit denen der
+> nativen Integration überein. Der Code ist großteils KI-generiert (Claude von
+> Anthropic) und nicht gründlich geprüft. Er verwaltet deinen InfluxDB-Token,
+> also prüf ihn und fang mit einem Test-Bucket an. Fehlerberichte und
+> Testergebnisse sind sehr willkommen.
 
-## Wie dieses Projekt entsteht
+## Funktionen
 
-Dieses Projekt wird mit Hilfe von KI entwickelt (Claude von Anthropic): Code,
-Dokumentation und Tests sind größtenteils KI-generiert. Der Maintainer hat weder
-die Zeit noch das Fachwissen, jeden Teil gründlich zu prüfen und zu testen.
-**Geh also nicht davon aus, dass der Code gründlich geprüft oder getestet ist.**
-Automatische Tests und CI sollen das ausgleichen. Weil die Integration dein
-InfluxDB-Token verwendet, prüfe den Code bitte vor der Installation und
-betrachte alle Versionen als experimentell. Code-Reviews, Testergebnisse aus
-echten Installationen und Fehlermeldungen sind nicht nur willkommen, sie sind
-das, was dieses Projekt am meisten braucht.
+- **Auswahl per Label:** ein Label für "bei Änderung schreiben", eines für "bei
+  Änderung und als Heartbeat schreiben". Labels an Gerät oder Bereich zählen
+  mit (abschaltbar).
+- **Kompatibel mit der nativen `influxdb`-Integration:** gleiche Measurements,
+  Tags und Felder. Ihre YAML-Optionen (`default_measurement`, `tags`,
+  `tags_attributes`, `ignore_attributes`, `component_config`, …) werden in der
+  Oberfläche eingestellt, bestehende Abfragen und Dashboards funktionieren
+  weiter.
+- **Heartbeat:** Entitäten, die sich selten ändern, werden regelmäßig erneut
+  geschrieben, damit Graphen keine Lücken haben.
+- **Startwert beim Start:** einstellbar (aktuelle Zeit, eigener Zeitstempel des
+  Zustands oder aus).
+- **Zuverlässiges Schreiben:** Pakete (1 s oder 100 Punkte), begrenzter Puffer
+  (50.000 Punkte), Wiederholung mit Backoff.
+- **Mehrere Instanzen:** ein Eintrag pro Bucket oder Server, jeweils mit eigenen
+  Labels.
 
-## Warum
-
-Die native `influxdb`-Integration filtert Entitäten nur per YAML
-(`include` / `exclude`), und jede Änderung braucht einen Neustart von Home
-Assistant. Mit Influx Picker wählst du Entitäten so aus, wie du Home Assistant
-ohnehin organisierst: mit **Labels**. Label in der Oberfläche setzen oder
-entfernen, und die Änderung wirkt sofort.
+Unterstützt: **InfluxDB 2.x**. 1.x und 3.x sind geplant.
 
 ## Installation
 
-Schritt-für-Schritt-Anleitung mit allen Einstellungen und Fehlersuche:
-**[docs/installation.de.md](docs/installation.de.md)**. Kurzfassung:
+Benötigt Home Assistant 2026.10 oder neuer.
 
-> Experimentell: Lies zuerst [Wie dieses Projekt entsteht](#wie-dieses-projekt-entsteht).
-> Es gibt noch kein Release, HACS installiert daher den aktuellen Stand des
-> Standard-Branches (`main`). Voraussetzung: Home Assistant 2026.10 oder neuer.
+1. **HACS** → Menü (drei Punkte) → **Benutzerdefinierte Repositories** →
+   `https://github.com/vandecook/influx-picker`, Typ **Integration**.
+2. **Influx Picker** herunterladen, Home Assistant neu starten.
+3. Zwei Labels anlegen, zum Beispiel `influx` und `influx-heartbeat`.
+4. **Einstellungen → Geräte & Dienste → Integration hinzufügen → Influx
+   Picker:** InfluxDB-Version, Verbindung (URL, Organisation, Bucket, Token mit
+   Schreibrecht), Labels, Datenformat.
+5. Die Labels an Entitäten, Geräte oder Bereiche hängen.
 
-### Mit HACS (empfohlen)
+Alle Schritte und Einstellungen, Umstieg von der nativen Integration und
+Fehlersuche: **[Installationsanleitung](docs/installation.de.md)**.
 
-1. In Home Assistant **HACS** öffnen.
-2. Das Menü öffnen (drei Punkte oben rechts) und **Benutzerdefinierte
-   Repositories** wählen.
-3. `https://github.com/vandecook/influx-picker` eintragen, Typ **Integration**
-   wählen und auf **Hinzufügen** klicken.
-4. In HACS nach **Influx Picker** suchen, öffnen und **Herunterladen** klicken.
-5. Home Assistant neu starten.
-
-### Manuell
-
-1. Dieses Repository herunterladen (grüner Button **Code**, **Download ZIP**).
-2. Den Ordner `custom_components/influx_picker` in den Ordner
-   `custom_components` deiner Home-Assistant-Konfiguration kopieren (anlegen,
-   falls er fehlt). Am Ende muss es
-   `config/custom_components/influx_picker/manifest.json` geben.
-3. Home Assistant neu starten.
-
-### Einrichten
-
-1. Die gewünschten Labels anlegen, zum Beispiel `influx` und
-   `influx-heartbeat`: **Einstellungen → Bereiche, Labels & Zonen → Labels**.
-2. In InfluxDB ein API-Token mit **Schreibrecht** auf den Ziel-Bucket anlegen.
-3. In Home Assistant **Einstellungen → Geräte & Dienste → Integration
-   hinzufügen** öffnen und **Influx Picker** wählen.
-4. Die Datenbankversion wählen (derzeit nur InfluxDB 2.x).
-5. URL (zum Beispiel `http://192.168.1.10:8086`), Organisation, Bucket und
-   Token eintragen. Die Verbindung wird mit einer echten Schreibanfrage geprüft.
-6. Die Labels, das Heartbeat-Intervall und den Startwert beim Start von Home
-   Assistant wählen.
-7. **Datenformat:** vorausgefüllt mit `default_measurement: units`, Tag
-   `source=HA` und `friendly_name` als Tag (nicht die nativen Standardwerte).
-   Wenn du bisher die native `influxdb`-Integration genutzt hast, übernimm die
-   Werte von `default_measurement`, `tags`, `tags_attributes`,
-   `ignore_attributes` und den anderen Optionen aus ihrem YAML, damit
-   bestehende Abfragen weiter funktionieren.
-8. Die Labels an Entitäten, Geräte oder Bereiche hängen. Änderungen wirken nach
-   etwa einer Sekunde, ohne Neustart. Labels, Intervall und Datenformat lassen
-   sich später über **Konfigurieren** bei der Integration ändern.
-
-Für ein zweites Ziel (anderer Bucket oder Server) die Integration einfach noch
-einmal hinzufügen.
-
-**Hinweis:** Schreibt die native `influxdb`-Integration in denselben Bucket,
-werden dieselben Entitäten unter Umständen doppelt geschrieben. Entferne sie aus
-der `include`-Liste der nativen Integration oder nutze einen eigenen Bucket.
-
-## Geplante Funktionen
-
-- **Auswahl per Label.** Zwei Labels, zum Beispiel `influx` (bei Änderung
-  schreiben) und `influx-heartbeat` (bei Änderung schreiben, dazu regelmäßig im
-  Ruhezustand). Die Labels sind frei wählbar. Labels von Gerät oder Bereich
-  können vererbt werden.
-- **Manuelle Liste.** Für Entitäten, die keine Labels tragen können (zum
-  Beispiel Entitäten ohne eindeutige ID), gepflegt in den Optionen der
-  Integration.
-- **Übersicht.** Eine Liste in den Optionen zeigt, welche Entitäten exportiert
-  werden und warum, und markiert manuell eingetragene Entitäten, die es nicht
-  mehr gibt. Ein Seitenleisten-Panel mit Schaltern ist für viel später geplant.
-- **Kompatibel.** Gleiche Measurement-, Tag- und Feldstruktur wie die native
-  Integration, damit bestehende Grafana-Abfragen und Dashboards weiter
-  funktionieren.
-- **Heartbeat.** Optionale regelmäßige Schreibvorgänge für Entitäten, die sich
-  selten ändern, damit Dashboards keine Lücken haben. Heartbeat-Punkte sind mit
-  einem Feld markiert, sodass man sie unterscheiden kann, ohne die Series zu
-  teilen.
-- **Zuverlässige Übertragung.** Gebündelte Schreibvorgänge, ein begrenzter
-  Puffer, Wiederholung mit Backoff und, wo sinnvoll, dieselben Standardwerte wie
-  die native Integration.
-- **Austauschbare Backends.** Zuerst InfluxDB 2.x. 1.x und 3.x kommen als
-  Backend-Plugins dazu. Backends liegen vorerst in diesem Repository.
-- **Mehrere Instanzen.** Ein Config-Entry pro Ziel, jeweils mit eigenen Labels,
-  zum Beispiel InfluxDB 2 und 3 parallel.
-
-## Bisherige Entscheidungen
-
-| Thema | Entscheidung |
-|---|---|
-| Backends | Backend-Interface und Registry von Anfang an; InfluxDB 2.x ist das erste Plugin. |
-| Kompatibilität | Gleiches Schema wie die native Integration. Anhand ihres Quellcodes geprüft ([Audit](docs/core-schema-audit.md), englisch) per Test gegen eine Kopie des Core-Algorithmus abgesichert und mit echten Daten der nativen Integration abgeglichen (10 Entitätstypen identisch, als Golden-Tests hinterlegt). Die nativen YAML-Optionen (`default_measurement`, `tags`, `tags_attributes`, …) werden in der UI eingestellt. |
-| Bündelung | Flush nach 1 s Ruhe oder 100 Punkten, wie die native Integration. |
-| Puffer | Begrenzt nach **Anzahl** (Standard 50.000 Punkte), bei Überlauf werden die ältesten verworfen, kein Alters-Limit. Die Zeitstempel bleiben erhalten, längeres Puffern verfälscht also nichts. |
-| Wiederholung | Backoff von 5 s bis 60 s. Ungültige Batches werden verworfen, nicht wiederholt. |
-| Attribute | Wie in der nativen Integration. |
-| Heartbeat-Markierung | Ein Feld `_heartbeat=true` an Heartbeat-Punkten, kein Tag, damit die Series durchgehend bleibt. |
-| Übersprungene Zustände | `unknown`, `unavailable` und leere Zustände werden nicht geschrieben. |
-| Persistenz | Eine Warteschlange auf der Platte kommt nur, wenn echte Ausfälle das nötig machen. |
+Schreibt die native `influxdb`-Integration dieselben Entitäten in denselben
+Bucket, landen sie doppelt. Einen eigenen Bucket nehmen oder sie aus ihrem
+`include` entfernen.
 
 ## Heartbeat-Markierung
 
-Heartbeat-Punkte (regelmäßige Schreibvorgänge für ruhende Entitäten sowie der
-Startwert, der beim Aufnehmen einer Entität geschrieben wird) tragen ein
-**Feld** `_heartbeat=true`. Änderungspunkte haben kein Zusatzfeld. Wahlweise
-kann der Startwert beim Start von Home Assistant stattdessen mit dem eigenen
-Zeitstempel des Zustands und einem Feld `_startup=true` geschrieben werden, oder
-gar nicht (siehe [Installationsanleitung](docs/installation.de.md#61-auswahl-der-entitäten)).
+Heartbeat-Punkte und der Startwert einer neu ausgewählten Entität tragen ein
+**Feld** `_heartbeat=true`; Änderungspunkte haben kein Zusatzfeld. Ein Feld
+statt eines Tags hält alle Punkte einer Entität in einer Series, Graphen zeigen
+also eine durchgehende Linie. Mit der Option "Zeit der letzten
+Zustandsänderung" bekommt der Startwert beim Start stattdessen das Feld
+`_startup=true`.
 
-Ein Feld statt eines Tags ist Absicht: Ein Tag würde Heartbeat-Punkte in eine
-eigene Series legen, und bestehende Flux-Panels zeigten dann eine zweite Linie
-pro Entität. Mit einem Feld bleiben alle Punkte einer Entität in einer Series,
-und Abfragen auf `value` sehen die Heartbeats als normale Werte und behalten
-eine durchgehende Linie.
-
-Alles, was **Ereignisse oder Zustandswechsel zählt**, muss Heartbeat-Punkte
-ausschließen. Beispiel in Flux (ungetestete Skizze):
+Abfragen, die **Änderungen zählen**, müssen Heartbeat-Punkte weglassen:
 
 ```flux
 from(bucket: "ha")
@@ -159,28 +73,13 @@ from(bucket: "ha")
   |> filter(fn: (r) => not exists r._heartbeat)
 ```
 
-Mittelwerte, `last()` und Graphen wollen meist alle Punkte und brauchen keinen
-Filter.
+Graphen, Mittelwerte und `last()` können alle Punkte verwenden.
 
 ## Roadmap
 
-Vollständige Roadmap: [Deutsch](ROADMAP.de.md) · [English](ROADMAP.en.md)
-
-| Meilenstein | Inhalt |
-|---|---|
-| M0 Fundament | Projektstruktur, neutrales Datenmodell, Backend-Interface und Registry, Config-Flow, Exporter-Kern |
-| M1 Kompatibilität | Audit des Schemas der nativen Integration, Golden-Tests, Attribut-Export, native Optionen, Heartbeat-Markierung |
-| M2 InfluxDB 2 | Erstes Backend, Auswahl per Label mit Vererbung, Heartbeat |
-| M3 Manuelle Liste & Übersicht | Manuelle Entitätenlisten, Übersicht als Liste, Status fehlender Entitäten, Reparaturhinweise |
-| M4 Puffer & Diagnose | Konfigurierbarer Puffer, Backoff, Diagnose-Sensoren, Lasttests |
-| M5 InfluxDB 1.x | Backend-Plugin |
-| M6 InfluxDB 3 | Backend-Plugin |
-| M7 Migration | Import aus der YAML der nativen Integration, Warnung bei Parallelbetrieb |
-| M8 Qualität & Release | CI gegen InfluxDB 1/2/3, Dokumentation, Übersetzungen, HACS-Metadaten |
-| M9 Übersichts-Panel (viel später) | Seitenleisten-Panel mit durchsuchbarer Tabelle, Entitäten ein- und ausschalten, Sammelaktionen |
-
-Offene Frage: die Markenprüfung vor einer öffentlichen Veröffentlichung (siehe
-Roadmap).
+Als Nächstes: manuelle Liste für Entitäten ohne Labels und eine Übersicht (M3),
+Diagnose und Puffer-Einstellungen (M4), InfluxDB 1.x und 3.x (M5, M6), Import
+aus dem nativen YAML (M7). Details: [ROADMAP.de.md](ROADMAP.de.md).
 
 ## Entwicklung
 
@@ -189,25 +88,14 @@ pip install -r requirements_test.txt
 pytest
 ```
 
-Tests, die einen echten InfluxDB-2-Server brauchen, werden übersprungen, solange
-`INFLUXDB_V2_URL`, `INFLUXDB_V2_TOKEN`, `INFLUXDB_V2_ORG` und
-`INFLUXDB_V2_BUCKET` nicht gesetzt sind. Die CI startet einen Server im
-Container und führt sie bei jedem Pull Request aus.
+Tests gegen ein echtes InfluxDB 2 laufen, wenn `INFLUXDB_V2_URL`,
+`INFLUXDB_V2_TOKEN`, `INFLUXDB_V2_ORG` und `INFLUXDB_V2_BUCKET` gesetzt sind;
+die CI führt sie bei jedem Pull Request in einem Container aus. Details zum
+Schema: [docs/core-schema-audit.md](docs/core-schema-audit.md).
 
-## Mitmachen
-
-Beiträge sind willkommen, besonders:
-
-- Tests mit deiner eigenen InfluxDB-1.x-/2.x-/3.x-Installation,
-- Backend-Plugins und Kompatibilitätsprüfungen gegen die native Integration,
-- Übersetzungen und Dokumentation.
-
-Größere Änderungen bitte zuerst in einem Issue besprechen.
-
-Wenn du InfluxDB oder andere InfluxData-Produkte in Dokumentation, UI-Texten
-oder Code erwähnst, verwende die Namen nur beschreibend, nenne InfluxData Inc.
-als Inhaber, wo ein Markenhinweis nötig ist, und verwende sie nie so, dass eine
-Verbindung oder Billigung nahegelegt wird.
+Beiträge sind willkommen: Tests mit deinem eigenen Setup, Backends,
+Übersetzungen. Größere Änderungen bitte vorher in einem Issue besprechen.
+Produktnamen von InfluxData nur beschreibend verwenden.
 
 ## Lizenz
 
@@ -215,8 +103,7 @@ Verbindung oder Billigung nahegelegt wird.
 
 ## Haftungsausschluss
 
-Dies ist ein unabhängiges Community-Projekt. Es steht in keiner Verbindung zu
-InfluxData Inc. und wird von InfluxData Inc. weder unterstützt noch gesponsert.
-InfluxDB® und InfluxData® sind eingetragene Marken der InfluxData Inc.
-Telegraf™, Kapacitor™ und Chronograf™ sind Marken der InfluxData Inc. Die Namen
-werden hier nur verwendet, um die Kompatibilität zu beschreiben.
+Unabhängiges Community-Projekt, nicht mit InfluxData Inc. verbunden, von ihr
+weder unterstützt noch gesponsert. InfluxDB® und InfluxData® sind eingetragene
+Marken der InfluxData Inc. Die Namen werden nur zur Beschreibung der
+Kompatibilität verwendet.

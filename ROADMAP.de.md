@@ -2,7 +2,7 @@
 
 [English](ROADMAP.en.md) · [README (Deutsch)](README.de.md)
 
-Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; in einer echten Home-Assistant-Installation lief noch nichts. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
+Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; ein erster Praxistest lief am 23.11.2026 (eine Installation, InfluxDB 2). Release v0.1.0 enthält M0, M1 und M2. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
 
 ## Anforderungen (Stand 17.11.2026)
 

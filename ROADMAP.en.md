@@ -2,7 +2,7 @@
 
 [Deutsch](ROADMAP.de.md) · [README](README.md)
 
-Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; nothing has run in a real Home Assistant installation yet. Project name: **Influx Picker**, domain `influx_picker`. If the project is published, the trademark question needs to be checked first (see Open questions).
+Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; a first real test ran on 2026-11-23 (one installation, InfluxDB 2). Release v0.1.0 contains M0, M1 and M2. Project name: **Influx Picker**, domain `influx_picker`. If the project is published, the trademark question needs to be checked first (see Open questions).
 
 ## Requirements (as of 2026-11-17)
 
