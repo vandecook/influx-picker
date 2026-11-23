@@ -134,7 +134,7 @@
     "measurement_attr": {
       "options": {
         "unit_of_measurement": "Maßeinheit (Standard)",
-        "domain__device_class": "Domain und Geräteklasse",
+        "domain_device_class": "Domain und Geräteklasse",
         "entity_id": "Entity-ID"
       }
     }

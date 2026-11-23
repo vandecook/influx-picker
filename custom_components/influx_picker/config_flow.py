@@ -54,13 +54,23 @@ from .const import (
     DEFAULT_INHERIT,
     DOMAIN,
 )
-from .schema import MEASUREMENT_ATTR_UNIT, MEASUREMENT_ATTRS, parse_customizations
+from .schema import (
+    MEASUREMENT_ATTR_DOMAIN_DEVICE_CLASS,
+    MEASUREMENT_ATTR_UNIT,
+    MEASUREMENT_ATTRS,
+    parse_customizations,
+)
 
 _CUSTOMIZATIONS = (
     CONF_COMPONENT_CONFIG,
     CONF_COMPONENT_CONFIG_DOMAIN,
     CONF_COMPONENT_CONFIG_GLOB,
 )
+
+# Translation keys may not contain "__", so the selector uses its own value for
+# the core option `domain__device_class`. Stored options keep the core value.
+_ATTR_TO_UI = {MEASUREMENT_ATTR_DOMAIN_DEVICE_CLASS: "domain_device_class"}
+_ATTR_FROM_UI = {ui: core for core, ui in _ATTR_TO_UI.items()}
 
 
 def _tags_to_text(tags: Mapping[str, str] | None) -> str:
@@ -96,13 +106,13 @@ def data_format_schema(defaults: Mapping[str, Any]) -> vol.Schema:
         )
     )
     tags = defaults.get(CONF_TAGS)
+    attr = defaults.get(CONF_MEASUREMENT_ATTR) or MEASUREMENT_ATTR_UNIT
     schema: dict[Any, Any] = {
         vol.Required(
-            CONF_MEASUREMENT_ATTR,
-            default=defaults.get(CONF_MEASUREMENT_ATTR) or MEASUREMENT_ATTR_UNIT,
+            CONF_MEASUREMENT_ATTR, default=_ATTR_TO_UI.get(attr, attr)
         ): SelectSelector(
             SelectSelectorConfig(
-                options=list(MEASUREMENT_ATTRS),
+                options=[_ATTR_TO_UI.get(a, a) for a in MEASUREMENT_ATTRS],
                 translation_key=CONF_MEASUREMENT_ATTR,
                 mode=SelectSelectorMode.DROPDOWN,
             )
@@ -142,9 +152,9 @@ def _clean_data_format(
 ) -> tuple[dict[str, Any], dict[str, str]]:
     """Normalize the data format step. Returns (options, errors)."""
     errors: dict[str, str] = {}
+    attr = user_input.get(CONF_MEASUREMENT_ATTR) or MEASUREMENT_ATTR_UNIT
     options: dict[str, Any] = {
-        CONF_MEASUREMENT_ATTR: user_input.get(CONF_MEASUREMENT_ATTR)
-        or MEASUREMENT_ATTR_UNIT,
+        CONF_MEASUREMENT_ATTR: _ATTR_FROM_UI.get(attr, attr),
         CONF_DEFAULT_MEASUREMENT: (
             user_input.get(CONF_DEFAULT_MEASUREMENT) or ""
         ).strip()

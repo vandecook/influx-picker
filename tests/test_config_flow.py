@@ -271,3 +271,29 @@ async def test_options_flow_data_format(hass: HomeAssistant) -> None:
         "tags": {"source": "HA"},
         "tags_attributes": ["friendly_name"],
     }
+
+
+async def test_data_format_domain_device_class(hass: HomeAssistant) -> None:
+    """The selector value is mapped to the core option value."""
+    flow_id = await _to_data_format_step(hass)
+    with patch(SETUP, return_value=True):
+        result = await hass.config_entries.flow.async_configure(
+            flow_id, {"measurement_attr": "domain_device_class"}
+        )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["options"]["measurement_attr"] == "domain__device_class"
+
+
+def test_translation_keys_valid() -> None:
+    """Selector option keys follow the hassfest rule (caught in CI otherwise)."""
+    import json
+    from pathlib import Path
+    import re
+
+    rule = re.compile(r"^(?!.*__)[a-z0-9]+(?:[a-z0-9_-]*[a-z0-9])?$")
+    base = Path(__file__).parent.parent / "custom_components" / "influx_picker"
+    for path in [base / "strings.json", *(base / "translations").glob("*.json")]:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for selector in data.get("selector", {}).values():
+            for key in selector.get("options", {}):
+                assert rule.match(key), f"{path.name}: {key}"

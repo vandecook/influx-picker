@@ -134,7 +134,7 @@
     "measurement_attr": {
       "options": {
         "unit_of_measurement": "Unit of measurement (default)",
-        "domain__device_class": "Domain and device class",
+        "domain_device_class": "Domain and device class",
         "entity_id": "Entity ID"
       }
     }
