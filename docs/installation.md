@@ -6,9 +6,9 @@ This guide walks through installing Influx Picker, setting it up, and every
 setting it has. It is based on a first real installation in the maintainer's
 Home Assistant (2026-11-23).
 
-> **Experimental.** The code is largely AI-generated and not thoroughly
-> reviewed. Read [How this project is built](../README.md#how-this-project-is-built)
-> before you install it. Start with a **test bucket**, not your production data.
+> **Early version.** The code is largely AI-generated and not thoroughly
+> reviewed (see the [status note](../README.md)). Start with a **test
+> bucket**, not your production data.
 
 ## Contents
 
@@ -51,8 +51,8 @@ works but is not needed.
 4. Search for **Influx Picker**, open it, click **Download**.
 5. **Restart Home Assistant.**
 
-There is no release yet, so HACS installs the current state of the `main`
-branch. Updates show up in HACS like for any other integration.
+HACS installs the latest release. Updates show up in HACS like for any other
+integration.
 
 ### Manually
 
