@@ -2,7 +2,7 @@
 
 [Deutsch](ROADMAP.de.md) · [README](README.md)
 
-Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; a first real test ran on 2026-11-23 (one installation, InfluxDB 2). Release v0.1.0 contains M0, M1 and M2. Project name: **Influx Picker**, domain `influx_picker`. If the project is published, the trademark question needs to be checked first (see Open questions).
+Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; a first real test ran on 2026-11-23 (one installation, InfluxDB 2). Release v0.1.0 contains M0, M1 and M2; M3 is implemented but not released yet. Project name: **Influx Picker**, domain `influx_picker`. If the project is published, the trademark question needs to be checked first (see Open questions).
 
 ## Requirements (as of 2026-11-17)
 
@@ -65,14 +65,14 @@ Acceptance: existing Grafana queries return the same results with the new data. 
 
 - [x] **Change connection data** (pulled forward from M7, decided 2026-11-23): "Reconfigure" in the entry's menu for URL, token, organization, bucket and SSL. The new data is checked for real before saving (as during setup); labels and data format are kept.
 - [x] **Re-authenticate:** if InfluxDB rejects the token (401/403), Home Assistant offers "Re-authenticate" by itself and asks only for the new token. Points collected meanwhile stay in memory and are written after the reload.
-- [ ] **Options flow menu:** "Labels & interval" / "Manual list" / "Overview". The menu exists (entity selection, data format); manual list and overview are added here.
-- [ ] **Two manual lists** (multi-select): "write on change" and "write on change + heartbeat".
-- [ ] **Merging** of label and manual selection (union, heartbeat wins). A hint if a manually chosen entity is already selected through a label.
-- [ ] **Overview as a list** in the options flow: counts by source (label directly, device, area, manual) and mode (change, heartbeat), plus one line per entity (entity ID, source, mode). Shortened or paged for long lists.
-- [ ] **Status of manual entries:** exists / **no longer exists** / disabled.
-- [ ] **Cleanup:** option "remove missing entries".
-- [ ] **Repairs issue** when manually listed entities have been deleted.
-- [ ] Until the panel exists (M9), the list in the options flow is the overview.
+- [x] **Options flow menu:** "Labels & interval" / "Manual list" / "Overview". Menu now: "Labels and interval" / "Manual list" / "Overview" / "Data format".
+- [x] **Two manual lists** (multi-select): "write on change" and "write on change + heartbeat".
+- [x] **Merging** of label and manual selection (union, heartbeat wins). A hint if a manually chosen entity is already selected through a label.
+- [x] **Overview as a list** in the options flow: counts by source (label directly, device, area, manual) and mode (change, heartbeat), plus one line per entity (entity ID, source, mode). Shortened or paged for long lists.
+- [x] **Status of manual entries:** exists / **no longer exists** / disabled. Entries that do not exist (yet) stay selected and are written as soon as they appear. Renamed entity IDs are followed automatically.
+- [x] **Cleanup:** option "remove missing entries".
+- [x] **Repairs issue** when manually listed entities have been deleted (checked once Home Assistant has started), with a fix that removes them.
+- [x] Until the panel exists (M9), the list in the options flow is the overview.
 
 ## M4 – Buffering, reliability, diagnostics
 

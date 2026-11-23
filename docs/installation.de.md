@@ -136,18 +136,45 @@ Zustand (als Heartbeat markiert, siehe [Abschnitt 6.1](#61-auswahl-der-entitäte
 **Grenzen:**
 
 - Nur Entitäten mit einer **Unique-ID** können Labels tragen. Manche haben keine
-  (zum Beispiel `sun.sun` oder Entitäten aus YAML ohne `unique_id`). Eine
-  manuelle Liste dafür ist geplant (Roadmap M3).
+  (zum Beispiel `sun.sun` oder Entitäten aus YAML ohne `unique_id`). Für sie
+  gibt es die **manuelle Liste** (siehe unten).
 - **Deaktivierte** Entitäten werden nicht geschrieben.
 - Die Zustände `unknown`, `unavailable` und leere Zustände werden nie
   geschrieben (wie bei der nativen Integration).
+
+### Manuelle Liste
+
+**Einstellungen → Geräte & Dienste → Influx Picker → Konfigurieren → Manuelle
+Liste.** Zwei Listen: **Bei Änderung schreiben** und **Bei Änderung und
+Heartbeat schreiben**. Sie gelten zusätzlich zu den Labels. Ist eine Entität
+doppelt ausgewählt, gewinnt Heartbeat. Das Formular zeigt, welche Einträge es
+nicht mehr gibt und welche ohnehin per Label ausgewählt sind.
+
+- Eine Entität, die es (noch) nicht gibt, bleibt in der Liste und wird
+  geschrieben, sobald sie auftaucht.
+- Fehlt eine gelistete Entität, nachdem Home Assistant gestartet ist, erscheint
+  eine **Reparaturmeldung** (Einstellungen → System → Reparaturen). Ihre
+  Reparatur entfernt die fehlenden Einträge. Dasselbe bietet das Formular mit
+  **Nicht mehr vorhandene Einträge entfernen**.
+- Wird eine Entity-ID umbenannt, zieht die Liste automatisch nach.
+- Stehen Entitäten in der manuellen Liste, dürfen die Labels leer bleiben.
+
+### Übersicht
+
+**Konfigurieren → Übersicht** zeigt alles, was geschrieben wird: Anzahl nach
+Quelle (Label an der Entität, Gerät, Bereich, manuelle Liste) und Modus (bei
+Änderung, Heartbeat), danach eine Zeile pro Entität. Manuelle Einträge, die es
+nicht mehr gibt oder die deaktiviert sind, sind markiert. Lange Listen werden
+nach 100 Zeilen gekürzt.
 
 ## 5. Einstellungen später ändern
 
 **Einstellungen → Geräte & Dienste → Influx Picker → Konfigurieren.** Es öffnet
 sich ein Menü:
 
-- **Auswahl der Entitäten:** Labels, Heartbeat-Intervall, Vererbung.
+- **Labels und Intervall:** Labels, Heartbeat-Intervall, Vererbung, Startwert.
+- **Manuelle Liste:** siehe [Abschnitt 4](#4-entitäten-auswählen).
+- **Übersicht:** was geschrieben wird und warum (nur lesen).
 - **Datenformat:** alle Optionen zum Datenformat.
 
 Speichern lädt die Integration neu, ein Neustart von Home Assistant ist nicht

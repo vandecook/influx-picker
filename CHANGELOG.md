@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Manual list (write on change / write on change plus heartbeat) for entities
+  that cannot carry labels. Merged with the label selection; heartbeat wins.
+  Entries that do not exist yet are written as soon as they appear; renamed
+  entity IDs are followed.
+- Overview in the options: counts by source and mode, one line per entity,
+  status of manual entries.
+- Repairs notice when manually listed entities no longer exist, with a fix
+  that removes them.
+- Options menu: "Labels and interval", "Manual list", "Overview", "Data format".
 - Change the connection (URL, organization, bucket, token, certificate check)
   with "Reconfigure", without setting the integration up again. An empty
   token keeps the current one.

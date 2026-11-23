@@ -6,12 +6,13 @@ from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STOP
-from homeassistant.core import Event, HomeAssistant
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import (
     ConfigEntryAuthFailed,
     ConfigEntryError,
     ConfigEntryNotReady,
 )
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .backends import (
@@ -22,8 +23,10 @@ from .backends import (
 )
 from .const import CONF_BACKEND, CONF_VERIFY_SSL, DOMAIN, SHUTDOWN_FLUSH_TIMEOUT
 from .exporter import Exporter
+from .issues import async_delete_missing_issue
 from .runtime import PickerRuntime
 from .schema import schema_options_from
+from .selection import renamed_entity
 
 
 @dataclass(slots=True)
@@ -68,7 +71,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: PickerConfigEntry) -> bo
     except ValueError as err:
         # The flows validate these options; this only guards hand-edited storage.
         raise ConfigEntryError(f"Invalid data format options: {err}") from err
-    runtime = PickerRuntime(hass, entry.options, exporter, schema_options)
+    runtime = PickerRuntime(
+        hass,
+        entry.options,
+        exporter,
+        schema_options,
+        entry_id=entry.entry_id,
+        title=entry.title,
+    )
     entry.runtime_data = PickerData(backend, exporter, runtime)
     # Points that could not be written before a reload (for example while the
     # token was rejected) are written with the new connection data.
@@ -86,6 +96,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: PickerConfigEntry) -> bo
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, _async_on_stop)
     )
     entry.async_on_unload(entry.add_update_listener(_async_reload))
+
+    @callback
+    def _async_entity_renamed(event: Event[er.EventEntityRegistryUpdatedData]) -> None:
+        # Keep manual entries when an entity ID is renamed (reloads the entry).
+        if event.data["action"] != "update" or "old_entity_id" not in event.data:
+            return
+        options = renamed_entity(
+            entry.options, event.data["old_entity_id"], event.data["entity_id"]
+        )
+        if options is not None:
+            hass.config_entries.async_update_entry(entry, options=options)
+
+    entry.async_on_unload(
+        hass.bus.async_listen(er.EVENT_ENTITY_REGISTRY_UPDATED, _async_entity_renamed)
+    )
     return True
 
 
@@ -107,5 +132,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: PickerConfigEntry) -> b
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: PickerConfigEntry) -> None:
-    """Forget points kept for a reload of a removed entry."""
+    """Forget points kept for a reload of a removed entry, and its issue."""
     hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+    async_delete_missing_issue(hass, entry.entry_id)

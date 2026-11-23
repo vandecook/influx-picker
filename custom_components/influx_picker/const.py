@@ -17,6 +17,8 @@ CONF_LABEL_HEARTBEAT = "label_heartbeat"
 CONF_HEARTBEAT_INTERVAL = "heartbeat_interval"
 CONF_INHERIT = "inherit_labels"
 CONF_STARTUP_SNAPSHOT = "startup_snapshot"
+CONF_MANUAL_CHANGE = "manual_change"  # entity IDs, write on change
+CONF_MANUAL_HEARTBEAT = "manual_heartbeat"  # entity IDs, change + heartbeat
 
 # What is written for every selected entity when the entry starts
 # (Home Assistant start or reload of the entry).

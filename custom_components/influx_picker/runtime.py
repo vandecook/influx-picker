@@ -10,6 +10,7 @@ from typing import Any
 
 from homeassistant.const import EVENT_STATE_CHANGED
 from homeassistant.core import (
+    CoreState,
     Event,
     EventStateChangedData,
     HomeAssistant,
@@ -24,24 +25,22 @@ from homeassistant.helpers import (
 )
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.state import state_as_number
 from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_HEARTBEAT_INTERVAL,
-    CONF_INHERIT,
-    CONF_LABEL_CHANGE,
-    CONF_LABEL_HEARTBEAT,
     CONF_STARTUP_SNAPSHOT,
     DEFAULT_HEARTBEAT_INTERVAL,
-    DEFAULT_INHERIT,
     DEFAULT_STARTUP_SNAPSHOT,
     STARTUP_SNAPSHOT_LAST_UPDATED,
     STARTUP_SNAPSHOT_OFF,
 )
 from .exporter import Exporter
+from .issues import async_update_missing_issue
 from .schema import SchemaOptions, state_to_point
-from .selection import Mode, compute_selection
+from .selection import Mode, compute_selection, manual_lists, missing_manual
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,14 +69,22 @@ class PickerRuntime:
         options: Mapping[str, Any],
         exporter: Exporter,
         schema_options: SchemaOptions | None = None,
+        *,
+        entry_id: str | None = None,
+        title: str = "",
     ) -> None:
-        """Store settings. Call `async_start()` to begin."""
+        """Store settings. Call `async_start()` to begin.
+
+        With `entry_id`, a repairs issue lists manual entries that no longer
+        exist (checked once Home Assistant has started).
+        """
         self.hass = hass
         self.exporter = exporter
         self.schema_options = schema_options or SchemaOptions()
-        self.change_label: str | None = options.get(CONF_LABEL_CHANGE) or None
-        self.heartbeat_label: str | None = options.get(CONF_LABEL_HEARTBEAT) or None
-        self.inherit: bool = options.get(CONF_INHERIT, DEFAULT_INHERIT)
+        self.options = dict(options)
+        self.entry_id = entry_id
+        self.title = title
+        self._manual = set().union(*manual_lists(self.options))
         self.heartbeat_seconds: float = 60 * float(
             options.get(CONF_HEARTBEAT_INTERVAL, DEFAULT_HEARTBEAT_INTERVAL)
         )
@@ -118,6 +125,26 @@ class PickerRuntime:
             )
         )
         self._async_rebuild()
+        if self.entry_id is not None:
+            # Entities without a unique ID appear only when their integration
+            # has loaded, so check for missing ones after the start.
+            self._unsubs.append(async_at_started(self.hass, self._async_at_started))
+
+    @callback
+    def _async_at_started(self, _hass: HomeAssistant) -> None:
+        self._async_update_issue()
+
+    @callback
+    def _async_update_issue(self) -> None:
+        # `is_running` is also true while starting, so check the state itself.
+        if self.entry_id is None or self.hass.state is not CoreState.running:
+            return
+        async_update_missing_issue(
+            self.hass,
+            self.entry_id,
+            self.title,
+            missing_manual(self.hass, self.options),
+        )
 
     @callback
     def async_stop(self) -> None:
@@ -143,9 +170,7 @@ class PickerRuntime:
 
         The first run after start follows the startup snapshot option.
         """
-        new = compute_selection(
-            self.hass, self.change_label, self.heartbeat_label, self.inherit
-        )
+        new = compute_selection(self.hass, self.options)
         added = new.keys() - self.tracked.keys()
         removed = self.tracked.keys() - new.keys()
         self.tracked = new
@@ -172,11 +197,19 @@ class PickerRuntime:
             _LOGGER.debug(
                 "Selection: %d entities (+%d, -%d)", len(new), len(added), len(removed)
             )
+        self._async_update_issue()
 
     @callback
     def _async_state_changed(self, event: Event[EventStateChangedData]) -> None:
         if (state := event.data["new_state"]) is not None:
             self._write(state, event.time_fired, heartbeat=False)
+        if (
+            event.data["entity_id"] in self._manual
+            and (state is None or event.data["old_state"] is None)
+            and self._debouncer is not None
+        ):
+            # A manual entry appeared or was removed: update the issue.
+            self._debouncer.async_schedule_call()
 
     @callback
     def _async_heartbeat(self, _now: datetime) -> None:

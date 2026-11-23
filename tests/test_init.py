@@ -11,10 +11,8 @@ from homeassistant.helpers import (
     area_registry as ar,
     device_registry as dr,
     entity_registry as er,
-    label_registry as lr,
 )
 from homeassistant.util import dt as dt_util
-import pytest
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
     async_fire_time_changed,
@@ -25,7 +23,8 @@ from custom_components.influx_picker.backends import (
     BackendConnectionError,
 )
 from custom_components.influx_picker.const import DOMAIN
-from custom_components.influx_picker.point import Point
+
+from .conftest import Written
 
 BACKEND = "custom_components.influx_picker.backends.v2.InfluxDB2Backend"
 
@@ -37,50 +36,6 @@ DATA = {
     "token": "secret-token",
     "verify_ssl": True,
 }
-
-
-class Written:
-    """Collects every point the backend is asked to write."""
-
-    def __init__(self) -> None:
-        self.points: list[Point] = []
-
-    async def __call__(self, points) -> None:
-        self.points.extend(points)
-
-    def entities(self) -> list[tuple[str, bool]]:
-        """(entity object id, is heartbeat) per written point."""
-        return [
-            (p.tags["entity_id"], p.fields.get("_heartbeat", False))
-            for p in self.points
-        ]
-
-    def clear(self) -> None:
-        self.points.clear()
-
-
-@pytest.fixture
-def written():
-    """Patch the v2 backend: validation passes, writes are recorded."""
-    rec = Written()
-
-    async def write(_self, points):
-        await rec(points)
-
-    with (
-        patch(f"{BACKEND}.validate", AsyncMock()),
-        patch(f"{BACKEND}.write", write),
-    ):
-        yield rec
-
-
-@pytest.fixture
-def labels(hass: HomeAssistant) -> tuple[str, str]:
-    """Create the two labels and return their IDs."""
-    reg = lr.async_get(hass)
-    change = reg.async_create("Influx").label_id
-    heartbeat = reg.async_create("Influx heartbeat").label_id
-    return change, heartbeat
 
 
 def _entity(hass: HomeAssistant, object_id: str, **kwargs) -> er.RegistryEntry:

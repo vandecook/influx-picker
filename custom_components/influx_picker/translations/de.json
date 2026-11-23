@@ -104,7 +104,9 @@
       "init": {
         "title": "Optionen",
         "menu_options": {
-          "selection": "Auswahl der Entitäten",
+          "selection": "Labels und Intervall",
+          "manual": "Manuelle Liste",
+          "overview": "Übersicht",
           "data_format": "Datenformat"
         }
       },
@@ -121,6 +123,19 @@
         "data_description": {
           "startup_snapshot": "Was beim Start von Home Assistant oder beim Neuladen der Integration für jede ausgewählte Entität geschrieben wird."
         }
+      },
+      "manual": {
+        "title": "Manuelle Liste",
+        "description": "Für Entitäten, die keine Labels tragen können (zum Beispiel Entitäten ohne Unique-ID). Sie werden zusätzlich zur Auswahl per Label geschrieben; steht eine Entität in beiden, gewinnt Heartbeat.\n\nNicht mehr vorhanden: {missing}\n\nSchon per Label ausgewählt: {by_label}",
+        "data": {
+          "manual_change": "Bei Änderung schreiben",
+          "manual_heartbeat": "Bei Änderung und Heartbeat schreiben",
+          "remove_missing": "Nicht mehr vorhandene Einträge entfernen"
+        }
+      },
+      "overview": {
+        "title": "Übersicht",
+        "description": "**{total}** Entitäten werden geschrieben: {change} bei Änderung, {heartbeat} mit Heartbeat.\n\nAusgewählt über: Label an der Entität {label}, Gerät {device}, Bereich {area}, manuelle Liste {manual}. Manuelle Einträge nicht mehr vorhanden: {missing}, deaktiviert: {disabled}.\n\n{entities}"
       },
       "data_format": {
         "title": "Datenformat",
@@ -150,12 +165,14 @@
       }
     },
     "error": {
-      "no_label": "Wähle mindestens ein Label.",
+      "no_label": "Wähle mindestens ein Label oder trage Entitäten in die manuelle Liste ein.",
       "same_label": "Wähle zwei verschiedene Labels.",
       "invalid_tags": "Ein Schlüssel=Wert pro Zeile.",
       "invalid_component_config": "Erwartet wird eine Zuordnung zu override_measurement (Text) und/oder ignore_attributes (Liste).",
       "invalid_measurement_attr": "Unbekannte Auswahl.",
-      "invalid_startup_snapshot": "Ungültige Auswahl."
+      "invalid_startup_snapshot": "Ungültige Auswahl.",
+      "manual_in_both": "Eine Entität kann nur in einer der beiden Listen stehen.",
+      "nothing_selected": "Ohne Labels darf die manuelle Liste nicht leer sein."
     }
   },
   "selector": {
@@ -176,6 +193,22 @@
         "now": "Aktuelle Zeit, als Heartbeat markiert (Standard)",
         "last_updated": "Zeit der letzten Zustandsänderung, mit _startup markiert",
         "off": "Nicht schreiben"
+      }
+    }
+  },
+  "issues": {
+    "missing_manual_entities": {
+      "title": "Influx Picker: manuell gelistete Entitäten gibt es nicht mehr",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Fehlende Entitäten entfernen",
+            "description": "Diese Entitäten werden aus der manuellen Liste von {title} entfernt:\n\n{entities}"
+          }
+        },
+        "abort": {
+          "entry_removed": "Den Eintrag der Integration gibt es nicht mehr."
+        }
       }
     }
   }

@@ -104,7 +104,9 @@
       "init": {
         "title": "Options",
         "menu_options": {
-          "selection": "Entity selection",
+          "selection": "Labels and interval",
+          "manual": "Manual list",
+          "overview": "Overview",
           "data_format": "Data format"
         }
       },
@@ -121,6 +123,19 @@
         "data_description": {
           "startup_snapshot": "What is written for every selected entity when Home Assistant starts or the integration is reloaded."
         }
+      },
+      "manual": {
+        "title": "Manual list",
+        "description": "For entities that cannot carry labels (for example entities without a unique ID). These are written in addition to the label selection; if an entity is in both, heartbeat wins.\n\nNo longer existing: {missing}\n\nAlready selected through a label: {by_label}",
+        "data": {
+          "manual_change": "Write on change",
+          "manual_heartbeat": "Write on change and heartbeat",
+          "remove_missing": "Remove entries that no longer exist"
+        }
+      },
+      "overview": {
+        "title": "Overview",
+        "description": "**{total}** entities are written: {change} on change, {heartbeat} with heartbeat.\n\nSelected through: label on the entity {label}, device {device}, area {area}, manual list {manual}. Manual entries no longer existing: {missing}, disabled: {disabled}.\n\n{entities}"
       },
       "data_format": {
         "title": "Data format",
@@ -150,12 +165,14 @@
       }
     },
     "error": {
-      "no_label": "Choose at least one label.",
+      "no_label": "Choose at least one label, or add entities to the manual list.",
       "same_label": "Choose two different labels.",
       "invalid_tags": "Use one key=value per line.",
       "invalid_component_config": "Expected a mapping to override_measurement (text) and/or ignore_attributes (list).",
       "invalid_measurement_attr": "Unknown choice.",
-      "invalid_startup_snapshot": "Invalid choice."
+      "invalid_startup_snapshot": "Invalid choice.",
+      "manual_in_both": "An entity can only be in one of the two lists.",
+      "nothing_selected": "Without labels, the manual list must not be empty."
     }
   },
   "selector": {
@@ -176,6 +193,22 @@
         "now": "Current time, marked as heartbeat (default)",
         "last_updated": "Time of the last state change, marked with _startup",
         "off": "Do not write"
+      }
+    }
+  },
+  "issues": {
+    "missing_manual_entities": {
+      "title": "Influx Picker: manually listed entities no longer exist",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Remove missing entities",
+            "description": "These entities will be removed from the manual list of {title}:\n\n{entities}"
+          }
+        },
+        "abort": {
+          "entry_removed": "The integration entry no longer exists."
+        }
       }
     }
   }
