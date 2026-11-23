@@ -67,9 +67,14 @@ entfernen, und die Änderung wirkt sofort.
 5. URL (zum Beispiel `http://192.168.1.10:8086`), Organisation, Bucket und
    Token eintragen. Die Verbindung wird mit einer echten Schreibanfrage geprüft.
 6. Die Labels und das Heartbeat-Intervall wählen.
-7. Die Labels an Entitäten, Geräte oder Bereiche hängen. Änderungen wirken nach
-   etwa einer Sekunde, ohne Neustart. Labels und Intervall lassen sich später
-   über **Konfigurieren** bei der Integration ändern.
+7. **Datenformat:** Wenn du bisher die native `influxdb`-Integration genutzt
+   hast, übernimm die Werte von `default_measurement`, `tags`,
+   `tags_attributes`, `ignore_attributes` und den anderen Optionen aus ihrem
+   YAML, damit bestehende Abfragen weiter funktionieren. Sonst die
+   Standardwerte lassen.
+8. Die Labels an Entitäten, Geräte oder Bereiche hängen. Änderungen wirken nach
+   etwa einer Sekunde, ohne Neustart. Labels, Intervall und Datenformat lassen
+   sich später über **Konfigurieren** bei der Integration ändern.
 
 Für ein zweites Ziel (anderer Bucket oder Server) die Integration einfach noch
 einmal hinzufügen.
@@ -110,7 +115,7 @@ der `include`-Liste der nativen Integration oder nutze einen eigenen Bucket.
 | Thema | Entscheidung |
 |---|---|
 | Backends | Backend-Interface und Registry von Anfang an; InfluxDB 2.x ist das erste Plugin. |
-| Kompatibilität | Gleiches Schema wie die native Integration. Anhand ihres Quellcodes geprüft ([Audit](docs/core-schema-audit.md), englisch) per Test gegen eine Kopie des Core-Algorithmus abgesichert und mit echten Daten der nativen Integration abgeglichen (10 Entitätstypen identisch, als Golden-Tests hinterlegt). Echte Grafana-Abfragen sind noch nicht geprüft. |
+| Kompatibilität | Gleiches Schema wie die native Integration. Anhand ihres Quellcodes geprüft ([Audit](docs/core-schema-audit.md), englisch) per Test gegen eine Kopie des Core-Algorithmus abgesichert und mit echten Daten der nativen Integration abgeglichen (10 Entitätstypen identisch, als Golden-Tests hinterlegt). Die nativen YAML-Optionen (`default_measurement`, `tags`, `tags_attributes`, …) werden in der UI eingestellt. |
 | Bündelung | Flush nach 1 s Ruhe oder 100 Punkten, wie die native Integration. |
 | Puffer | Begrenzt nach **Anzahl** (Standard 50.000 Punkte), bei Überlauf werden die ältesten verworfen, kein Alters-Limit. Die Zeitstempel bleiben erhalten, längeres Puffern verfälscht also nichts. |
 | Wiederholung | Backoff von 5 s bis 60 s. Ungültige Batches werden verworfen, nicht wiederholt. |

@@ -16,6 +16,8 @@ from custom_components.influx_picker.line_protocol import to_line
 from custom_components.influx_picker.schema import (
     EntityCustomization,
     SchemaOptions,
+    parse_customizations,
+    schema_options_from,
     state_to_point,
 )
 
@@ -243,3 +245,54 @@ def test_precision(precision, expected) -> None:
     """Timestamps are truncated to the precision."""
     point = state_to_point("sensor.counter", "42", {}, T, SchemaOptions())
     assert to_line(point, precision).endswith(f" {expected}")
+
+
+def test_schema_options_from_defaults() -> None:
+    """Empty stored options give the core defaults."""
+    assert schema_options_from({}) == SchemaOptions()
+
+
+def test_schema_options_from_full() -> None:
+    """Stored options (as the flows save them) convert to SchemaOptions."""
+    options = schema_options_from(
+        {
+            "measurement_attr": "entity_id",
+            "default_measurement": "units",
+            "override_measurement": "",
+            "tags": {"source": "HA"},
+            "tags_attributes": ["friendly_name"],
+            "ignore_attributes": ["icon"],
+            "component_config": {"sensor.a": {"override_measurement": "m"}},
+            "component_config_domain": {"light": {"ignore_attributes": ["x"]}},
+            "component_config_glob": {"sensor.*": None},
+        }
+    )
+    assert options == SchemaOptions(
+        measurement_attr="entity_id",
+        default_measurement="units",
+        override_measurement=None,
+        tags={"source": "HA"},
+        tags_attributes=["friendly_name"],
+        ignore_attributes=["icon"],
+        component_config={"sensor.a": EntityCustomization(override_measurement="m")},
+        component_config_domain={"light": EntityCustomization(ignore_attributes=["x"])},
+        component_config_glob={"sensor.*": EntityCustomization()},
+    )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "text",
+        {"sensor.a": "text"},
+        {"": {}},
+        {"sensor.a": {"unknown": 1}},
+        {"sensor.a": {"override_measurement": 1}},
+        {"sensor.a": {"ignore_attributes": "a"}},
+        {"sensor.a": {"ignore_attributes": [1]}},
+    ],
+)
+def test_parse_customizations_rejects(value) -> None:
+    """Invalid per-entity settings raise ValueError."""
+    with pytest.raises(ValueError):
+        parse_customizations(value)

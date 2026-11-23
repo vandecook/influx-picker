@@ -1,7 +1,7 @@
 # Audit: data schema of the core `influxdb` integration
 
-Status: **source audit done, real-data check done (2026-11-23, see section 10).
-Check of the maintainer's Grafana queries still open.**
+Status: **done.** Source audit, real-data check (2026-11-23, see section 10).
+There are no existing Grafana queries to check (section 9).
 
 This document records how the Home Assistant core `influxdb` integration turns a
 state change into an InfluxDB® point. Influx Picker reproduces these rules so
@@ -19,7 +19,7 @@ Sources read on 2026-11-17:
   decides the exact line protocol.
 
 The rules were then compared with real data from the maintainer's bucket
-(section 10). **Not yet done:** a check of real Grafana queries.
+(section 10).
 
 ## 1. Skipped states
 
@@ -126,8 +126,9 @@ because InfluxDB reserves it.
    section 10.
 3. Do the existing Grafana panels filter by `_field`? If not, the extra
    `_heartbeat` field shows up as its own series in those panels, and the
-   heartbeat decision must be revisited with the maintainer. **Still open:**
-   needs example queries from the maintainer.
+   heartbeat decision must be revisited with the maintainer. **Answer
+   (2026-11-23):** the maintainer has no existing Grafana queries, so nothing
+   needs to be adapted and the `_heartbeat` field decision stands.
 
 ## 10. Real-data check (2026-11-23)
 

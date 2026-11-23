@@ -19,6 +19,7 @@ from .backends import (
 from .const import CONF_BACKEND, CONF_VERIFY_SSL, SHUTDOWN_FLUSH_TIMEOUT
 from .exporter import Exporter
 from .runtime import PickerRuntime
+from .schema import schema_options_from
 
 
 @dataclass(slots=True)
@@ -52,7 +53,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: PickerConfigEntry) -> bo
         raise ConfigEntryNotReady(str(err)) from err
 
     exporter = Exporter(backend.write, name=entry.title)
-    runtime = PickerRuntime(hass, entry.options, exporter)
+    try:
+        schema_options = schema_options_from(entry.options)
+    except ValueError as err:
+        # The flows validate these options; this only guards hand-edited storage.
+        raise ConfigEntryError(f"Invalid data format options: {err}") from err
+    runtime = PickerRuntime(hass, entry.options, exporter, schema_options)
     entry.runtime_data = PickerData(backend, exporter, runtime)
 
     exporter.start()

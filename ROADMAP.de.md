@@ -22,7 +22,7 @@ Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt un
 - **Puffer-Entscheidung:** Queue nach Anzahl statt Alter (die Zeitstempel bleiben erhalten, längeres Puffern verfälscht nichts). Persistenz auf Platte nur bei Bedarf.
 - **Native Integration, Puffer:** Batch bis 100 Einträge oder 1 s Ruhe, unbegrenzte Queue, Events älter als 30 s (plus Retries) werden verworfen, `max_retries` Standard 0, ungültige Batches werden nicht wiederholt, unbekannte/leere/nicht verfügbare Zustände werden übersprungen. Quelle: HA Core `influxdb/__init__.py` und `const.py`.
 - **Native Integration, Konfiguration:** Filter nur per YAML, jede Änderung braucht einen Neustart. Das ist der Grund für dieses Projekt.
-- **Schema der nativen Integration:** anhand des Quellcodes geprüft und mit echten Daten aus einem Bucket abgeglichen (10 Entitätstypen identisch), siehe [docs/core-schema-audit.md](docs/core-schema-audit.md). Die Prüfung echter Grafana-Abfragen steht noch aus (siehe M1).
+- **Schema der nativen Integration:** anhand des Quellcodes geprüft und mit echten Daten aus einem Bucket abgeglichen (10 Entitätstypen identisch), siehe [docs/core-schema-audit.md](docs/core-schema-audit.md). Es gibt keine bestehenden Grafana-Abfragen zu prüfen (Maintainer, 2026-11-23).
 
 ---
 
@@ -41,15 +41,15 @@ Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt un
 
 Ziel: Grafana-Abfragen laufen unverändert weiter.
 
-- [ ] **Audit:** Quellcode-Teil und Teil mit echten Daten erledigt ([docs/core-schema-audit.md](docs/core-schema-audit.md)), mit Golden-Tests aus echten Daten; Prüfung echter Grafana-Abfragen offen. Schema der aktuellen nativen Integration prüfen (Core-Quellcode plus echte Daten aus einem Bucket): Measurement-Namen, Feldnamen (`value`, `state`, `*_str`), Tags, Behandlung von on/off, Strings, Booleans und Attributen.
+- [x] **Audit:** Quellcode-Teil und Teil mit echten Daten erledigt ([docs/core-schema-audit.md](docs/core-schema-audit.md)), mit Golden-Tests aus echten Daten. Keine bestehenden Grafana-Abfragen zu prüfen (Maintainer, 2026-11-23). Schema der aktuellen nativen Integration prüfen (Core-Quellcode plus echte Daten aus einem Bucket): Measurement-Namen, Feldnamen (`value`, `state`, `*_str`), Tags, Behandlung von on/off, Strings, Booleans und Attributen.
 - [x] **Golden-Tests:** (dazu ein Test, der jeden Fall mit einer Referenzkopie des Core-Algorithmus und dem offiziellen Client vergleicht) pro Fall (numerischer Sensor, Einheit, binary_sensor, switch, Text, Attribute) ein erwartetes Line-Protocol-Beispiel festschreiben.
 - [x] **Attribut-Export:** wie in der nativen Integration (beschlossen). Numerische Attribute als Felder, Strings als `*_str`; die genauen Regeln ergibt der Audit.
-- [ ] **Native Optionen nachbilden:** Umwandlung umgesetzt und getestet; in der UI noch nicht einstellbar. `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
+- [x] **Native Optionen nachbilden:** im Schritt "Datenformat" des Config Flows einstellbar (bevor der erste Punkt geschrieben wird) und im Options Flow änderbar. Gleiche Namen und Standardwerte wie im nativen YAML; Einstellungen pro Entität werden in der UI als YAML eingegeben. `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [x] **Puffer-Standardwerte (beschlossen):** Flush nach 1 s Ruhe oder 100 Einträgen (wie nativ), Skip-Regeln für unknown/unavailable/leer, Verwerfen ungültiger Batches. Queue-Begrenzung nach Anzahl (Standard 50.000 Punkte, ca. 10 MB), bei Überlauf werden die ältesten verworfen, kein zusätzliches Alters-Limit. Wiederholung bei Fehler mit Backoff (5 s, steigend bis max. 60 s). Alles konfigurierbar (siehe M4).
-- [x] **Heartbeat-Markierung (beschlossen):** ein **Feld** `_heartbeat=true`, nur an Heartbeat-Punkten und am Startwert einer neu selektierten Entität. Kein Tag, damit Heartbeat-Punkte in derselben Series wie Änderungspunkte bleiben und bestehende Panels ihre durchgehenden Linien behalten. Änderungspunkte tragen kein Zusatzfeld. Im Audit prüfen, ob bestehende Panels nach `_field` filtern. Optional später: umschaltbare Modi (Tag / aus).
+- [x] **Heartbeat-Markierung (beschlossen):** ein **Feld** `_heartbeat=true`, nur an Heartbeat-Punkten und am Startwert einer neu selektierten Entität. Kein Tag, damit Heartbeat-Punkte in derselben Series wie Änderungspunkte bleiben und bestehende Panels ihre durchgehenden Linien behalten. Änderungspunkte tragen kein Zusatzfeld. Ergebnis des Audits: noch keine bestehenden Panels, also nichts anzupassen; neue Panels sollten nach `_field` filtern. Optional später: umschaltbare Modi (Tag / aus).
 - [x] **Vergleichswerkzeug:** `tools/compare_with_influx.py` vergleicht die Punkte der nativen Integration mit den Punkten, die Influx Picker für dieselben Zustände schreiben würde (nur lesend), und kann das Ergebnis als Golden-Fixture speichern.
 
-Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebnis.
+Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebnis. Stand: keine bestehenden Abfragen; stattdessen ist das Schema gegen echte Daten der nativen Integration geprüft (Golden-Tests).
 
 ## M2 – InfluxDB-2-Backend und Selektion (erster nutzbarer Stand)
 
@@ -57,12 +57,13 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [x] **Label-Selektion:** zwei Labels, in der UI mit dem Label-Selector von Home Assistant gewählt und über die **Label-ID** gespeichert, damit das Umbenennen eines Labels in Home Assistant die Auswahl nicht kaputt macht. Auflösung über die Label-Registry, Wirkung bei Registry-Änderung ohne Neustart.
 - [x] **Vererbung** von Gerät und Bereich, abschaltbar.
 - [x] **Initialer Schreibvorgang** für neu gelabelte Entitäten.
+- [ ] **Entscheidung: nach jedem Neustart von Home Assistant einen Startwert schreiben?** Die native Integration verliert Zustände, die während des Starts gesetzt werden (in echten Daten gesehen). Vorschlag: den aktuellen Zustand jeder ausgewählten Entität einmal nach dem Start schreiben, mit ihrem eigenen `last_updated` als Zeitstempel und **ohne** `_heartbeat`. Vorhandene Punkte werden mit identischen Werten überschrieben (keine Duplikate), fehlende mit dem richtigen Zeitpunkt ergänzt. Kosten: ein Punkt pro ausgewählter Entität und Neustart. Noch nicht entschieden.
 - [x] **Heartbeat-Schreibzyklus** (Intervall konfigurierbar, schreibt nur, wenn die Entität im Intervall nichts geschrieben hat).
 - [x] **Zugehörige Tests** (Unit, Golden, Integration gegen InfluxDB 2 im Container in der CI). Vorgezogen: CI läuft ab M0.
 
 ## M3 – Manuelle Entitätenliste und Übersicht
 
-- [ ] **Options-Flow-Menü:** „Labels & Intervall“ / „Manuelle Liste“ / „Übersicht“.
+- [ ] **Options-Flow-Menü:** „Labels & Intervall“ / „Manuelle Liste“ / „Übersicht“. Das Menü gibt es schon (Auswahl der Entitäten, Datenformat); manuelle Liste und Übersicht kommen hier dazu.
 - [ ] **Zwei manuelle Listen** (Mehrfachauswahl): „bei Änderung schreiben“ und „bei Änderung + Heartbeat“.
 - [ ] **Zusammenführung** von Label und manueller Selektion (Vereinigung, Heartbeat gewinnt). Hinweis, wenn eine manuell gewählte Entität schon per Label erfasst wird.
 - [ ] **Übersicht als Liste** im Options-Flow: Anzahl nach Quelle (Label direkt, Gerät, Bereich, manuell) und Modus (Änderung, Heartbeat), dazu eine Zeile pro Entität (Entity-ID, Quelle, Modus). Bei langen Listen gekürzt oder seitenweise.

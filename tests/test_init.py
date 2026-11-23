@@ -146,6 +146,52 @@ async def test_snapshot_and_changes(
     assert written.points[0].fields["value"] == 2.0
 
 
+async def test_data_format_options_are_used(
+    hass: HomeAssistant, written: Written, labels
+) -> None:
+    """Stored data format options shape every point, from the first snapshot on."""
+    a = _entity(hass, "a")
+    er.async_get(hass).async_update_entity(a.entity_id, labels={labels[0]})
+    hass.states.async_set("sensor.a", "on", {"friendly_name": "A"})
+
+    await _setup(
+        hass,
+        labels,
+        default_measurement="units",
+        tags={"source": "HA"},
+        tags_attributes=["friendly_name"],
+    )
+    await _flush(hass)
+    hass.states.async_set("sensor.a", "off", {"friendly_name": "A"})
+    await _flush(hass)
+
+    assert len(written.points) == 2
+    for point in written.points:
+        assert point.measurement == "units"
+        assert point.tags == {
+            "domain": "sensor",
+            "entity_id": "a",
+            "friendly_name": "A",
+            "source": "HA",
+        }
+        assert "friendly_name_str" not in point.fields
+
+
+async def test_invalid_stored_data_format_fails_setup(
+    hass: HomeAssistant, written: Written, labels
+) -> None:
+    """Hand-edited, invalid per-entity settings stop the entry with an error."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="ha",
+        data=DATA,
+        options={"label_change": labels[0], "component_config": {"x": "bad"}},
+    )
+    entry.add_to_hass(hass)
+    assert not await hass.config_entries.async_setup(entry.entry_id)
+    assert entry.state is ConfigEntryState.SETUP_ERROR
+
+
 async def test_label_added_at_runtime(
     hass: HomeAssistant, written: Written, labels
 ) -> None:

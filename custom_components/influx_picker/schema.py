@@ -104,6 +104,65 @@ class SchemaOptions:
         return merged
 
 
+_CUSTOMIZATION_KEYS = ("override_measurement", "ignore_attributes")
+_CUSTOMIZATION_OPTIONS = (
+    "component_config",
+    "component_config_domain",
+    "component_config_glob",
+)
+
+
+def parse_customizations(value: Any) -> dict[str, EntityCustomization]:
+    """Check and convert one `component_config*` mapping. Raises ValueError.
+
+    Expected form, like the core YAML:
+    `{"sensor.x": {"override_measurement": "m", "ignore_attributes": ["a"]}}`.
+    """
+    if value in (None, ""):
+        return {}
+    if not isinstance(value, Mapping):
+        raise ValueError("expected a mapping")
+    result: dict[str, EntityCustomization] = {}
+    for key, settings in value.items():
+        if not isinstance(key, str) or not key:
+            raise ValueError("keys must be non-empty strings")
+        if settings is None:
+            settings = {}
+        if not isinstance(settings, Mapping):
+            raise ValueError(f"{key}: expected a mapping")
+        unknown = set(settings) - set(_CUSTOMIZATION_KEYS)
+        if unknown:
+            raise ValueError(f"{key}: unknown keys {sorted(unknown)}")
+        override = settings.get("override_measurement")
+        if override is not None and not isinstance(override, str):
+            raise ValueError(f"{key}: override_measurement must be a string")
+        ignore = settings.get("ignore_attributes")
+        if ignore is not None and (
+            not isinstance(ignore, list) or not all(isinstance(a, str) for a in ignore)
+        ):
+            raise ValueError(f"{key}: ignore_attributes must be a list of strings")
+        result[key] = EntityCustomization(
+            override_measurement=override, ignore_attributes=ignore
+        )
+    return result
+
+
+def schema_options_from(options: Mapping[str, Any]) -> SchemaOptions:
+    """Build SchemaOptions from stored entry options. Missing keys use core defaults."""
+    return SchemaOptions(
+        measurement_attr=options.get("measurement_attr") or MEASUREMENT_ATTR_UNIT,
+        default_measurement=options.get("default_measurement") or None,
+        override_measurement=options.get("override_measurement") or None,
+        tags=dict(options.get("tags") or {}),
+        tags_attributes=list(options.get("tags_attributes") or []),
+        ignore_attributes=list(options.get("ignore_attributes") or []),
+        **{
+            key: parse_customizations(options.get(key))
+            for key in _CUSTOMIZATION_OPTIONS
+        },
+    )
+
+
 def state_to_point(
     entity_id: str,
     state: str | None,

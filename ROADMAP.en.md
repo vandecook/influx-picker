@@ -22,7 +22,7 @@ Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemen
 - **Buffer decision:** the queue is bounded by count, not by age. Timestamps are preserved, so buffering longer does not distort data. A disk-backed queue only if needed.
 - **Core integration, buffering:** batches of up to 100 points or 1 s of quiet, unbounded queue, events older than 30 s (plus retries) are dropped, `max_retries` defaults to 0, invalid batches are not retried, unknown/empty/unavailable states are skipped. Source: Home Assistant Core `influxdb/__init__.py` and `const.py`.
 - **Core integration, configuration:** filters are YAML only, and every change needs a restart. This is the reason for this project.
-- **Core integration, schema:** audited from the source code and checked against real data from a bucket (10 entity types identical), see [docs/core-schema-audit.md](docs/core-schema-audit.md). The check of real Grafana queries is still open (see M1).
+- **Core integration, schema:** audited from the source code and checked against real data from a bucket (10 entity types identical), see [docs/core-schema-audit.md](docs/core-schema-audit.md). There are no existing Grafana queries to check (maintainer, 2026-11-23).
 
 ---
 
@@ -41,15 +41,15 @@ Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemen
 
 Goal: Grafana queries keep working unchanged.
 
-- [ ] **Audit:** source part and real-data part done ([docs/core-schema-audit.md](docs/core-schema-audit.md)), with golden tests from real data; check of real Grafana queries open. Check the schema of the current core integration (core source code plus real data from a bucket): measurement names, field names (`value`, `state`, `*_str`), tags, handling of on/off, strings, booleans and attributes.
+- [x] **Audit:** source part and real-data part done ([docs/core-schema-audit.md](docs/core-schema-audit.md)), with golden tests from real data. No existing Grafana queries to check (maintainer, 2026-11-23). Check the schema of the current core integration (core source code plus real data from a bucket): measurement names, field names (`value`, `state`, `*_str`), tags, handling of on/off, strings, booleans and attributes.
 - [x] **Golden tests:** (plus a test that compares every case with a reference copy of the core algorithm and the official client) one expected line-protocol example per case (numeric sensor, unit, binary_sensor, switch, text, attributes).
 - [x] **Attribute export:** handled like in the core integration (decided). Numeric attributes as fields, strings as `*_str`; the exact rules come from the audit.
-- [ ] **Reproduce the core options:** conversion implemented and tested; not yet settable in the UI. `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
+- [x] **Reproduce the core options:** set in a "Data format" step of the config flow (before the first point is written) and changeable in the options flow. Same names and defaults as the core YAML; per-entity settings are entered as YAML in the UI. `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [x] **Buffer defaults (decided):** flush after 1 s of quiet or 100 points (as in the core integration), skip rules for unknown/unavailable/empty, drop invalid batches. Queue bounded by count (default 50,000 points, about 10 MB), oldest points dropped on overflow, no extra age limit. Retry with backoff (5 s, rising to at most 60 s). Everything configurable (see M4).
-- [x] **Heartbeat marking (decided):** a **field** `_heartbeat=true`, written only on heartbeat points and on the initial snapshot of a newly selected entity. No tag, so heartbeat points stay in the same series as change points and existing panels keep their continuous lines. Change points carry no extra field. Verify in the audit that existing panels filter by `_field`. Optional later: switchable modes (tag / off).
+- [x] **Heartbeat marking (decided):** a **field** `_heartbeat=true`, written only on heartbeat points and on the initial snapshot of a newly selected entity. No tag, so heartbeat points stay in the same series as change points and existing panels keep their continuous lines. Change points carry no extra field. Audit result: no existing panels yet, so nothing to adapt; new panels should filter by `_field`. Optional later: switchable modes (tag / off).
 - [x] **Comparison tool:** `tools/compare_with_influx.py` compares the points the core integration wrote with the points Influx Picker would write for the same states (read-only), and can save the result as a golden fixture.
 
-Acceptance: existing Grafana queries return the same results with the new data.
+Acceptance: existing Grafana queries return the same results with the new data. Status: no existing queries; the schema is checked against real core data instead (golden tests).
 
 ## M2 – InfluxDB 2 backend and selection (first usable state)
 
@@ -57,12 +57,13 @@ Acceptance: existing Grafana queries return the same results with the new data.
 - [x] **Label selection:** two labels, chosen in the UI with Home Assistant's label selector and stored by **label ID**, so renaming a label in Home Assistant does not break the selection. Resolved through the label registry, effective on registry changes without a restart.
 - [x] **Inheritance** from device and area, can be switched off.
 - [x] **Initial write** for newly labelled entities.
+- [ ] **Decision: write a snapshot after every Home Assistant restart?** The core integration loses states set while Home Assistant starts (seen in real data). Proposal: write the current state of every selected entity once after start, with its own `last_updated` as timestamp and **without** `_heartbeat`. Points that already exist are overwritten with identical values (no duplicates); missing ones are filled with the correct time. Cost: one point per selected entity per restart. Not decided yet.
 - [x] **Heartbeat write cycle** (configurable interval, writes only if the entity wrote nothing during the interval).
 - [x] **Matching tests** (unit, golden, integration against an InfluxDB 2 container in CI). Pulled forward: CI runs from M0 on.
 
 ## M3 – Manual entity list and overview
 
-- [ ] **Options flow menu:** "Labels & interval" / "Manual list" / "Overview".
+- [ ] **Options flow menu:** "Labels & interval" / "Manual list" / "Overview". The menu exists (entity selection, data format); manual list and overview are added here.
 - [ ] **Two manual lists** (multi-select): "write on change" and "write on change + heartbeat".
 - [ ] **Merging** of label and manual selection (union, heartbeat wins). A hint if a manually chosen entity is already selected through a label.
 - [ ] **Overview as a list** in the options flow: counts by source (label directly, device, area, manual) and mode (change, heartbeat), plus one line per entity (entity ID, source, mode). Shortened or paged for long lists.

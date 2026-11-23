@@ -18,7 +18,7 @@ from typing import Any
 
 import pytest
 
-from custom_components.influx_picker.schema import SchemaOptions, state_to_point
+from custom_components.influx_picker.schema import schema_options_from, state_to_point
 
 FIXTURES = sorted((Path(__file__).parent / "fixtures").glob("real_data_*.json"))
 
@@ -61,7 +61,7 @@ def test_matches_real_core_point(options: dict[str, Any], item: dict[str, Any]) 
         item["state"],
         _decode(item["attributes"]),
         datetime.fromisoformat(item["last_updated"]),
-        SchemaOptions(**options),
+        schema_options_from(options),  # same path as stored entry options
     )
     assert point is not None
 
