@@ -147,8 +147,21 @@ Saving reloads the integration, no Home Assistant restart needed. After the
 reload every selected entity gets one snapshot again, depending on
 **Snapshot when Home Assistant starts** (see [section 6.1](#61-entity-selection)).
 
-The connection (URL, token, …) cannot be changed yet (planned for M7). To
-change it, remove the integration and add it again.
+### Change the connection (URL, token, …)
+
+**Settings → Devices & services → Influx Picker → ⋮ → Reconfigure.** Change
+URL, organization, bucket, token or the certificate check. Leave the token
+empty to keep the current one. The new connection is checked with a real write
+request before it is saved; labels and data format stay as they are. If you
+change the bucket, the integration writes to the new bucket from then on
+(nothing is copied over).
+
+**Token rejected:** if InfluxDB rejects the token (for example after it was
+deleted or replaced), Home Assistant shows a **Re-authenticate** notice under
+Settings → Devices & services. It asks only for the new token. This happens at
+start as well as while running. Points collected while the token was rejected
+stay in memory (up to the buffer limit) and are written once the new token
+works, unless Home Assistant is restarted in between.
 
 ## 6. All settings
 
@@ -305,6 +318,7 @@ working.
 | Setup: "The token is invalid or has no write permission." | Token wrong or without write permission for the bucket. |
 | Setup: "Organization or bucket not found." | Check spelling. If the token may not list organizations, enter the organization **ID**. |
 | Setup: "Cannot connect to the server." | Check URL and port, and that Home Assistant can reach the server. |
+| Notice "Re-authenticate" / "New token" | InfluxDB rejected the stored token. Create a token with write permission for the bucket and enter it ([section 5](#5-change-settings-later)). |
 | Points land in measurements named after the entity ID (`switch.kitchen`) | No **default measurement** set. If you came from the core integration, copy `default_measurement` ([section 7](#7-coming-from-the-core-influxdb-integration)). |
 | `friendly_name` is a field (`friendly_name_str`) instead of a tag | Add `friendly_name` to **Attributes written as tags**. |
 | An entity is not written | Does it have a unique ID (otherwise no labels)? Is it disabled? Is its state `unknown`/`unavailable`? Is the label on the entity, device or area, and is inheritance on for device/area labels? |

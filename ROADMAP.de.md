@@ -61,8 +61,10 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [x] **Heartbeat-Schreibzyklus** (Intervall konfigurierbar, schreibt nur, wenn die Entität im Intervall nichts geschrieben hat).
 - [x] **Zugehörige Tests** (Unit, Golden, Integration gegen InfluxDB 2 im Container in der CI). Vorgezogen: CI läuft ab M0.
 
-## M3 – Manuelle Entitätenliste und Übersicht
+## M3 – Verbindungsdaten ändern, manuelle Entitätenliste und Übersicht
 
+- [x] **Verbindungsdaten ändern** (vorgezogen aus M7, entschieden 2026-11-23): „Neu konfigurieren“ im Menü des Eintrags für URL, Token, Organisation, Bucket und SSL. Die neuen Daten werden vor dem Speichern echt geprüft (wie beim Einrichten); Labels und Datenformat bleiben erhalten.
+- [x] **Neu anmelden:** Lehnt InfluxDB den Token ab (401/403), bietet Home Assistant von selbst „Erneut authentifizieren“ an und fragt nur nach dem neuen Token. In der Zwischenzeit gesammelte Punkte bleiben im Speicher und werden nach dem Neuladen geschrieben.
 - [ ] **Options-Flow-Menü:** „Labels & Intervall“ / „Manuelle Liste“ / „Übersicht“. Das Menü gibt es schon (Auswahl der Entitäten, Datenformat); manuelle Liste und Übersicht kommen hier dazu.
 - [ ] **Zwei manuelle Listen** (Mehrfachauswahl): „bei Änderung schreiben“ und „bei Änderung + Heartbeat“.
 - [ ] **Zusammenführung** von Label und manueller Selektion (Vereinigung, Heartbeat gewinnt). Hinweis, wenn eine manuell gewählte Entität schon per Label erfasst wird.
@@ -101,7 +103,7 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [ ] **Import aus der nativen Integration:** `include.entities`/`domains`/`entity_globs` einlesen und als manuelle Liste oder Label-Vorschlag übernehmen.
 - [ ] **Label-Schnellvergabe** aus dem Import.
 - [ ] **Warnung**, wenn die native Integration parallel läuft (doppelte Writes).
-- [ ] **Options-Flow für Verbindungsdaten** (Token ändern ohne Neuanlage).
+- Verbindungsdaten ändern: vorgezogen nach M3.
 - [ ] Mehrere Instanzen parallel testen (z. B. Influx 2 und 3), inklusive eigener Labels pro Instanz und einer Warnung, wenn zwei Instanzen versehentlich dieselben Entitäten selektieren.
 
 ## M8 – Qualität und Veröffentlichung
@@ -130,7 +132,7 @@ Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was export
 
 1. **M0** und **M1** (Fundament und Kompatibilität). Das Schema muss feststehen, bevor produktiv Daten geschrieben werden.
 2. **M2** (erster nutzbarer Stand mit InfluxDB 2).
-3. **M3** (manuelle Liste, Übersicht als Liste) und **M4** (Puffer, Diagnose).
+3. **M3** (Verbindungsdaten ändern, manuelle Liste, Übersicht als Liste) und **M4** (Puffer, Diagnose).
 4. **M5**, **M6** (InfluxDB 1 und 3).
 5. **M7**, **M8** parallel nach Bedarf.
 6. **M9** (Panel) viel später, nach dem ersten Release.

@@ -61,8 +61,10 @@ Acceptance: existing Grafana queries return the same results with the new data. 
 - [x] **Heartbeat write cycle** (configurable interval, writes only if the entity wrote nothing during the interval).
 - [x] **Matching tests** (unit, golden, integration against an InfluxDB 2 container in CI). Pulled forward: CI runs from M0 on.
 
-## M3 – Manual entity list and overview
+## M3 – Change connection data, manual entity list and overview
 
+- [x] **Change connection data** (pulled forward from M7, decided 2026-11-23): "Reconfigure" in the entry's menu for URL, token, organization, bucket and SSL. The new data is checked for real before saving (as during setup); labels and data format are kept.
+- [x] **Re-authenticate:** if InfluxDB rejects the token (401/403), Home Assistant offers "Re-authenticate" by itself and asks only for the new token. Points collected meanwhile stay in memory and are written after the reload.
 - [ ] **Options flow menu:** "Labels & interval" / "Manual list" / "Overview". The menu exists (entity selection, data format); manual list and overview are added here.
 - [ ] **Two manual lists** (multi-select): "write on change" and "write on change + heartbeat".
 - [ ] **Merging** of label and manual selection (union, heartbeat wins). A hint if a manually chosen entity is already selected through a label.
@@ -101,7 +103,7 @@ Acceptance: existing Grafana queries return the same results with the new data. 
 - [ ] **Import from the core integration:** read `include.entities`/`domains`/`entity_globs` and turn them into a manual list or label suggestions.
 - [ ] **Quick label assignment** from the import.
 - [ ] **Warning** if the core integration is running in parallel (double writes).
-- [ ] **Options flow for connection data** (change the token without setting up again).
+- Change connection data: pulled forward to M3.
 - [ ] Test multiple instances in parallel (for example InfluxDB 2 and 3), including separate labels per instance and a warning when two instances select the same entities by accident.
 
 ## M8 – Quality and release
@@ -130,7 +132,7 @@ Goal: select and deselect entities easily, see at a glance what is exported and 
 
 1. **M0** and **M1** (foundation and compatibility). The schema must be settled before production data is written.
 2. **M2** (first usable state with InfluxDB 2).
-3. **M3** (manual list, overview as a list) and **M4** (buffering, diagnostics).
+3. **M3** (change connection data, manual list, overview as a list) and **M4** (buffering, diagnostics).
 4. **M5**, **M6** (InfluxDB 1 and 3).
 5. **M7**, **M8** in parallel as needed.
 6. **M9** (panel) much later, after the first release.

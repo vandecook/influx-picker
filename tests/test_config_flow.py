@@ -359,3 +359,122 @@ def test_translation_keys_valid() -> None:
         for selector in data.get("selector", {}).values():
             for key in selector.get("options", {}):
                 assert rule.match(key), f"{path.name}: {key}"
+
+
+def _connected_entry(hass: HomeAssistant) -> MockConfigEntry:
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="ha (influx.test:8086)",
+        unique_id="v2|http://influx.test:8086|home|ha",
+        data={"backend": "v2", **CONNECTION},
+        options={**SELECTION, **DEFAULT_FORMAT},
+    )
+    entry.add_to_hass(hass)
+    return entry
+
+
+def _defaults(schema) -> dict:
+    return {
+        str(key): key.default()
+        for key in schema.schema
+        if callable(getattr(key, "default", None))
+    }
+
+
+async def test_reconfigure_keeps_token_when_empty(hass: HomeAssistant) -> None:
+    """Changing the bucket keeps the token, updates title and unique ID."""
+    entry = _connected_entry(hass)
+    result = await entry.start_reconfigure_flow(hass)
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reconfigure"
+    # The stored token is not sent back to the form.
+    defaults = _defaults(result["data_schema"])
+    assert "token" not in defaults
+    assert defaults["bucket"] == "ha"
+
+    new = {**CONNECTION, "bucket": "ha2", "token": ""}
+    with patch(VALIDATE, AsyncMock()) as validate, patch(SETUP, return_value=True):
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], new)
+    validate.assert_awaited_once()
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data == {"backend": "v2", **CONNECTION, "bucket": "ha2"}
+    assert entry.unique_id == "v2|http://influx.test:8086|home|ha2"
+    assert entry.title == "ha2 (influx.test:8086)"
+    assert entry.options == {**SELECTION, **DEFAULT_FORMAT}
+
+
+async def test_reconfigure_new_token_and_own_title(hass: HomeAssistant) -> None:
+    """A new token is stored; a title the user chose is kept."""
+    entry = _connected_entry(hass)
+    hass.config_entries.async_update_entry(entry, title="My Influx")
+    result = await entry.start_reconfigure_flow(hass)
+    with patch(VALIDATE, AsyncMock()), patch(SETUP, return_value=True):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {**CONNECTION, "token": "new-token"}
+        )
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.data["token"] == "new-token"
+    assert entry.title == "My Influx"
+
+
+@pytest.mark.parametrize(
+    ("error", "base"),
+    [
+        (BackendAuthError("401"), "invalid_auth"),
+        (BackendNotFoundError("404"), "not_found"),
+        (BackendConnectionError("down"), "cannot_connect"),
+    ],
+)
+async def test_reconfigure_errors(hass: HomeAssistant, error, base) -> None:
+    """A failed check shows the error and changes nothing."""
+    entry = _connected_entry(hass)
+    result = await entry.start_reconfigure_flow(hass)
+    with patch(VALIDATE, AsyncMock(side_effect=error)):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {**CONNECTION, "token": "wrong"}
+        )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": base}
+    assert entry.data["token"] == "secret-token"
+
+
+async def test_reconfigure_to_target_of_other_entry(hass: HomeAssistant) -> None:
+    """A target another entry already writes to is refused."""
+    entry = _connected_entry(hass)
+    MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="v2|http://influx.test:8086|home|other",
+        data={"backend": "v2", **CONNECTION, "bucket": "other"},
+    ).add_to_hass(hass)
+    result = await entry.start_reconfigure_flow(hass)
+    with patch(VALIDATE, AsyncMock()):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {**CONNECTION, "bucket": "other", "token": ""}
+        )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+    assert entry.data["bucket"] == "ha"
+
+
+async def test_reauth(hass: HomeAssistant) -> None:
+    """Re-authentication asks only for the token and stores it."""
+    entry = _connected_entry(hass)
+    result = await entry.start_reauth_flow(hass)
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reauth_confirm"
+    assert [str(key) for key in result["data_schema"].schema] == ["token"]
+
+    with patch(VALIDATE, AsyncMock(side_effect=BackendAuthError("401"))):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {"token": "still-wrong"}
+        )
+    assert result["errors"] == {"base": "invalid_auth"}
+
+    with patch(VALIDATE, AsyncMock()), patch(SETUP, return_value=True):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {"token": "new-token"}
+        )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reauth_successful"
+    assert entry.data == {"backend": "v2", **CONNECTION, "token": "new-token"}

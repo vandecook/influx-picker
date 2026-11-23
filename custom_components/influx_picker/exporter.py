@@ -16,7 +16,7 @@ from dataclasses import dataclass
 import logging
 import time
 
-from .backends.base import BackendError, BackendInvalidDataError
+from .backends.base import BackendAuthError, BackendError, BackendInvalidDataError
 from .const import (
     BACKOFF_MAX,
     BACKOFF_START,
@@ -57,6 +57,7 @@ class Exporter:
         backoff_start: float = BACKOFF_START,
         backoff_max: float = BACKOFF_MAX,
         name: str = "",
+        on_auth_error: Callable[[], None] | None = None,
     ) -> None:
         """Set up an idle exporter. Call `start()` to begin writing."""
         self._write = write
@@ -66,10 +67,12 @@ class Exporter:
         self._backoff_start = backoff_start
         self._backoff_max = backoff_max
         self._name = name
+        self._on_auth_error = on_auth_error
         self._queue: deque[Point] = deque()
         self._new_point = asyncio.Event()
         self._task: asyncio.Task[None] | None = None
         self._failing = False
+        self._auth_reported = False
         self.stats = ExporterStats()
 
     @property
@@ -84,6 +87,12 @@ class Exporter:
             self.stats.dropped_overflow += 1
         self._queue.append(point)
         self._new_point.set()
+
+    def take_queue(self) -> list[Point]:
+        """Remove and return all queued points (oldest first)."""
+        points = list(self._queue)
+        self._queue.clear()
+        return points
 
     def start(self) -> None:
         """Start the writer task."""
@@ -110,7 +119,7 @@ class Exporter:
             pass
         if self._queue:
             _LOGGER.warning(
-                "%s: %d points could not be written before shutdown",
+                "%s: %d points could not be written before stopping",
                 self._name,
                 len(self._queue),
             )
@@ -146,6 +155,11 @@ class Exporter:
             else:
                 _LOGGER.debug("%s: write failed again: %s", self._name, err)
             self._failing = True
+            if isinstance(err, BackendAuthError) and not self._auth_reported:
+                # Once per failure streak, not on every retry.
+                self._auth_reported = True
+                if self._on_auth_error is not None:
+                    self._on_auth_error()
             return False
         except Exception:
             # A bug, not a server problem: do not retry forever.
@@ -159,6 +173,7 @@ class Exporter:
         if self._failing:
             _LOGGER.info("%s: writing works again", self._name)
             self._failing = False
+            self._auth_reported = False
         return True
 
     def _requeue(self, batch: list[Point]) -> None:

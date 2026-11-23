@@ -11,7 +11,7 @@ from homeassistant.config_entries import (
     ConfigFlowResult,
     OptionsFlow,
 )
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.selector import (
     LabelSelector,
     LabelSelectorConfig,
@@ -258,8 +258,36 @@ def _clean_selection(user_input: Mapping[str, Any]) -> tuple[dict[str, Any], dic
     return options, errors
 
 
+async def _validate(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, str]:
+    """Check connection data for real. Returns form errors (empty: fine)."""
+    try:
+        await create_backend(hass, data).validate()
+    except BackendAuthError:
+        return {"base": "invalid_auth"}
+    except BackendNotFoundError:
+        return {"base": "not_found"}
+    except BackendError:
+        return {"base": "cannot_connect"}
+    return {}
+
+
+def _without_empty_secrets(
+    backend_cls: type, user_input: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Drop empty secret fields, so the stored value is kept."""
+    return {
+        key: value
+        for key, value in user_input.items()
+        if key not in backend_cls.secret_fields or value
+    }
+
+
 class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Step 1: version. Step 2: connection. Step 3: labels."""
+    """Step 1: version. Step 2: connection. Step 3: labels. Step 4: data format.
+
+    Later: "Reconfigure" changes the connection, "Re-authenticate" asks for a
+    new token when InfluxDB rejects the stored one.
+    """
 
     VERSION = 1
 
@@ -307,15 +335,8 @@ class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
             if (unique_id := backend_cls.unique_id(data)) is not None:
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
-            try:
-                await create_backend(self.hass, data).validate()
-            except BackendAuthError:
-                errors["base"] = "invalid_auth"
-            except BackendNotFoundError:
-                errors["base"] = "not_found"
-            except BackendError:
-                errors["base"] = "cannot_connect"
-            else:
+            errors = await _validate(self.hass, data)
+            if not errors:
                 self._data = data
                 return await self.async_step_selection()
         schema = backend_cls.schema(user_input)
@@ -357,6 +378,79 @@ class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="data_format",
             data_schema=data_format_schema(user_input or SUGGESTED_DATA_FORMAT),
             errors=errors,
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Change the connection (URL, token, ...). Labels and options are kept."""
+        entry = self._get_reconfigure_entry()
+        backend_cls = get_backend(entry.data[CONF_BACKEND])
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            data = {**entry.data, **_without_empty_secrets(backend_cls, user_input)}
+            unique_id = backend_cls.unique_id(data)
+            if unique_id is not None and unique_id != entry.unique_id:
+                # Another target: it must not belong to another entry already.
+                await self.async_set_unique_id(unique_id)
+                self._abort_if_unique_id_configured()
+            errors = await _validate(self.hass, data)
+            if not errors:
+                # Keep a title the user chose; follow the target otherwise.
+                title = (
+                    backend_cls.title(data)
+                    if entry.title == backend_cls.title(entry.data)
+                    else entry.title
+                )
+                return self.async_update_reload_and_abort(
+                    entry,
+                    unique_id=unique_id if unique_id is not None else entry.unique_id,
+                    title=title,
+                    data=data,
+                )
+        # The stored secret is never sent back to the form.
+        defaults = {
+            key: value
+            for key, value in {**entry.data, **(user_input or {})}.items()
+            if key not in backend_cls.secret_fields
+        }
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=backend_cls.schema(defaults, keep_secrets=True),
+            errors=errors,
+        )
+
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
+        """InfluxDB rejected the stored credentials."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Ask only for the secret fields (the token for InfluxDB 2)."""
+        entry = self._get_reauth_entry()
+        backend_cls = get_backend(entry.data[CONF_BACKEND])
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            data = {**entry.data, **user_input}
+            errors = await _validate(self.hass, data)
+            if not errors:
+                return self.async_update_reload_and_abort(entry, data=data)
+        full = backend_cls.schema(entry.data).schema
+        schema = vol.Schema(
+            {
+                key: value
+                for key, value in full.items()
+                if str(key) in backend_cls.secret_fields
+            }
+        )
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=schema,
+            errors=errors,
+            description_placeholders={"title": entry.title},
         )
 
 

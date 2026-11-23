@@ -58,6 +58,27 @@
           "component_config_domain": "nativ: component_config_domain. Domain mit override_measurement und/oder ignore_attributes.",
           "component_config_glob": "nativ: component_config_glob. Muster wie sensor.*_temp mit override_measurement und/oder ignore_attributes."
         }
+      },
+      "reconfigure": {
+        "title": "Verbindung ändern",
+        "description": "Die neue Verbindung wird mit einer echten Schreibanfrage geprüft. Token leer lassen, um das bisherige zu behalten. Labels und Datenformat bleiben erhalten.",
+        "data": {
+          "url": "URL",
+          "organization": "Organisation",
+          "bucket": "Bucket",
+          "token": "API-Token",
+          "verify_ssl": "SSL-Zertifikat prüfen"
+        },
+        "data_description": {
+          "token": "Leer: bisheriges Token behalten."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Neues Token",
+        "description": "Der Server hat das Token von {title} abgelehnt. Gib ein Token mit Schreibrechten auf den Bucket ein.",
+        "data": {
+          "token": "API-Token"
+        }
       }
     },
     "error": {
@@ -73,7 +94,9 @@
       "invalid_startup_snapshot": "Ungültige Auswahl."
     },
     "abort": {
-      "already_configured": "Dieser Bucket ist bereits eingerichtet."
+      "already_configured": "Dieser Bucket ist bereits eingerichtet.",
+      "reconfigure_successful": "Die Verbindung wurde geändert.",
+      "reauth_successful": "Das Token wurde geändert."
     }
   },
   "options": {

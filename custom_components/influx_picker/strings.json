@@ -58,6 +58,27 @@
           "component_config_domain": "core: component_config_domain. Domain mapped to override_measurement and/or ignore_attributes.",
           "component_config_glob": "core: component_config_glob. Pattern such as sensor.*_temp mapped to override_measurement and/or ignore_attributes."
         }
+      },
+      "reconfigure": {
+        "title": "Change connection",
+        "description": "The new connection is tested with a real write request. Leave the token empty to keep the current one. Labels and data format are kept.",
+        "data": {
+          "url": "URL",
+          "organization": "Organization",
+          "bucket": "Bucket",
+          "token": "API token",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "token": "Empty: keep the current token."
+        }
+      },
+      "reauth_confirm": {
+        "title": "New token",
+        "description": "The server rejected the token of {title}. Enter a token with write permission for the bucket.",
+        "data": {
+          "token": "API token"
+        }
       }
     },
     "error": {
@@ -73,7 +94,9 @@
       "invalid_startup_snapshot": "Invalid choice."
     },
     "abort": {
-      "already_configured": "This bucket is already configured."
+      "already_configured": "This bucket is already configured.",
+      "reconfigure_successful": "The connection was changed.",
+      "reauth_successful": "The token was changed."
     }
   },
   "options": {
