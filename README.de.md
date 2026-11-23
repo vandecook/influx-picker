@@ -77,7 +77,8 @@ Graphen, Mittelwerte und `last()` können alle Punkte verwenden.
 
 ## Roadmap
 
-Als Nächstes: manuelle Liste für Entitäten ohne Labels und eine Übersicht (M3),
+Als Nächstes: Verbindung (Token, URL, …) ohne Neuanlage ändern, eine manuelle
+Liste für Entitäten ohne Labels und eine Übersicht (M3),
 Diagnose und Puffer-Einstellungen (M4), InfluxDB 1.x und 3.x (M5, M6), Import
 aus dem nativen YAML (M7). Details: [ROADMAP.de.md](ROADMAP.de.md).
 

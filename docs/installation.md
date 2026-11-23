@@ -147,7 +147,7 @@ Saving reloads the integration, no Home Assistant restart needed. After the
 reload every selected entity gets one snapshot again, depending on
 **Snapshot when Home Assistant starts** (see [section 6.1](#61-entity-selection)).
 
-The connection (URL, token, …) cannot be changed yet (planned for M7). To
+The connection (URL, token, …) cannot be changed yet (planned for M3). To
 change it, remove the integration and add it again.
 
 ## 6. All settings

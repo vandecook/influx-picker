@@ -74,7 +74,8 @@ Graphs, averages and `last()` can use all points.
 
 ## Roadmap
 
-Next: manual list for entities without labels and an overview (M3),
+Next: change the connection (token, URL, …) without setting up again, a
+manual list for entities without labels and an overview (M3),
 diagnostics and buffer settings (M4), InfluxDB 1.x and 3.x (M5, M6), import
 from the core YAML (M7). Details: [ROADMAP.en.md](ROADMAP.en.md).
 

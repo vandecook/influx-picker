@@ -155,7 +155,7 @@ nötig. Nach dem Neuladen bekommt jede ausgewählte Entität wieder einen
 Startwert, je nach **Startwert beim Start von Home Assistant** (siehe
 [Abschnitt 6.1](#61-auswahl-der-entitäten)).
 
-Die Verbindung (URL, Token, …) lässt sich noch nicht ändern (geplant für M7).
+Die Verbindung (URL, Token, …) lässt sich noch nicht ändern (geplant für M3).
 Dafür die Integration entfernen und neu hinzufügen.
 
 ## 6. Alle Einstellungen
