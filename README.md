@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="custom_components/series_picker/brand/dark_icon.png">
+  <img src="custom_components/series_picker/brand/icon.png" alt="Series Picker icon" width="96" height="96" align="right">
+</picture>
+
 # Series Picker
 
 **English** · [Deutsch](README.de.md) · [Installation guide](docs/installation.md) · [Roadmap](ROADMAP.en.md)

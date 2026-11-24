@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Integration icon (light and dark), shown in Home Assistant 2026.3 and
+  later.
 - **Renamed from Influx Picker to Series Picker** (domain `series_picker`,
   repository `series-picker`), to follow InfluxData's trademark guidelines.
   Existing installations must remove Influx Picker and set Series Picker up

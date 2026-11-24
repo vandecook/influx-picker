@@ -117,6 +117,7 @@ Planned, but on hold for the same reason as M5: the maintainer does not use Infl
 - [ ] **Trademark review:** trademark notices in README, translations and HACS metadata; product names only descriptively and with the owner named (InfluxData Inc.).
 - [ ] Translations de/en, documentation, HACS metadata, real repository URLs.
 - [ ] Versioning and changelog.
+- [x] Integration icon (light and dark) in `custom_components/series_picker/brand/`, shown by Home Assistant 2026.3 and later; SVG sources in `docs/brand/`.
 
 ## M9 – Overview panel (much later, after the first release)
 

@@ -117,6 +117,7 @@ Geplant, ruht aus demselben Grund wie M5: Der Maintainer nutzt InfluxDB 3 nicht.
 - [ ] **Markenprüfung:** Markenhinweise in README, Übersetzungen und HACS-Metadaten; Produktnamen nur beschreibend und mit Nennung des Inhabers (InfluxData Inc.).
 - [ ] Übersetzungen de/en, Doku, HACS-Metadaten, echte Repo-URLs.
 - [ ] Versionierung und Changelog.
+- [x] Integrations-Symbol (hell und dunkel) in `custom_components/series_picker/brand/`, angezeigt ab Home Assistant 2026.3; SVG-Quellen in `docs/brand/`.
 
 ## M9 – Übersichts-Panel (viel später, nach dem ersten Release)
 
