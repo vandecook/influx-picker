@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EVENT_HOMEASSISTANT_STOP
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import (
     ConfigEntryAuthFailed,
@@ -27,6 +27,8 @@ from .issues import async_delete_missing_issue
 from .runtime import PickerRuntime
 from .schema import schema_options_from
 from .selection import renamed_entity
+
+PLATFORMS = [Platform.SENSOR]
 
 
 @dataclass(slots=True)
@@ -87,6 +89,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: PickerConfigEntry) -> bo
 
     exporter.start()
     runtime.async_start()
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     async def _async_on_stop(_event: Event) -> None:
         runtime.async_stop()
@@ -121,6 +124,8 @@ async def _async_reload(hass: HomeAssistant, entry: PickerConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: PickerConfigEntry) -> bool:
     """Stop listening, flush what is queued, close the backend."""
+    if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        return False
     data = entry.runtime_data
     data.runtime.async_stop()
     await data.exporter.stop(SHUTDOWN_FLUSH_TIMEOUT)

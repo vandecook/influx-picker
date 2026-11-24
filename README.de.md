@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="custom_components/series_picker/brand/dark_icon.png">
+  <img src="custom_components/series_picker/brand/icon.png" alt="Series-Picker-Symbol" width="96" height="96" align="right">
+</picture>
+
 # Series Picker
 
 [English](README.md) · **Deutsch** · [Installationsanleitung](docs/installation.de.md) · [Roadmap](ROADMAP.de.md)
@@ -38,6 +43,8 @@ sofort.
   Zustands oder aus).
 - **Zuverlässiges Schreiben:** Pakete (1 s oder 100 Punkte), begrenzter Puffer
   (50.000 Punkte), Wiederholung mit Backoff.
+- **Diagnose-Sensoren:** erfasste Entitäten, wartende, geschriebene und
+  verworfene Punkte, Schreibfehler, letzter erfolgreicher Schreibvorgang.
 - **Mehrere Instanzen:** ein Eintrag pro Bucket oder Server, jeweils mit eigenen
   Labels.
 
@@ -89,7 +96,7 @@ Graphen, Mittelwerte und `last()` können alle Punkte verwenden.
 
 ## Roadmap
 
-Als Nächstes: Diagnose und Puffer-Einstellungen (M4), Import aus dem nativen
+Als Nächstes: Puffer-Einstellungen (M4), Import aus dem nativen
 YAML (M7). InfluxDB 1.x und 3.x (M5, M6) sind geplant, ruhen aber, bis jemand,
 der sie nutzt, sie beisteuert. Details: [ROADMAP.de.md](ROADMAP.de.md).
 

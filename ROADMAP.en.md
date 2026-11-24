@@ -79,7 +79,7 @@ Acceptance: existing Grafana queries return the same results with the new data. 
 - [ ] **Configurable:** flush interval, batch size, maximum queue size (by count), backoff limits.
 - [ ] **Backoff** on failure (5 s, rising to at most 60 s) instead of a fixed retry.
 - [ ] **Persistent queue** (only if needed): implement only if real-world operation shows losses from longer InfluxDB outages or Home Assistant restarts during an outage.
-- [ ] **Diagnostic sensors:** number of tracked entities, queue size, dropped points, write errors, last successful write.
+- [x] **Diagnostic sensors** (pulled forward, 2026-11-24): one device per entry with six diagnostic sensors: tracked entities, queued points, points written, dropped points (queue full or invalid), write errors, last successful write. Read from memory every 30 s; counters start at 0 on every start or reload of the entry.
 - [x] **Flush on shutdown.**
 - [ ] **Load test:** thousands of entities, offline phases, restart behavior.
 
@@ -117,6 +117,7 @@ Planned, but on hold for the same reason as M5: the maintainer does not use Infl
 - [ ] **Trademark review:** trademark notices in README, translations and HACS metadata; product names only descriptively and with the owner named (InfluxData Inc.).
 - [ ] Translations de/en, documentation, HACS metadata, real repository URLs.
 - [ ] Versioning and changelog.
+- [x] Integration icon (light and dark) in `custom_components/series_picker/brand/`, shown by Home Assistant 2026.3 and later; SVG sources in `docs/brand/`.
 
 ## M9 – Overview panel (much later, after the first release)
 
