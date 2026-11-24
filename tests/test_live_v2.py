@@ -6,6 +6,7 @@ INFLUXDB_V2_BUCKET are set. CI starts a server in a container for this.
 
 from __future__ import annotations
 
+import asyncio
 import csv
 from datetime import UTC, datetime
 import io
@@ -36,6 +37,10 @@ pytestmark = [
     # that hook and allows them again (connections stay limited to 127.0.0.1).
     pytest.mark.usefixtures("socket_enabled"),
 ]
+
+
+QUERY_ATTEMPTS = 20
+QUERY_DELAY = 0.5  # seconds
 
 
 async def _query(session: aiohttp.ClientSession, flux: str) -> list[dict]:
@@ -76,22 +81,32 @@ async def test_validate_and_write_roundtrip() -> None:
         ]
         await backend.write(points)
 
-        rows = await _query(
-            session,
-            f'from(bucket: "{ENV["bucket"]}") |> range(start: -1h) '
-            '|> filter(fn: (r) => r.entity_id == "live_temp" or r.entity_id == "live_door") '
-            '|> keep(columns: ["_measurement", "domain", "entity_id", "_field", "_value"]) '
-            "|> map(fn: (r) => ({r with _value: string(v: r._value)})) "
-            "|> group()",
-        )
-        got = {
-            (r["_measurement"], r["entity_id"], r["_field"], r["_value"]) for r in rows
+        expected = {
+            ("°C", "live_temp", "value", "21.5"),
+            ("°C", "live_temp", "friendly_name_str", 'Live "test"'),
+            ("binary_sensor.live_door", "live_door", "state", "on"),
+            ("binary_sensor.live_door", "live_door", "value", "1"),
+            ("binary_sensor.live_door", "live_door", "_heartbeat", "true"),
         }
-        assert ("°C", "live_temp", "value", "21.5") in got
-        assert ("°C", "live_temp", "friendly_name_str", 'Live "test"') in got
-        assert ("binary_sensor.live_door", "live_door", "state", "on") in got
-        assert ("binary_sensor.live_door", "live_door", "value", "1") in got
-        assert ("binary_sensor.live_door", "live_door", "_heartbeat", "true") in got
+        # A write is acknowledged (204) before the points can always be
+        # queried, so wait for them a little (seen once in CI: empty result).
+        for _ in range(QUERY_ATTEMPTS):
+            rows = await _query(
+                session,
+                f'from(bucket: "{ENV["bucket"]}") |> range(start: -1h) '
+                '|> filter(fn: (r) => r.entity_id == "live_temp" or r.entity_id == "live_door") '
+                '|> keep(columns: ["_measurement", "domain", "entity_id", "_field", "_value"]) '
+                "|> map(fn: (r) => ({r with _value: string(v: r._value)})) "
+                "|> group()",
+            )
+            got = {
+                (r["_measurement"], r["entity_id"], r["_field"], r["_value"])
+                for r in rows
+            }
+            if expected <= got:
+                break
+            await asyncio.sleep(QUERY_DELAY)
+        assert expected <= got, f"missing {expected - got}; rows: {rows}"
         assert all(r["domain"] in ("sensor", "binary_sensor") for r in rows)
 
 
