@@ -20,7 +20,7 @@ The core `influxdb` integration filters only via YAML (`include`/`exclude` with 
 
 1. Supports InfluxDB **1.x, 2.x, 3.x**, but **implement InfluxDB 2 first**. 1.x and 3.x come later as **backend plugins**. Status 2026-11-24: 1.x and 3.x stay planned but are **on hold** (maintainer does not use them); contributions welcome.
 2. **Maximum compatibility with the core integration** (schema, behavior, defaults) so existing Grafana queries and dashboards need as few changes as possible.
-3. **Two labels**, suggested names `influx` (write on change) and `influx-heartbeat` (write on change plus periodic heartbeat). The heartbeat label alone is enough (it implies export).
+3. **Two labels**, suggested names `influx` (write on change) and `influx-heartbeat` (write on change plus periodic heartbeat). The heartbeat label alone is enough (it implies export). Since 2026-11-24 each of the two fields holds a **list** of label IDs (several labels per mode); old single string values are still read (`selection.label_lists`).
 4. A **manual entity list** in the config/options flow for entities that cannot carry labels (for example entities without a unique ID).
 5. An **overview** of selected (label) and manually listed entities. For manual entries, show whether the entity still exists.
 6. **Multiple instances** by design: one config entry per target, each with its own labels.

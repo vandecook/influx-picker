@@ -21,7 +21,7 @@ sofort.
 
 ## Funktionen
 
-- **Auswahl per Label:** ein Label für "bei Änderung schreiben", eines für "bei
+- **Auswahl per Label:** Labels für "bei Änderung schreiben" und für "bei
   Änderung und als Heartbeat schreiben". Labels an Gerät oder Bereich zählen
   mit (abschaltbar).
 - **Manuelle Liste** für Entitäten, die keine Labels tragen können (zum

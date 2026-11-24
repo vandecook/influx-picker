@@ -76,8 +76,9 @@ anderen Integration.
 
 ### 3.1 Labels anlegen
 
-Series Picker schreibt Entitäten, die eines von **zwei Labels** tragen. Leg sie
-zuerst an: **Einstellungen → Bereiche, Labels & Zonen → Labels → Label
+Series Picker schreibt Entitäten, die eines seiner Labels tragen. Es gibt
+**zwei Felder**, eines pro Modus, und jedes kann ein oder mehrere Labels
+enthalten. Leg die Labels zuerst an: **Einstellungen → Bereiche, Labels & Zonen → Labels → Label
 erstellen**.
 
 | Label (Vorschlag) | Wirkung |
@@ -87,7 +88,8 @@ erstellen**.
 
 Die Namen sind frei wählbar. Series Picker speichert die **ID** des Labels,
 Umbenennen macht also später nichts kaputt. Du kannst auch nur eines der beiden
-Labels verwenden.
+Felder füllen oder mehrere Labels in ein Feld setzen (zum Beispiel vorhandene
+Labels wie `pv` oder `waermepumpe`).
 
 ### 3.2 Integration hinzufügen
 
@@ -110,7 +112,7 @@ Die Verbindung wird mit einer **echten Schreibanfrage** geprüft. Ein falsches
 Token, eine falsche Organisation oder ein falscher Bucket fällt also schon hier
 auf.
 
-**Schritt 3: Auswahl der Entitäten.** Die beiden Labels, das Heartbeat-Intervall,
+**Schritt 3: Auswahl der Entitäten.** Die Labels für beide Modi, das Heartbeat-Intervall,
 ob Labels von Geräten und Bereichen mitzählen und was beim Start geschrieben
 wird. Details in
 [Abschnitt 6.1](#61-auswahl-der-entitäten).
@@ -214,13 +216,14 @@ wird in der Zwischenzeit neu gestartet.
 
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
-| Label: bei Änderung schreiben | – | Entitäten mit diesem Label werden bei jeder Zustands- oder Attributänderung geschrieben. |
-| Label: bei Änderung und als Heartbeat schreiben | – | Wie oben, plus ein Heartbeat-Schreibvorgang, wenn im Intervall nichts geschrieben wurde. Hat eine Entität beide Labels, gewinnt Heartbeat. |
+| Labels: bei Änderung schreiben | – | Entitäten mit einem dieser Labels werden bei jeder Zustands- oder Attributänderung geschrieben. |
+| Labels: bei Änderung und als Heartbeat schreiben | – | Wie oben, plus ein Heartbeat-Schreibvorgang, wenn im Intervall nichts geschrieben wurde. Hat eine Entität Labels aus beiden Feldern, gewinnt Heartbeat. |
 | Heartbeat-Intervall | 15 min | 1 bis 1440 Minuten. Wird einmal pro Minute geprüft, ein Heartbeat kommt also bis zu einer Minute später. |
 | Labels von Gerät und Bereich einbeziehen | an | Aus: nur Labels an der Entität selbst zählen. |
 | Startwert beim Start von Home Assistant | Aktuelle Zeit, als Heartbeat markiert | Siehe unten. |
 
-Mindestens ein Label ist nötig. Die beiden Labels müssen verschieden sein.
+Mindestens ein Label ist nötig (oder ein Eintrag in der manuellen Liste). Ein
+Label darf nur in einem der beiden Felder stehen.
 
 **Heartbeat- und Startwert-Punkte** tragen ein zusätzliches Feld
 `_heartbeat=true`. Änderungspunkte nicht. So markierte Punkte entstehen:
@@ -372,7 +375,7 @@ Dashboards weiter funktionieren.
 | Punkte landen in Measurements mit der Entity-ID als Namen (`switch.kitchen`) | Kein **Standard-Measurement** gesetzt. Beim Umstieg von der nativen Integration `default_measurement` übernehmen ([Abschnitt 7](#7-umstieg-von-der-nativen-influxdb-integration)). |
 | `friendly_name` ist ein Feld (`friendly_name_str`) statt eines Tags | `friendly_name` bei **Attribute als Tags schreiben** eintragen. |
 | Eine Entität wird nicht geschrieben | Hat sie eine Unique-ID (sonst keine Labels)? Ist sie deaktiviert? Ist ihr Zustand `unknown`/`unavailable`? Hängt das Label an Entität, Gerät oder Bereich, und ist bei Geräte-/Bereichslabels die Vererbung an? |
-| Im Optionsformular steht bei einem Label "Unbekanntes Element" | Einmal gesehen, direkt nachdem die Labels bei offener Seite angelegt wurden; der gespeicherte Wert war richtig. Seite neu laden (Strg+F5). Bleibt es, bitte ein Issue öffnen. |
+| Im Optionsformular steht bei einem Label "Unbekanntes Element" (bis 0.1.0) | Ein Anzeigefehler der Einzel-Label-Auswahl im Frontend von Home Assistant; der gespeicherte Wert war richtig. Seit die Label-Felder mehrere Labels erlauben, wird eine andere Auswahl verwendet. Tritt es trotzdem auf, Seite neu laden (Strg+F5) und bitte ein Issue öffnen. |
 | Jede Änderung erscheint doppelt | Die native Integration schreibt dieselben Entitäten in denselben Bucket ([Abschnitt 7](#7-umstieg-von-der-nativen-influxdb-integration), Schritt 4). |
 
 ## 10. Entfernen

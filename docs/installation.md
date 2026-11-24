@@ -75,7 +75,8 @@ integration.
 
 ### 3.1 Create labels
 
-Series Picker writes entities that carry one of **two labels**. Create them
+Series Picker writes entities that carry one of its labels. There are **two
+fields**, one per mode, and each can hold one or more labels. Create the labels
 first: **Settings → Areas, labels & zones → Labels → Create label**.
 
 | Label (suggestion) | Effect |
@@ -84,7 +85,9 @@ first: **Settings → Areas, labels & zones → Labels → Create label**.
 | `influx-heartbeat` | Write on every change **and** again periodically while nothing changes (heartbeat). |
 
 Names are free. Series Picker stores the label's **ID**, so renaming a label
-later does not break anything. You can also use only one of the two labels.
+later does not break anything. You can also fill only one of the two fields,
+or put several labels into one field (for example existing labels such as
+`pv` or `heat-pump`).
 
 ### 3.2 Add the integration
 
@@ -106,7 +109,7 @@ has four steps.
 The connection is checked with a **real write request**, so a wrong token,
 organization or bucket is reported right here.
 
-**Step 3: Entity selection.** Choose the two labels, the heartbeat interval,
+**Step 3: Entity selection.** Choose the labels for both modes, the heartbeat interval,
 whether labels of devices and areas count, and what is written at start. Details in
 [section 6.1](#61-entity-selection).
 
@@ -204,13 +207,14 @@ works, unless Home Assistant is restarted in between.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| Label: write on change | – | Entities with this label are written on every state or attribute change. |
-| Label: write on change and heartbeat | – | Like above, plus a heartbeat write when nothing was written during the interval. If an entity has both labels, heartbeat wins. |
+| Labels: write on change | – | Entities with one of these labels are written on every state or attribute change. |
+| Labels: write on change and heartbeat | – | Like above, plus a heartbeat write when nothing was written during the interval. If an entity has labels from both fields, heartbeat wins. |
 | Heartbeat interval | 15 min | 1 to 1440 minutes. Checked once per minute, so a heartbeat comes up to one minute late. |
 | Include labels of the device and area | on | Off: only labels on the entity itself count. |
 | Snapshot when Home Assistant starts | Current time, marked as heartbeat | See below. |
 
-At least one label is required. Both labels must be different.
+At least one label is required (or an entry in the manual list). A label can
+only be in one of the two fields.
 
 **Heartbeat and snapshot points** carry an extra field `_heartbeat=true`.
 Change points do not. Points marked like this are written:
@@ -357,7 +361,7 @@ working.
 | Points land in measurements named after the entity ID (`switch.kitchen`) | No **default measurement** set. If you came from the core integration, copy `default_measurement` ([section 7](#7-coming-from-the-core-influxdb-integration)). |
 | `friendly_name` is a field (`friendly_name_str`) instead of a tag | Add `friendly_name` to **Attributes written as tags**. |
 | An entity is not written | Does it have a unique ID (otherwise no labels)? Is it disabled? Is its state `unknown`/`unavailable`? Is the label on the entity, device or area, and is inheritance on for device/area labels? |
-| Options form shows a label as "Unknown item" | Seen once right after the labels were created while the page was open; the stored value was correct. Reload the page (Ctrl+F5). If it stays, please open an issue. |
+| Options form shows a label as "Unknown item" (up to 0.1.0) | A display problem of the single-label picker in the Home Assistant frontend; the stored value was correct. Since the label fields allow several labels, a different picker is used. If it still happens, reload the page (Ctrl+F5) and please open an issue. |
 | Every change appears twice | The core integration writes the same entities to the same bucket ([section 7](#7-coming-from-the-core-influxdb-integration), step 4). |
 
 ## 10. Remove

@@ -19,7 +19,7 @@ in the UI, and the change applies at once.
 
 ## Features
 
-- **Selection by label:** one label for "write on change", one for "write on
+- **Selection by label:** labels for "write on change" and for "write on
   change plus heartbeat". Labels on a device or area count too (can be switched
   off).
 - **Manual list** for entities that cannot carry labels (for example without a

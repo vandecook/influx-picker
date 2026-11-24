@@ -64,6 +64,23 @@ def manual_lists(options: Mapping[str, Any]) -> tuple[list[str], list[str]]:
     )
 
 
+def label_lists(options: Mapping[str, Any]) -> tuple[list[str], list[str]]:
+    """Return the two label ID lists (change, heartbeat) from entry options.
+
+    Up to 0.1.0 each option held a single label ID (a string); that form is
+    still read.
+    """
+
+    def _ids(value: Any) -> list[str]:
+        if not value:
+            return []
+        if isinstance(value, str):
+            return [value]
+        return [v for v in value if v]
+
+    return _ids(options.get(CONF_LABEL_CHANGE)), _ids(options.get(CONF_LABEL_HEARTBEAT))
+
+
 def manual_status(hass: HomeAssistant, entity_id: str) -> Status:
     """Whether a manually listed entity still exists."""
     entry = er.async_get(hass).async_get(entity_id)
@@ -111,18 +128,13 @@ def renamed_entity(
 
 def _label_selection(
     hass: HomeAssistant,
-    change_label: str | None,
-    heartbeat_label: str | None,
+    change_labels: list[str],
+    heartbeat_labels: list[str],
     inherit: bool,
 ) -> dict[str, Selected]:
-    wanted = {
-        label: mode
-        for label, mode in (
-            (change_label, Mode.CHANGE),
-            (heartbeat_label, Mode.HEARTBEAT),
-        )
-        if label
-    }
+    # Heartbeat wins if a label is in both lists.
+    wanted = dict.fromkeys(change_labels, Mode.CHANGE)
+    wanted.update(dict.fromkeys(heartbeat_labels, Mode.HEARTBEAT))
     if not wanted:
         return {}
 
@@ -171,10 +183,7 @@ def compute_details(
     written as soon as they appear.
     """
     result = _label_selection(
-        hass,
-        options.get(CONF_LABEL_CHANGE) or None,
-        options.get(CONF_LABEL_HEARTBEAT) or None,
-        options.get(CONF_INHERIT, DEFAULT_INHERIT),
+        hass, *label_lists(options), options.get(CONF_INHERIT, DEFAULT_INHERIT)
     )
     change, heartbeat = manual_lists(options)
     for entity_ids, mode in ((change, Mode.CHANGE), (heartbeat, Mode.HEARTBEAT)):

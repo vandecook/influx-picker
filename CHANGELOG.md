@@ -6,6 +6,9 @@
   repository `series-picker`), to follow InfluxData's trademark guidelines.
   Existing installations must remove Influx Picker and set Series Picker up
   again; labels and data stay. See the installation guide.
+- Each label field can now hold several labels. Entries saved with a single
+  label keep working. This also avoids a display problem where the options
+  form showed a valid label as "Unknown item".
 - InfluxDB 1.x and 3.x backends: planned, but on hold until someone who uses
   them contributes.
 - Manual list (write on change / write on change plus heartbeat) for entities

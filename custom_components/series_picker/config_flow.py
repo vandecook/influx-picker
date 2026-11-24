@@ -72,6 +72,7 @@ from .schema import (
 from .selection import (
     Source,
     compute_details,
+    label_lists,
     manual_lists,
     missing_manual,
     without_entities,
@@ -208,18 +209,18 @@ def _clean_data_format(
 def selection_schema(defaults: Mapping[str, Any]) -> vol.Schema:
     """Labels, heartbeat interval and inheritance (config and options flow)."""
 
-    def _default(key: str) -> dict[str, Any]:
-        value = defaults.get(key)
+    change, heartbeat = label_lists(defaults)
+
+    def _default(value: list[str]) -> dict[str, Any]:
         return {"suggested_value": value} if value else {}
 
+    # multiple=True: the single-label picker of the frontend can show a valid
+    # label as "unknown item" when the form opens before the labels are loaded.
+    labels = LabelSelector(LabelSelectorConfig(multiple=True))
     return vol.Schema(
         {
-            vol.Optional(
-                CONF_LABEL_CHANGE, description=_default(CONF_LABEL_CHANGE)
-            ): LabelSelector(LabelSelectorConfig()),
-            vol.Optional(
-                CONF_LABEL_HEARTBEAT, description=_default(CONF_LABEL_HEARTBEAT)
-            ): LabelSelector(LabelSelectorConfig()),
+            vol.Optional(CONF_LABEL_CHANGE, description=_default(change)): labels,
+            vol.Optional(CONF_LABEL_HEARTBEAT, description=_default(heartbeat)): labels,
             vol.Required(
                 CONF_HEARTBEAT_INTERVAL,
                 default=defaults.get(
@@ -258,9 +259,10 @@ def _clean_selection(
 
     Without manual entries at least one label is needed.
     """
+    change, heartbeat = label_lists(user_input)
     options = {
-        CONF_LABEL_CHANGE: user_input.get(CONF_LABEL_CHANGE) or None,
-        CONF_LABEL_HEARTBEAT: user_input.get(CONF_LABEL_HEARTBEAT) or None,
+        CONF_LABEL_CHANGE: change,
+        CONF_LABEL_HEARTBEAT: heartbeat,
         CONF_HEARTBEAT_INTERVAL: int(user_input[CONF_HEARTBEAT_INTERVAL]),
         CONF_INHERIT: bool(user_input[CONF_INHERIT]),
         CONF_STARTUP_SNAPSHOT: user_input.get(
@@ -268,10 +270,10 @@ def _clean_selection(
         ),
     }
     errors: dict[str, str] = {}
-    if not options[CONF_LABEL_CHANGE] and not options[CONF_LABEL_HEARTBEAT]:
+    if not change and not heartbeat:
         if not has_manual:
             errors["base"] = "no_label"
-    elif options[CONF_LABEL_CHANGE] == options[CONF_LABEL_HEARTBEAT]:
+    elif set(change) & set(heartbeat):
         errors["base"] = "same_label"
     if options[CONF_STARTUP_SNAPSHOT] not in STARTUP_SNAPSHOT_MODES:
         errors[CONF_STARTUP_SNAPSHOT] = "invalid_startup_snapshot"
@@ -527,9 +529,7 @@ class SeriesPickerOptionsFlow(OptionsFlow):
             change, heartbeat = manual_lists(new)
             if set(change) & set(heartbeat):
                 errors["base"] = "manual_in_both"
-            elif not (change or heartbeat) and not (
-                options.get(CONF_LABEL_CHANGE) or options.get(CONF_LABEL_HEARTBEAT)
-            ):
+            elif not (change or heartbeat) and not any(label_lists(options)):
                 errors["base"] = "nothing_selected"
             else:
                 return self.async_create_entry(data=new)
