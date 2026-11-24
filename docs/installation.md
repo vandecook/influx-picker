@@ -347,6 +347,22 @@ working.
 - **Compare with the core integration** (developers): `tools/compare_with_influx.py`
   compares, for given states, the points the core integration wrote with the
   points Series Picker would write (read-only).
+- **Diagnostic sensors:** every entry has a device with six sensors
+  (**Settings → Devices & services → Series Picker → the entry → device**,
+  section "Diagnostic"). Updated every 30 seconds:
+
+  | Sensor | Meaning |
+  |---|---|
+  | Tracked entities | Entities currently selected (labels and manual list). |
+  | Queued points | Points waiting to be written. Rises while InfluxDB cannot be reached; at most 50,000. |
+  | Points written | Points written successfully. |
+  | Dropped points | Points dropped because the queue was full or InfluxDB rejected them as invalid. |
+  | Write errors | Failed write attempts (each one is retried). |
+  | Last successful write | Time of the last successful write. |
+
+  The counters start at 0 when Home Assistant starts and when the entry is
+  reloaded (for example after saving options). The sensors are not written
+  to InfluxDB unless you give them a label.
 - **Logs:** Settings → System → Logs, search for `series_picker`. Write errors
   are logged once, then only at debug level until writing works again.
 

@@ -79,7 +79,7 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [ ] **Konfigurierbar:** Flush-Intervall, Batch-Größe, maximale Queue-Größe (nach Anzahl), Backoff-Grenzen.
 - [ ] **Backoff** bei Ausfall (5 s, steigend bis max. 60 s) statt fester Wiederholung.
 - [ ] **Persistente Queue** (nur bei Bedarf): erst umsetzen, wenn im Betrieb Verluste durch längere Influx-Ausfälle oder HA-Neustarts im Ausfall auftreten.
-- [ ] **Diagnose-Sensoren:** Zahl der getrackten Entitäten, Queue-Größe, verworfene Punkte, Schreibfehler, letzter erfolgreicher Write.
+- [x] **Diagnose-Sensoren** (vorgezogen, 24.11.2026): ein Gerät pro Eintrag mit sechs Diagnose-Sensoren: erfasste Entitäten, wartende Punkte, geschriebene Punkte, verworfene Punkte (Warteschlange voll oder ungültig), Schreibfehler, letzter erfolgreicher Schreibvorgang. Alle 30 s aus dem Speicher gelesen; die Zähler beginnen bei jedem Start oder Neuladen des Eintrags bei 0.
 - [x] **Flush beim Herunterfahren.**
 - [ ] **Lasttest:** Tausende Entitäten, Offline-Phasen, Neustart-Verhalten.
 

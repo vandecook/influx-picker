@@ -39,6 +39,8 @@ in the UI, and the change applies at once.
   or off).
 - **Reliable writing:** batches (1 s or 100 points), bounded buffer
   (50,000 points), retry with backoff.
+- **Diagnostic sensors:** tracked entities, queued, written and dropped
+  points, write errors, last successful write.
 - **Multiple instances:** one entry per bucket or server, each with its own
   labels.
 
@@ -89,7 +91,7 @@ Graphs, averages and `last()` can use all points.
 
 ## Roadmap
 
-Next: diagnostics and buffer settings (M4), import from the core YAML (M7).
+Next: buffer settings (M4), import from the core YAML (M7).
 InfluxDB 1.x and 3.x (M5, M6) are planned, but on hold until someone who uses
 them contributes. Details: [ROADMAP.en.md](ROADMAP.en.md).
 

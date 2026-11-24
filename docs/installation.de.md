@@ -360,6 +360,22 @@ Dashboards weiter funktionieren.
 - **Vergleich mit der nativen Integration** (für Entwickler):
   `tools/compare_with_influx.py` vergleicht für gegebene Zustände die Punkte der
   nativen Integration mit denen, die Series Picker schreiben würde (nur lesend).
+- **Diagnose-Sensoren:** Jeder Eintrag hat ein Gerät mit sechs Sensoren
+  (**Einstellungen → Geräte & Dienste → Series Picker → Eintrag → Gerät**,
+  Abschnitt „Diagnose“). Aktualisiert alle 30 Sekunden:
+
+  | Sensor | Bedeutung |
+  |---|---|
+  | Erfasste Entitäten | Derzeit ausgewählte Entitäten (Labels und manuelle Liste). |
+  | Wartende Punkte | Punkte, die noch geschrieben werden müssen. Steigt, solange InfluxDB nicht erreichbar ist; höchstens 50.000. |
+  | Geschriebene Punkte | Erfolgreich geschriebene Punkte. |
+  | Verworfene Punkte | Punkte, die verworfen wurden, weil die Warteschlange voll war oder InfluxDB sie als ungültig abgelehnt hat. |
+  | Schreibfehler | Fehlgeschlagene Schreibversuche (jeder wird wiederholt). |
+  | Letzter erfolgreicher Schreibvorgang | Zeitpunkt des letzten erfolgreichen Schreibens. |
+
+  Die Zähler beginnen bei 0, wenn Home Assistant startet und wenn der Eintrag
+  neu geladen wird (zum Beispiel nach dem Speichern der Optionen). Die Sensoren
+  werden nicht nach InfluxDB geschrieben, außer du gibst ihnen ein Label.
 - **Logs:** Einstellungen → System → Protokolle, nach `series_picker` suchen.
   Schreibfehler werden einmal gemeldet, danach nur noch auf Debug-Ebene, bis
   das Schreiben wieder klappt.

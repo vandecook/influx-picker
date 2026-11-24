@@ -211,5 +211,30 @@
         }
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "tracked_entities": {
+        "name": "Tracked entities"
+      },
+      "queue_size": {
+        "name": "Queued points",
+        "unit_of_measurement": "points"
+      },
+      "points_written": {
+        "name": "Points written",
+        "unit_of_measurement": "points"
+      },
+      "dropped_points": {
+        "name": "Dropped points",
+        "unit_of_measurement": "points"
+      },
+      "write_errors": {
+        "name": "Write errors"
+      },
+      "last_success": {
+        "name": "Last successful write"
+      }
+    }
   }
 }
