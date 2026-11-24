@@ -2,7 +2,7 @@
 
 [English](ROADMAP.en.md) · [README (Deutsch)](README.de.md)
 
-Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; ein erster Praxistest lief am 23.11.2026 (eine Installation, InfluxDB 2). Release v0.1.0 enthält M0, M1 und M2; M3 ist umgesetzt, aber noch nicht veröffentlicht. Projektname: **Series Picker**, Domain `series_picker` (am 24.11.2026 von „Influx Picker“ umbenannt, nach Prüfung der Markenrichtlinien von InfluxData, siehe Beschlossen). Series Picker ist ein freies, unabhängiges Projekt; sein Zweck ist, die Neustarts von Home Assistant überflüssig zu machen, die die native Integration bei jeder Änderung der zu schreibenden Entitäten braucht.
+Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; ein erster Praxistest lief am 23.11.2026 (eine Installation, InfluxDB 2). Release v0.1.0 enthält M0, M1 und M2; Release v0.2.0 (24.11.2026) bringt M3, die Diagnose-Sensoren aus M4, mehrere Labels pro Feld und den neuen Namen (noch nicht in einer echten Installation getestet). Projektname: **Series Picker**, Domain `series_picker` (am 24.11.2026 von „Influx Picker“ umbenannt, nach Prüfung der Markenrichtlinien von InfluxData, siehe Beschlossen). Series Picker ist ein freies, unabhängiges Projekt; sein Zweck ist, die Neustarts von Home Assistant überflüssig zu machen, die die native Integration bei jeder Änderung der zu schreibenden Entitäten braucht.
 
 ## Anforderungen (Stand 17.11.2026)
 
