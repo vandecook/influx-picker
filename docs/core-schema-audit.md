@@ -4,7 +4,7 @@ Status: **done.** Source audit, real-data check (2026-11-23, see section 10).
 There are no existing Grafana queries to check (section 9).
 
 This document records how the Home Assistant core `influxdb` integration turns a
-state change into an InfluxDB® point. Influx Picker reproduces these rules so
+state change into an InfluxDB® point. Series Picker reproduces these rules so
 existing queries and dashboards keep working. Every rule below is covered by a
 golden test in `tests/test_schema_golden.py` (expected line protocol per case).
 
@@ -111,7 +111,7 @@ because InfluxDB reserves it.
 - Unbounded queue; events older than 30 s plus `max_retries × 20 s` are dropped.
 - `max_retries` defaults to 0. HTTP 400 means invalid data and is not retried.
 
-## 8. Where Influx Picker deviates on purpose
+## 8. Where Series Picker deviates on purpose
 
 - Heartbeat points and the initial snapshot carry the extra field
   `_heartbeat=true` (decision in the roadmap). Change points are identical to
@@ -186,7 +186,7 @@ This confirms in particular:
 - **States set during a Home Assistant restart are missing.** One compared
   entity (`input_number`, state set at 19:02:33 UTC on 2026-11-17) has no point
   at all. The bucket has no Home Assistant points between 19:02:00 and
-  19:02:30 that day: the core integration was not listening yet. Influx Picker
+  19:02:30 that day: the core integration was not listening yet. Series Picker
   writes an initial snapshot for newly tracked entities; whether it should also
   write one after every restart is a question for M2.
 - The bucket also holds InfluxDB's own metrics (`go_*`, `storage_*`, …), not
@@ -194,4 +194,9 @@ This confirms in particular:
 - Measurements mix float and string fields (for example `value` and `state`
   in `units`). Flux queries without a `_field` filter fail with "schema
   collision" in some functions (seen with `limit()` after `group()`). This is
-  existing behaviour of the core data, not caused by Influx Picker.
+  existing behaviour of the core data, not caused by Series Picker.
+
+---
+
+InfluxDB® and InfluxData® are trademarks registered by InfluxData Inc., which
+is not affiliated with, and does not endorse, this project.

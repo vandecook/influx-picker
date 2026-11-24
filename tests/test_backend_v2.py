@@ -12,7 +12,7 @@ from pytest_homeassistant_custom_component.test_util.aiohttp import (
     AiohttpClientMocker,
 )
 
-from custom_components.influx_picker.backends import (
+from custom_components.series_picker.backends import (
     BACKENDS,
     BackendAuthError,
     BackendConnectionError,
@@ -20,8 +20,8 @@ from custom_components.influx_picker.backends import (
     BackendNotFoundError,
     get_backend,
 )
-from custom_components.influx_picker.backends.v2 import InfluxDB2Backend
-from custom_components.influx_picker.point import Point
+from custom_components.series_picker.backends.v2 import InfluxDB2Backend
+from custom_components.series_picker.point import Point
 
 CONFIG = {
     "backend": "v2",

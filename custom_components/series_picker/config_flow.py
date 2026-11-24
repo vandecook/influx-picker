@@ -1,4 +1,4 @@
-"""Config flow and options flow for Influx Picker."""
+"""Config flow and options flow for Series Picker."""
 
 from __future__ import annotations
 
@@ -323,7 +323,7 @@ def _without_empty_secrets(
     }
 
 
-class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
+class SeriesPickerConfigFlow(ConfigFlow, domain=DOMAIN):
     """Step 1: version. Step 2: connection. Step 3: labels. Step 4: data format.
 
     Later: "Reconfigure" changes the connection, "Re-authenticate" asks for a
@@ -341,7 +341,7 @@ class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
         """Return the options flow."""
-        return InfluxPickerOptionsFlow()
+        return SeriesPickerOptionsFlow()
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -495,7 +495,7 @@ class InfluxPickerConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
-class InfluxPickerOptionsFlow(OptionsFlow):
+class SeriesPickerOptionsFlow(OptionsFlow):
     """Menu: labels, manual lists, overview, data format."""
 
     async def async_step_init(

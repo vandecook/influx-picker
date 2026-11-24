@@ -1,4 +1,4 @@
-"""Influx Picker: write label-selected Home Assistant entities to InfluxDB."""
+"""Series Picker: write label-selected Home Assistant entities to InfluxDB."""
 
 from __future__ import annotations
 

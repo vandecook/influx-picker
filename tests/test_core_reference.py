@@ -1,8 +1,8 @@
-"""Compare Influx Picker with the core algorithm and the official client.
+"""Compare Series Picker with the core algorithm and the official client.
 
 For every case, the core reference conversion (tests/core_reference.py) is
 serialized with the official `influxdb-client` package, exactly as the core
-integration does for InfluxDB 2. Influx Picker must produce the same line.
+integration does for InfluxDB 2. Series Picker must produce the same line.
 """
 
 from __future__ import annotations
@@ -14,9 +14,9 @@ from homeassistant.helpers import state as state_helper
 from influxdb_client import Point as ClientPoint
 import pytest
 
-from custom_components.influx_picker import schema
-from custom_components.influx_picker.line_protocol import to_line
-from custom_components.influx_picker.schema import (
+from custom_components.series_picker import schema
+from custom_components.series_picker.line_protocol import to_line
+from custom_components.series_picker.schema import (
     EntityCustomization,
     SchemaOptions,
     state_to_point,

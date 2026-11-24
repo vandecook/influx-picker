@@ -18,15 +18,15 @@ from pytest_homeassistant_custom_component.common import (
     async_fire_time_changed,
 )
 
-from custom_components.influx_picker.backends import (
+from custom_components.series_picker.backends import (
     BackendAuthError,
     BackendConnectionError,
 )
-from custom_components.influx_picker.const import DOMAIN
+from custom_components.series_picker.const import DOMAIN
 
 from .conftest import Written
 
-BACKEND = "custom_components.influx_picker.backends.v2.InfluxDB2Backend"
+BACKEND = "custom_components.series_picker.backends.v2.InfluxDB2Backend"
 
 DATA = {
     "backend": "v2",
@@ -251,7 +251,7 @@ async def test_inheritance_from_device_and_area(
     entry = await _setup(hass, labels)
     await _flush(hass)
     assert sorted(written.entities()) == [("in_area", True), ("on_device", True)]
-    from custom_components.influx_picker.selection import Mode
+    from custom_components.series_picker.selection import Mode
 
     assert entry.runtime_data.runtime.tracked == {
         "sensor.on_device": Mode.HEARTBEAT,
@@ -278,7 +278,7 @@ async def test_disabled_entity_and_heartbeat_wins(
     reg.async_update_entity(off.entity_id, labels={labels[0]})
     reg.async_update_entity(both.entity_id, labels={labels[0], labels[1]})
     entry = await _setup(hass, labels)
-    from custom_components.influx_picker.selection import Mode
+    from custom_components.series_picker.selection import Mode
 
     assert entry.runtime_data.runtime.tracked == {"sensor.both": Mode.HEARTBEAT}
 

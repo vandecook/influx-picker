@@ -10,15 +10,15 @@ from homeassistant.data_entry_flow import FlowResultType
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.influx_picker.backends import (
+from custom_components.series_picker.backends import (
     BackendAuthError,
     BackendConnectionError,
     BackendNotFoundError,
 )
-from custom_components.influx_picker.const import DOMAIN
+from custom_components.series_picker.const import DOMAIN
 
-VALIDATE = "custom_components.influx_picker.backends.v2.InfluxDB2Backend.validate"
-SETUP = "custom_components.influx_picker.async_setup_entry"
+VALIDATE = "custom_components.series_picker.backends.v2.InfluxDB2Backend.validate"
+SETUP = "custom_components.series_picker.async_setup_entry"
 
 CONNECTION = {
     "url": "http://influx.test:8086",
@@ -353,7 +353,7 @@ def test_translation_keys_valid() -> None:
     import re
 
     rule = re.compile(r"^(?!.*__)[a-z0-9]+(?:[a-z0-9_-]*[a-z0-9])?$")
-    base = Path(__file__).parent.parent / "custom_components" / "influx_picker"
+    base = Path(__file__).parent.parent / "custom_components" / "series_picker"
     for path in [base / "strings.json", *(base / "translations").glob("*.json")]:
         data = json.loads(path.read_text(encoding="utf-8"))
         for selector in data.get("selector", {}).values():

@@ -2,13 +2,22 @@
 
 [English](installation.md) · **Deutsch** · [README](../README.de.md)
 
-Diese Anleitung führt durch Installation und Einrichtung von Influx Picker und
+Diese Anleitung führt durch Installation und Einrichtung von Series Picker und
 erklärt jede Einstellung. Sie beruht auf einer ersten echten Installation im
 Home Assistant des Maintainers (2026-11-23).
 
 > **Frühe Version.** Der Code ist größtenteils KI-generiert und nicht gründlich
 > geprüft (siehe [Status-Hinweis](../README.de.md)). Fang mit einem
 > **Test-Bucket** an, nicht mit deinen produktiven Daten.
+
+> **Umstieg von Influx Picker 0.1.0?** Das Projekt heißt jetzt Series
+> Picker, die Domain der Integration hat sich von `influx_picker` in
+> `series_picker` geändert. Home Assistant sieht das als neue Integration:
+> den alten Influx-Picker-Eintrag löschen, das alte Repository in HACS
+> entfernen (oder `custom_components/influx_picker` löschen), Series Picker
+> wie unten beschrieben installieren und neu einrichten. Labels und die Daten
+> in InfluxDB bleiben, wie sie sind; dieselben Labels und dasselbe
+> Datenformat wieder wählen.
 
 ## Inhalt
 
@@ -30,8 +39,8 @@ Du brauchst:
 - **Home Assistant 2026.10 oder neuer.**
 - **HACS** (ab Home Assistant 2026.11: den eingebauten **Marketplace**) oder
   Zugriff auf den Ordner `config` für eine manuelle Installation.
-- Einen **InfluxDB®-2.x**-Server. InfluxDB 1.x und 3.x werden noch nicht
-  unterstützt.
+- Einen **InfluxDB®-2.x**-Server. InfluxDB 1.x und 3.x werden nicht unterstützt
+  (geplant, ruhen aber, bis jemand, der sie nutzt, sie beisteuert).
 - In InfluxDB:
   - die **Organisation** (Name oder ID),
   - einen **Bucket** als Ziel (für den ersten Test einen eigenen anlegen, zum
@@ -47,9 +56,9 @@ Rechten funktioniert auch, ist aber nicht nötig.
 
 1. **HACS** öffnen (oder **Einstellungen → Marketplace**).
 2. Menü (drei Punkte oben rechts) → **Benutzerdefinierte Repositories**.
-3. Repository `https://github.com/vandecook/influx-picker`, Typ
+3. Repository `https://github.com/vandecook/series-picker`, Typ
    **Integration**, dann **Hinzufügen**.
-4. Nach **Influx Picker** suchen, öffnen, **Herunterladen**.
+4. Nach **Series Picker** suchen, öffnen, **Herunterladen**.
 5. **Home Assistant neu starten.**
 
 HACS installiert das neueste Release. Updates erscheinen in HACS wie bei jeder
@@ -58,16 +67,16 @@ anderen Integration.
 ### Manuell
 
 1. Repository herunterladen (**Code → Download ZIP**).
-2. `custom_components/influx_picker` in den Ordner `custom_components` deiner
+2. `custom_components/series_picker` in den Ordner `custom_components` deiner
    Home-Assistant-Konfiguration kopieren, sodass
-   `config/custom_components/influx_picker/manifest.json` existiert.
+   `config/custom_components/series_picker/manifest.json` existiert.
 3. **Home Assistant neu starten.**
 
 ## 3. Einrichten
 
 ### 3.1 Labels anlegen
 
-Influx Picker schreibt Entitäten, die eines von **zwei Labels** tragen. Leg sie
+Series Picker schreibt Entitäten, die eines von **zwei Labels** tragen. Leg sie
 zuerst an: **Einstellungen → Bereiche, Labels & Zonen → Labels → Label
 erstellen**.
 
@@ -76,13 +85,13 @@ erstellen**.
 | `influx` | Bei jeder Änderung schreiben. |
 | `influx-heartbeat` | Bei jeder Änderung **und** zusätzlich regelmäßig, solange sich nichts ändert (Heartbeat). |
 
-Die Namen sind frei wählbar. Influx Picker speichert die **ID** des Labels,
+Die Namen sind frei wählbar. Series Picker speichert die **ID** des Labels,
 Umbenennen macht also später nichts kaputt. Du kannst auch nur eines der beiden
 Labels verwenden.
 
 ### 3.2 Integration hinzufügen
 
-**Einstellungen → Geräte & Dienste → Integration hinzufügen → Influx Picker.**
+**Einstellungen → Geräte & Dienste → Integration hinzufügen → Series Picker.**
 Die Einrichtung hat vier Schritte.
 
 **Schritt 1: Datenbankversion.** **InfluxDB 2.x** wählen.
@@ -144,7 +153,7 @@ Zustand (als Heartbeat markiert, siehe [Abschnitt 6.1](#61-auswahl-der-entitäte
 
 ### Manuelle Liste
 
-**Einstellungen → Geräte & Dienste → Influx Picker → Konfigurieren → Manuelle
+**Einstellungen → Geräte & Dienste → Series Picker → Konfigurieren → Manuelle
 Liste.** Zwei Listen: **Bei Änderung schreiben** und **Bei Änderung und
 Heartbeat schreiben**. Sie gelten zusätzlich zu den Labels. Ist eine Entität
 doppelt ausgewählt, gewinnt Heartbeat. Das Formular zeigt, welche Einträge es
@@ -169,7 +178,7 @@ nach 100 Zeilen gekürzt.
 
 ## 5. Einstellungen später ändern
 
-**Einstellungen → Geräte & Dienste → Influx Picker → Konfigurieren.** Es öffnet
+**Einstellungen → Geräte & Dienste → Series Picker → Konfigurieren.** Es öffnet
 sich ein Menü:
 
 - **Labels und Intervall:** Labels, Heartbeat-Intervall, Vererbung, Startwert.
@@ -184,7 +193,7 @@ Startwert, je nach **Startwert beim Start von Home Assistant** (siehe
 
 ### Verbindung ändern (URL, Token, …)
 
-**Einstellungen → Geräte & Dienste → Influx Picker → ⋮ → Neu konfigurieren.**
+**Einstellungen → Geräte & Dienste → Series Picker → ⋮ → Neu konfigurieren.**
 Dort lassen sich URL, Organisation, Bucket, Token und die Zertifikatsprüfung
 ändern. Token leer lassen, um das bisherige zu behalten. Die neue Verbindung
 wird vor dem Speichern mit einer echten Schreibanfrage geprüft; Labels und
@@ -310,7 +319,7 @@ Dashboards weiter funktionieren.
 2. Übernimm diese Werte ins **Datenformat** (Einrichtungsschritt 4 oder später
    über **Konfigurieren → Datenformat**):
 
-   | In deinem YAML | Feld in Influx Picker |
+   | In deinem YAML | Feld in Series Picker |
    |---|---|
    | `measurement_attr: …` | Measurement aus |
    | `default_measurement: units` | Standard-Measurement: `units` |
@@ -347,8 +356,8 @@ Dashboards weiter funktionieren.
 
 - **Vergleich mit der nativen Integration** (für Entwickler):
   `tools/compare_with_influx.py` vergleicht für gegebene Zustände die Punkte der
-  nativen Integration mit denen, die Influx Picker schreiben würde (nur lesend).
-- **Logs:** Einstellungen → System → Protokolle, nach `influx_picker` suchen.
+  nativen Integration mit denen, die Series Picker schreiben würde (nur lesend).
+- **Logs:** Einstellungen → System → Protokolle, nach `series_picker` suchen.
   Schreibfehler werden einmal gemeldet, danach nur noch auf Debug-Ebene, bis
   das Schreiben wieder klappt.
 
@@ -368,14 +377,13 @@ Dashboards weiter funktionieren.
 
 ## 10. Entfernen
 
-1. **Einstellungen → Geräte & Dienste → Influx Picker → ⋮ → Löschen.**
-2. In HACS entfernen (oder `custom_components/influx_picker` löschen).
+1. **Einstellungen → Geräte & Dienste → Series Picker → ⋮ → Löschen.**
+2. In HACS entfernen (oder `custom_components/series_picker` löschen).
 3. Home Assistant neu starten.
 4. Die Labels löschen, wenn du sie nicht mehr brauchst. Bereits geschriebene
    Daten bleiben in InfluxDB.
 
 ---
 
-InfluxDB® ist eine eingetragene Marke der InfluxData Inc. Dieses Projekt ist
-nicht mit InfluxData Inc. verbunden und wird von ihr weder unterstützt noch
-gesponsert.
+InfluxDB® und InfluxData® sind eingetragene Marken der InfluxData Inc., die
+mit diesem Projekt nicht verbunden ist und es nicht unterstützt.

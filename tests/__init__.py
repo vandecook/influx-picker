@@ -1,1 +1,1 @@
-"""Tests for Influx Picker."""
+"""Tests for Series Picker."""

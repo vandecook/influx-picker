@@ -1,9 +1,16 @@
-# Influx Picker
+# Series Picker
 
 [English](README.md) · **Deutsch** · [Installationsanleitung](docs/installation.de.md) · [Roadmap](ROADMAP.de.md)
 
 Schreibt ausgewählte Home-Assistant-Entitäten nach InfluxDB®, ausgewählt über
 **Labels**. Änderungen wirken sofort, **ohne Neustart von Home Assistant**.
+
+Series Picker ist ein freies, unabhängiges Open-Source-Projekt (MIT-Lizenz).
+Es gibt es aus einem Grund: Bei der nativen `influxdb`-Integration stehen die
+zu schreibenden Entitäten im YAML, und jede Änderung braucht einen Neustart
+von Home Assistant. Series Picker macht diese Neustarts überflüssig: Entitäten
+werden per Label oder Liste in der Oberfläche ausgewählt, die Änderung gilt
+sofort.
 
 > **Status: v0.1, frühe Version.** Mit automatischen Tests abgedeckt und in
 > einer echten Installation getestet; dort stimmten die Punkte mit denen der
@@ -34,17 +41,19 @@ Schreibt ausgewählte Home-Assistant-Entitäten nach InfluxDB®, ausgewählt üb
 - **Mehrere Instanzen:** ein Eintrag pro Bucket oder Server, jeweils mit eigenen
   Labels.
 
-Unterstützt: **InfluxDB 2.x**. 1.x und 3.x sind geplant.
+Unterstützt: **InfluxDB 2.x**. Backends für 1.x und 3.x sind geplant, aber
+derzeit arbeitet niemand daran, weil der Maintainer diese Versionen nicht
+nutzt. Beiträge sind willkommen; die Backend-Schnittstelle ist dafür gebaut.
 
 ## Installation
 
 Benötigt Home Assistant 2026.10 oder neuer.
 
 1. **HACS** → Menü (drei Punkte) → **Benutzerdefinierte Repositories** →
-   `https://github.com/vandecook/influx-picker`, Typ **Integration**.
-2. **Influx Picker** herunterladen, Home Assistant neu starten.
+   `https://github.com/vandecook/series-picker`, Typ **Integration**.
+2. **Series Picker** herunterladen, Home Assistant neu starten.
 3. Zwei Labels anlegen, zum Beispiel `influx` und `influx-heartbeat`.
-4. **Einstellungen → Geräte & Dienste → Integration hinzufügen → Influx
+4. **Einstellungen → Geräte & Dienste → Integration hinzufügen → Series
    Picker:** InfluxDB-Version, Verbindung (URL, Organisation, Bucket, Token mit
    Schreibrecht), Labels, Datenformat.
 5. Die Labels an Entitäten, Geräte oder Bereiche hängen.
@@ -80,8 +89,9 @@ Graphen, Mittelwerte und `last()` können alle Punkte verwenden.
 
 ## Roadmap
 
-Als Nächstes: Diagnose und Puffer-Einstellungen (M4), InfluxDB 1.x und 3.x (M5, M6), Import
-aus dem nativen YAML (M7). Details: [ROADMAP.de.md](ROADMAP.de.md).
+Als Nächstes: Diagnose und Puffer-Einstellungen (M4), Import aus dem nativen
+YAML (M7). InfluxDB 1.x und 3.x (M5, M6) sind geplant, ruhen aber, bis jemand,
+der sie nutzt, sie beisteuert. Details: [ROADMAP.de.md](ROADMAP.de.md).
 
 ## Entwicklung
 
@@ -105,7 +115,8 @@ Produktnamen von InfluxData nur beschreibend verwenden.
 
 ## Haftungsausschluss
 
-Unabhängiges Community-Projekt, nicht mit InfluxData Inc. verbunden, von ihr
-weder unterstützt noch gesponsert. InfluxDB® und InfluxData® sind eingetragene
-Marken der InfluxData Inc. Die Namen werden nur zur Beschreibung der
-Kompatibilität verwendet.
+InfluxDB® und InfluxData® sind eingetragene Marken der InfluxData Inc., die
+mit diesem Projekt nicht verbunden ist und es nicht unterstützt. Series Picker
+ist ein unabhängiges Community-Projekt; die Namen werden nur zur Beschreibung
+der Kompatibilität verwendet. Bis Version 0.1.0 hieß das Projekt
+„Influx Picker“.

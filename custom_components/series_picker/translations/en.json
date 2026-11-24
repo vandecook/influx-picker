@@ -198,7 +198,7 @@
   },
   "issues": {
     "missing_manual_entities": {
-      "title": "Influx Picker: manually listed entities no longer exist",
+      "title": "Series Picker: manually listed entities no longer exist",
       "fix_flow": {
         "step": {
           "confirm": {

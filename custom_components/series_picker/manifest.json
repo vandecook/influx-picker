@@ -1,0 +1,12 @@
+{
+  "domain": "series_picker",
+  "name": "Series Picker",
+  "codeowners": ["@vandecook"],
+  "config_flow": true,
+  "documentation": "https://github.com/vandecook/series-picker",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/vandecook/series-picker/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

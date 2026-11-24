@@ -12,8 +12,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from custom_components.influx_picker.line_protocol import to_line
-from custom_components.influx_picker.schema import (
+from custom_components.series_picker.line_protocol import to_line
+from custom_components.series_picker.schema import (
     EntityCustomization,
     SchemaOptions,
     parse_customizations,

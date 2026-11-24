@@ -14,10 +14,10 @@ from homeassistant.helpers import (
 )
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.influx_picker.const import DOMAIN
-from custom_components.influx_picker.issues import issue_id
-from custom_components.influx_picker.repairs import async_create_fix_flow
-from custom_components.influx_picker.selection import (
+from custom_components.series_picker.const import DOMAIN
+from custom_components.series_picker.issues import issue_id
+from custom_components.series_picker.repairs import async_create_fix_flow
+from custom_components.series_picker.selection import (
     Mode,
     Source,
     Status,
@@ -28,7 +28,7 @@ from custom_components.influx_picker.selection import (
 from .conftest import Written
 from .test_init import DATA, _entity, _flush, _setup
 
-SETUP = "custom_components.influx_picker.async_setup_entry"
+SETUP = "custom_components.series_picker.async_setup_entry"
 
 
 def _options(labels, **extra) -> dict:

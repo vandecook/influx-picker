@@ -198,7 +198,7 @@
   },
   "issues": {
     "missing_manual_entities": {
-      "title": "Influx Picker: manuell gelistete Entitäten gibt es nicht mehr",
+      "title": "Series Picker: manuell gelistete Entitäten gibt es nicht mehr",
       "fix_flow": {
         "step": {
           "confirm": {

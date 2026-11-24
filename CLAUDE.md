@@ -1,4 +1,4 @@
-# Influx Picker: project brief (CLAUDE.md)
+# Series Picker: project brief (CLAUDE.md)
 
 Hand-over document. Everything decided so far, in one place. Read it fully before writing code.
 
@@ -6,8 +6,8 @@ Hand-over document. Everything decided so far, in one place. Read it fully befor
 
 A **Home Assistant custom integration** that writes only selected entities to InfluxDB, selected through **Home Assistant labels** (plus a manual list), with changes taking effect **immediately, without restarting Home Assistant**.
 
-- Repository: https://github.com/vandecook/influx-picker (MIT license, owner `vandecook`)
-- Name: **Influx Picker**, domain `influx_picker`, repo `influx-picker`
+- Repository: https://github.com/vandecook/series-picker (MIT license, owner `vandecook`)
+- Name: **Series Picker**, domain `series_picker`, repo `series-picker` (renamed from Influx Picker / `influx_picker` on 2026-11-24 for trademark reasons; the GitHub repository rename is done by the maintainer)
 - Docs: README.md (en), README.de.md (de), ROADMAP.en.md (en), ROADMAP.de.md (de). Code for M0 exists on branch `m0-foundation`.
 - Language: the maintainer talks to you in **German**. Repository documentation, code comments, commit messages and UI source strings are **English**. German translation files are provided too.
 - The maintainer has little time and no deep expertise to review or test. **Automated tests are therefore the main safety net.** Be honest in docs about what is tested.
@@ -18,7 +18,7 @@ The core `influxdb` integration filters only via YAML (`include`/`exclude` with 
 
 ## 3. Requirements
 
-1. Supports InfluxDB **1.x, 2.x, 3.x**, but **implement InfluxDB 2 first**. 1.x and 3.x come later as **backend plugins**.
+1. Supports InfluxDB **1.x, 2.x, 3.x**, but **implement InfluxDB 2 first**. 1.x and 3.x come later as **backend plugins**. Status 2026-11-24: 1.x and 3.x stay planned but are **on hold** (maintainer does not use them); contributions welcome.
 2. **Maximum compatibility with the core integration** (schema, behavior, defaults) so existing Grafana queries and dashboards need as few changes as possible.
 3. **Two labels**, suggested names `influx` (write on change) and `influx-heartbeat` (write on change plus periodic heartbeat). The heartbeat label alone is enough (it implies export).
 4. A **manual entity list** in the config/options flow for entities that cannot carry labels (for example entities without a unique ID).
@@ -111,13 +111,14 @@ Source: Home Assistant Core `homeassistant/components/influxdb/__init__.py` and 
 
 - InfluxDB®, InfluxData®, Telegraf™, Kapacitor™, Chronograf™ are trademarks of **InfluxData Inc.**
 - Mention product names **descriptively only**, name InfluxData Inc. as the owner where a notice is needed, and never in a way that suggests affiliation or endorsement. Applies to docs, UI strings, code comments, translations, HACS metadata, repository description.
-- Keep the disclaimer in the README. The name "Influx Picker" contains "Influx"; this is fine for private use, but check the trademark guidelines before a wide public release (open question, not a blocker).
+- Source: InfluxData "Guidelines for Using InfluxData Trademarks" (https://www.influxdata.com/legal/guidelines-for-using-influxdata-trademarks/, checked 2026-11-24). No InfluxData mark (and no "Influx" shortening) in the project name; use marks as adjectives with ® / ™ ("for InfluxDB®"); no InfluxData logos.
+- Every page (Markdown file) that names an InfluxData mark ends with the notice: "InfluxDB® and InfluxData® are trademarks registered by InfluxData Inc., which is not affiliated with, and does not endorse, this project." (German: "… sind eingetragene Marken der InfluxData Inc., die mit diesem Projekt nicht verbunden ist und es nicht unterstützt.")
+- Keep the disclaimer in the README.
 - The README says honestly that the code is AI-generated and **not** thoroughly reviewed or tested. Keep that statement true: update it only when it changes.
 
 ## 10. Open questions
 
-1. **Trademark risk** of "Influx" in the name on a public release (check before publishing).
-2. Everything else is decided. Anything that comes up during the M1 audit that contradicts a decision above must be raised with the maintainer, not silently changed (especially the `_heartbeat` field if existing panels do not filter by `_field`).
+1. None. (The trademark question was resolved on 2026-11-24 by renaming to Series Picker.) Everything is decided. Anything that comes up during the M1 audit that contradicts a decision above must be raised with the maintainer, not silently changed (especially the `_heartbeat` field if existing panels do not filter by `_field`).
 
 ## 11. Working agreements
 
