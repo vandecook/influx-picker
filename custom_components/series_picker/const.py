@@ -1,6 +1,6 @@
-"""Constants for Influx Picker."""
+"""Constants for Series Picker."""
 
-DOMAIN = "influx_picker"
+DOMAIN = "series_picker"
 
 # Entry data
 CONF_BACKEND = "backend"

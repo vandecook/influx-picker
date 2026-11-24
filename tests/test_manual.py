@@ -11,30 +11,32 @@ from homeassistant.helpers import (
     device_registry as dr,
     entity_registry as er,
     issue_registry as ir,
+    label_registry as lr,
 )
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.influx_picker.const import DOMAIN
-from custom_components.influx_picker.issues import issue_id
-from custom_components.influx_picker.repairs import async_create_fix_flow
-from custom_components.influx_picker.selection import (
+from custom_components.series_picker.const import DOMAIN
+from custom_components.series_picker.issues import issue_id
+from custom_components.series_picker.repairs import async_create_fix_flow
+from custom_components.series_picker.selection import (
     Mode,
     Source,
     Status,
     compute_details,
+    label_lists,
     manual_status,
 )
 
 from .conftest import Written
 from .test_init import DATA, _entity, _flush, _setup
 
-SETUP = "custom_components.influx_picker.async_setup_entry"
+SETUP = "custom_components.series_picker.async_setup_entry"
 
 
 def _options(labels, **extra) -> dict:
     return {
-        "label_change": labels[0],
-        "label_heartbeat": labels[1],
+        "label_change": [labels[0]],
+        "label_heartbeat": [labels[1]],
         "heartbeat_interval": 15,
         "inherit_labels": True,
         "startup_snapshot": "now",
@@ -80,6 +82,44 @@ async def test_manual_merge_and_sources(hass: HomeAssistant, labels) -> None:
     assert manual_status(hass, "sensor.no_unique_id") is Status.OK
     assert manual_status(hass, "sensor.off") is Status.DISABLED
     assert manual_status(hass, "sensor.gone") is Status.MISSING
+
+
+async def test_several_labels_per_mode(hass: HomeAssistant, labels) -> None:
+    """Each field can hold several labels; any of them selects the entity."""
+    extra = lr.async_get(hass).async_create("Influx extra").label_id
+    first = _entity(hass, "first")
+    second = _entity(hass, "second")
+    both = _entity(hass, "both")
+    reg = er.async_get(hass)
+    reg.async_update_entity(first.entity_id, labels={labels[0]})
+    reg.async_update_entity(second.entity_id, labels={extra})
+    reg.async_update_entity(both.entity_id, labels={extra, labels[1]})
+    options = {**_options(labels), "label_change": [labels[0], extra]}
+    details = compute_details(hass, options)
+    assert details[first.entity_id].mode is Mode.CHANGE
+    assert details[second.entity_id].mode is Mode.CHANGE
+    assert details[both.entity_id].mode is Mode.HEARTBEAT
+
+
+def test_label_lists_reads_old_single_values() -> None:
+    """Up to 0.1.0 a label option held one label ID as a string."""
+    assert label_lists({"label_change": "a", "label_heartbeat": None}) == (["a"], [])
+    assert label_lists({"label_change": ["a", "b"]}) == (["a", "b"], [])
+    assert label_lists({}) == ([], [])
+
+
+async def test_old_single_label_options_still_select(
+    hass: HomeAssistant, labels
+) -> None:
+    """Entries saved with single label IDs keep working."""
+    entity = _entity(hass, "old")
+    er.async_get(hass).async_update_entity(entity.entity_id, labels={labels[1]})
+    options = {
+        **_options(labels),
+        "label_change": labels[0],
+        "label_heartbeat": labels[1],
+    }
+    assert compute_details(hass, options)[entity.entity_id].mode is Mode.HEARTBEAT
 
 
 async def test_manual_entity_is_written(
@@ -186,7 +226,7 @@ async def test_options_labels_optional_with_manual_list(
             result["flow_id"], new
         )
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options["label_change"] is None
+    assert entry.options["label_change"] == []
     assert entry.options["manual_change"] == ["sensor.a"]
 
 

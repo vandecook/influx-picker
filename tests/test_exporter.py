@@ -5,13 +5,13 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 
-from custom_components.influx_picker.backends import (
+from custom_components.series_picker.backends import (
     BackendAuthError,
     BackendConnectionError,
     BackendInvalidDataError,
 )
-from custom_components.influx_picker.exporter import Exporter
-from custom_components.influx_picker.point import Point
+from custom_components.series_picker.exporter import Exporter
+from custom_components.series_picker.point import Point
 
 T = datetime(2026, 11, 17, tzinfo=UTC)
 

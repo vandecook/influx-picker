@@ -4,7 +4,7 @@ Copied from Home Assistant Core, `homeassistant/components/influxdb/__init__.py`
 (`_generate_event_to_json`, branch `dev`, 2026-11-17), licensed under the
 Apache License 2.0, Copyright Home Assistant contributors. Only the include /
 exclude filter and the config parsing were removed. Used by tests only, to
-compare Influx Picker's output with the original algorithm.
+compare Series Picker's output with the original algorithm.
 
 When the core integration changes, update this copy and run the tests.
 """

@@ -6,7 +6,7 @@ really wrote to InfluxDB for that state: measurement, tags, field names, values
 and types. The fixtures are produced by `tools/compare_with_influx.py --dump`,
 not by the code under test.
 
-A test fails if Influx Picker would write anything different for the same state.
+A test fails if Series Picker would write anything different for the same state.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from typing import Any
 
 import pytest
 
-from custom_components.influx_picker.schema import schema_options_from, state_to_point
+from custom_components.series_picker.schema import schema_options_from, state_to_point
 
 FIXTURES = sorted((Path(__file__).parent / "fixtures").glob("real_data_*.json"))
 

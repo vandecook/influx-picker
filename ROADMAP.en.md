@@ -1,13 +1,13 @@
-# Roadmap: Influx Picker (`influx_picker`)
+# Roadmap: Series Picker (`series_picker`)
 
 [Deutsch](ROADMAP.de.md) · [README](README.md)
 
-Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; a first real test ran on 2026-11-23 (one installation, InfluxDB 2). Release v0.1.0 contains M0, M1 and M2; M3 is implemented but not released yet. Project name: **Influx Picker**, domain `influx_picker`. If the project is published, the trademark question needs to be checked first (see Open questions).
+Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; a first real test ran on 2026-11-23 (one installation, InfluxDB 2). Release v0.1.0 contains M0, M1 and M2; M3 is implemented but not released yet. Project name: **Series Picker**, domain `series_picker` (renamed from "Influx Picker" on 2026-11-24 after checking InfluxData's trademark guidelines, see Decided). Series Picker is a free, independent project; its purpose is to remove the Home Assistant restarts that the core integration needs whenever the set of written entities changes.
 
 ## Requirements (as of 2026-11-17)
 
 1. Supports InfluxDB **1.x, 2.x and 3.x**.
-2. Implement **InfluxDB 2 first**. 1.x and 3.x follow later through a **plugin system** (backends).
+2. Implement **InfluxDB 2 first**. 1.x and 3.x follow later through a **plugin system** (backends). Status 2026-11-24: 1.x and 3.x stay planned, but are not being worked on because the maintainer does not use them (see M5, M6).
 3. **Maximum compatibility with the core Home Assistant integration** (schema, behavior, defaults), so that existing Grafana queries need as few changes as possible.
 4. **Two labels** (for example `influx` and `influx-heartbeat`). Changes take effect immediately, without a restart.
 5. A **manual list** in the config/options flow for entities that cannot carry labels.
@@ -28,7 +28,7 @@ Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemen
 
 ## M0 – Foundation
 
-- [x] **Project name:** Influx Picker, domain `influx_picker` (changing it later means setting the integration up again).
+- [x] **Project name:** Series Picker, domain `series_picker` (changing it later means setting the integration up again). Renamed from Influx Picker (`influx_picker`) on 2026-11-24.
 - [x] **Project structure:** HACS-ready repository, config-entry based (`runtime_data`), de/en translations.
 - [x] **Neutral data model:** `Point` (measurement, tags, fields, timestamp), independent of the InfluxDB version.
 - [x] **Backend interface** and **registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. A new backend is one file plus a registration.
@@ -47,14 +47,14 @@ Goal: Grafana queries keep working unchanged.
 - [x] **Reproduce the core options:** set in a "Data format" step of the config flow (before the first point is written) and changeable in the options flow. Same names and defaults as the core YAML; per-entity settings are entered as YAML in the UI. `default_measurement`, `override_measurement`, `measurement_attr`, static `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [x] **Buffer defaults (decided):** flush after 1 s of quiet or 100 points (as in the core integration), skip rules for unknown/unavailable/empty, drop invalid batches. Queue bounded by count (default 50,000 points, about 10 MB), oldest points dropped on overflow, no extra age limit. Retry with backoff (5 s, rising to at most 60 s). Everything configurable (see M4).
 - [x] **Heartbeat marking (decided):** a **field** `_heartbeat=true`, written only on heartbeat points and on the initial snapshot of a newly selected entity. No tag, so heartbeat points stay in the same series as change points and existing panels keep their continuous lines. Change points carry no extra field. Audit result: no existing panels yet, so nothing to adapt; new panels should filter by `_field`. Optional later: switchable modes (tag / off).
-- [x] **Comparison tool:** `tools/compare_with_influx.py` compares the points the core integration wrote with the points Influx Picker would write for the same states (read-only), and can save the result as a golden fixture.
+- [x] **Comparison tool:** `tools/compare_with_influx.py` compares the points the core integration wrote with the points Series Picker would write for the same states (read-only), and can save the result as a golden fixture.
 
 Acceptance: existing Grafana queries return the same results with the new data. Status: no existing queries; the schema is checked against real core data instead (golden tests).
 
 ## M2 – InfluxDB 2 backend and selection (first usable state)
 
 - [x] **v2 backend** as the first plugin (`/api/v2/write`, token, org, bucket, SSL option, real validation of token/org/bucket during setup).
-- [x] **Label selection:** two labels, chosen in the UI with Home Assistant's label selector and stored by **label ID**, so renaming a label in Home Assistant does not break the selection. Resolved through the label registry, effective on registry changes without a restart.
+- [x] **Label selection:** two fields (write on change / with heartbeat), each with one or more labels (several per field since 2026-11-24, also because the single-label picker of the frontend sometimes showed a valid label as "unknown item"), chosen in the UI with Home Assistant's label selector and stored by **label ID**, so renaming a label in Home Assistant does not break the selection. Resolved through the label registry, effective on registry changes without a restart.
 - [x] **Inheritance** from device and area, can be switched off.
 - [x] **Initial write** for newly labelled entities.
 - [x] **Snapshot after a Home Assistant restart: configurable** (option "Snapshot when Home Assistant starts": current time with `_heartbeat` (default) / own `last_updated` with field `_startup=true` / off). Background, from the first real test: after every start and every reload of the entry (for example after saving options), each selected entity gets one point with the **current time** and `_heartbeat=true`. This closes the gap the core integration leaves for states set during start, but writes the value at the wrong time and marks it as heartbeat. Alternative proposal: write the state with its own `last_updated` timestamp and **without** `_heartbeat` (an existing point is overwritten with identical values, a missing one is filled at the correct time). Cost either way: one point per selected entity per restart/reload. Decided 2026-11-23: both, as an option, plus "off".
@@ -85,6 +85,8 @@ Acceptance: existing Grafana queries return the same results with the new data. 
 
 ## M5 – InfluxDB 1.x backend
 
+Planned, but on hold: the maintainer does not use InfluxDB 1.x, so nobody works on it right now. Contributions are very welcome. A backend is one file plus a registration (see M0); please open an issue first.
+
 - [ ] Endpoint `/write?db=&rp=&precision=`, auth by user/password or none.
 - [ ] Fields: URL, database, retention policy, user, password, SSL.
 - [ ] Handle field type conflicts (InfluxDB 1 rejects writes when a field changes its type).
@@ -92,6 +94,8 @@ Acceptance: existing Grafana queries return the same results with the new data. 
 - [ ] Integration test against an InfluxDB 1 container.
 
 ## M6 – InfluxDB 3 backend
+
+Planned, but on hold for the same reason as M5: the maintainer does not use InfluxDB 3. Contributions are very welcome.
 
 - [ ] Endpoint `/api/v3/write_lp?db=&precision=` with a bearer token.
 - [ ] Fields: URL, database, token, SSL.
@@ -133,7 +137,7 @@ Goal: select and deselect entities easily, see at a glance what is exported and 
 1. **M0** and **M1** (foundation and compatibility). The schema must be settled before production data is written.
 2. **M2** (first usable state with InfluxDB 2).
 3. **M3** (change connection data, manual list, overview as a list) and **M4** (buffering, diagnostics).
-4. **M5**, **M6** (InfluxDB 1 and 3).
+4. **M5**, **M6** (InfluxDB 1 and 3): on hold until someone who uses these versions contributes.
 5. **M7**, **M8** in parallel as needed.
 6. **M9** (panel) much later, after the first release.
 
@@ -144,7 +148,13 @@ Goal: select and deselect entities easily, see at a glance what is exported and 
 - **Attributes:** like the core integration (see M1).
 - **Heartbeat marking:** field `_heartbeat`, no tag (see M1).
 - **Overview:** starts as a list in the options flow (M3). The dedicated panel comes much later (M9).
+- **Project name (2026-11-24):** InfluxData's "Guidelines for Using InfluxData Trademarks" do not allow InfluxData marks in the name of third-party products without permission, and say the platform should not be shortened to "Influx". The project was therefore renamed from Influx Picker to **Series Picker**. InfluxDB® is named only descriptively ("for InfluxDB®"), and every page that names it ends with the trademark notice the guidelines ask for.
+- **InfluxDB 1.x and 3.x (2026-11-24):** planned, on hold, contributions welcome (see M5, M6).
 
 ## Open questions
 
-1. **Trademark risk on publication:** "Influx" in the name may conflict with InfluxData's trademark guidelines when the project is public. Check before publishing, keep to descriptive use only, and state that the project is not affiliated with InfluxData. Not an issue for purely private use.
+None at the moment.
+
+---
+
+InfluxDB® and InfluxData® are trademarks registered by InfluxData Inc., which is not affiliated with, and does not endorse, this project.

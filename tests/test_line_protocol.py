@@ -6,8 +6,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from custom_components.influx_picker.line_protocol import timestamp, to_body, to_line
-from custom_components.influx_picker.point import Point
+from custom_components.series_picker.line_protocol import timestamp, to_body, to_line
+from custom_components.series_picker.point import Point
 
 T = datetime(2026, 11, 17, 12, 0, 0, 123456, tzinfo=UTC)
 TS = 1794916800123456000

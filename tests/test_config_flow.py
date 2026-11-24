@@ -10,15 +10,15 @@ from homeassistant.data_entry_flow import FlowResultType
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.influx_picker.backends import (
+from custom_components.series_picker.backends import (
     BackendAuthError,
     BackendConnectionError,
     BackendNotFoundError,
 )
-from custom_components.influx_picker.const import DOMAIN
+from custom_components.series_picker.const import DOMAIN
 
-VALIDATE = "custom_components.influx_picker.backends.v2.InfluxDB2Backend.validate"
-SETUP = "custom_components.influx_picker.async_setup_entry"
+VALIDATE = "custom_components.series_picker.backends.v2.InfluxDB2Backend.validate"
+SETUP = "custom_components.series_picker.async_setup_entry"
 
 CONNECTION = {
     "url": "http://influx.test:8086",
@@ -28,8 +28,8 @@ CONNECTION = {
     "verify_ssl": True,
 }
 SELECTION = {
-    "label_change": "influx",
-    "label_heartbeat": "influx_heartbeat",
+    "label_change": ["influx"],
+    "label_heartbeat": ["influx_heartbeat"],
     "heartbeat_interval": 15,
     "inherit_labels": True,
     "startup_snapshot": "now",
@@ -110,10 +110,10 @@ async def test_connection_errors(hass: HomeAssistant, error, key) -> None:
 
 @pytest.mark.parametrize(
     ("change", "heartbeat", "key"),
-    [(None, None, "no_label"), ("a", "a", "same_label")],
+    [(None, None, "no_label"), (["a"], ["b", "a"], "same_label")],
 )
 async def test_selection_errors(hass: HomeAssistant, change, heartbeat, key) -> None:
-    """At least one label, and two different labels."""
+    """At least one label, and no label in both fields."""
     flow_id = await _to_connection_step(hass)
     with patch(VALIDATE, AsyncMock()):
         await hass.config_entries.flow.async_configure(flow_id, CONNECTION)
@@ -133,12 +133,12 @@ async def test_heartbeat_label_alone_is_enough(hass: HomeAssistant) -> None:
         await hass.config_entries.flow.async_configure(flow_id, CONNECTION)
     await hass.config_entries.flow.async_configure(
         flow_id,
-        {"label_heartbeat": "hb", "heartbeat_interval": 5, "inherit_labels": False},
+        {"label_heartbeat": ["hb"], "heartbeat_interval": 5, "inherit_labels": False},
     )
     with patch(SETUP, return_value=True):
         result = await hass.config_entries.flow.async_configure(flow_id, {})
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["options"]["label_change"] is None
+    assert result["options"]["label_change"] == []
 
 
 async def test_duplicate_target_aborts(hass: HomeAssistant) -> None:
@@ -238,7 +238,7 @@ async def test_options_flow(hass: HomeAssistant) -> None:
         result["flow_id"], {"next_step_id": "selection"}
     )
     assert result["step_id"] == "selection"
-    new = {**SELECTION, "label_change": "other", "heartbeat_interval": 30}
+    new = {**SELECTION, "label_change": ["other", "more"], "heartbeat_interval": 30}
     with patch(SETUP, return_value=True):
         result = await hass.config_entries.options.async_configure(
             result["flow_id"], new
@@ -353,7 +353,7 @@ def test_translation_keys_valid() -> None:
     import re
 
     rule = re.compile(r"^(?!.*__)[a-z0-9]+(?:[a-z0-9_-]*[a-z0-9])?$")
-    base = Path(__file__).parent.parent / "custom_components" / "influx_picker"
+    base = Path(__file__).parent.parent / "custom_components" / "series_picker"
     for path in [base / "strings.json", *(base / "translations").glob("*.json")]:
         data = json.loads(path.read_text(encoding="utf-8"))
         for selector in data.get("selector", {}).values():

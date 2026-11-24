@@ -1,7 +1,7 @@
-"""Compare Influx Picker's output with points the core integration really wrote.
+"""Compare Series Picker's output with points the core integration really wrote.
 
 For each Home Assistant state in an input file, this tool builds the point with
-Influx Picker's schema code and reads the point the core `influxdb` integration
+Series Picker's schema code and reads the point the core `influxdb` integration
 wrote for the same entity at the same timestamp. It then reports differences in
 measurement, tags, field names, field values and field types.
 
@@ -48,7 +48,7 @@ from typing import Any
 import urllib.parse
 import urllib.request
 
-from custom_components.influx_picker.schema import (
+from custom_components.series_picker.schema import (
     EntityCustomization,
     SchemaOptions,
     state_to_point,

@@ -2,13 +2,21 @@
 
 **English** · [Deutsch](installation.de.md) · [README](../README.md)
 
-This guide walks through installing Influx Picker, setting it up, and every
+This guide walks through installing Series Picker, setting it up, and every
 setting it has. It is based on a first real installation in the maintainer's
 Home Assistant (2026-11-23).
 
 > **Early version.** The code is largely AI-generated and not thoroughly
 > reviewed (see the [status note](../README.md)). Start with a **test
 > bucket**, not your production data.
+
+> **Coming from Influx Picker 0.1.0?** The project was renamed to Series
+> Picker, and the integration domain changed from `influx_picker` to
+> `series_picker`. Home Assistant treats it as a new integration: delete the
+> old Influx Picker entry, remove the old repository in HACS (or delete
+> `custom_components/influx_picker`), install Series Picker as described
+> below and set it up again. Your labels and the data in InfluxDB stay as
+> they are; choose the same labels and data format again.
 
 ## Contents
 
@@ -30,7 +38,8 @@ You need:
 - **Home Assistant 2026.10 or newer.**
 - **HACS** (on Home Assistant 2026.11 and newer: the built-in **Marketplace**),
   or access to the `config` folder for a manual install.
-- An **InfluxDB® 2.x** server. InfluxDB 1.x and 3.x are not supported yet.
+- An **InfluxDB® 2.x** server. InfluxDB 1.x and 3.x are not supported (planned, but on hold
+  until someone who uses them contributes).
 - In InfluxDB:
   - the **organization** (name or ID),
   - a **bucket** to write to (for a first test, create a separate one, for
@@ -46,9 +55,9 @@ works but is not needed.
 
 1. Open **HACS** (or **Settings → Marketplace**).
 2. Menu (three dots, top right) → **Custom repositories**.
-3. Repository `https://github.com/vandecook/influx-picker`, type
+3. Repository `https://github.com/vandecook/series-picker`, type
    **Integration**, then **Add**.
-4. Search for **Influx Picker**, open it, click **Download**.
+4. Search for **Series Picker**, open it, click **Download**.
 5. **Restart Home Assistant.**
 
 HACS installs the latest release. Updates show up in HACS like for any other
@@ -57,16 +66,17 @@ integration.
 ### Manually
 
 1. Download the repository (**Code → Download ZIP**).
-2. Copy `custom_components/influx_picker` into the `custom_components` folder of
+2. Copy `custom_components/series_picker` into the `custom_components` folder of
    your Home Assistant configuration, so that
-   `config/custom_components/influx_picker/manifest.json` exists.
+   `config/custom_components/series_picker/manifest.json` exists.
 3. **Restart Home Assistant.**
 
 ## 3. Set up
 
 ### 3.1 Create labels
 
-Influx Picker writes entities that carry one of **two labels**. Create them
+Series Picker writes entities that carry one of its labels. There are **two
+fields**, one per mode, and each can hold one or more labels. Create the labels
 first: **Settings → Areas, labels & zones → Labels → Create label**.
 
 | Label (suggestion) | Effect |
@@ -74,12 +84,14 @@ first: **Settings → Areas, labels & zones → Labels → Create label**.
 | `influx` | Write on every change. |
 | `influx-heartbeat` | Write on every change **and** again periodically while nothing changes (heartbeat). |
 
-Names are free. Influx Picker stores the label's **ID**, so renaming a label
-later does not break anything. You can also use only one of the two labels.
+Names are free. Series Picker stores the label's **ID**, so renaming a label
+later does not break anything. You can also fill only one of the two fields,
+or put several labels into one field (for example existing labels such as
+`pv` or `heat-pump`).
 
 ### 3.2 Add the integration
 
-**Settings → Devices & services → Add integration → Influx Picker.** The setup
+**Settings → Devices & services → Add integration → Series Picker.** The setup
 has four steps.
 
 **Step 1: Database version.** Choose **InfluxDB 2.x**.
@@ -97,7 +109,7 @@ has four steps.
 The connection is checked with a **real write request**, so a wrong token,
 organization or bucket is reported right here.
 
-**Step 3: Entity selection.** Choose the two labels, the heartbeat interval,
+**Step 3: Entity selection.** Choose the labels for both modes, the heartbeat interval,
 whether labels of devices and areas count, and what is written at start. Details in
 [section 6.1](#61-entity-selection).
 
@@ -138,7 +150,7 @@ heartbeat, see [section 6.1](#61-entity-selection)).
 
 ### Manual list
 
-**Settings → Devices & services → Influx Picker → Configure → Manual list.**
+**Settings → Devices & services → Series Picker → Configure → Manual list.**
 Two lists: **Write on change** and **Write on change and heartbeat**. They work
 in addition to the labels. If an entity is selected twice, heartbeat wins. The
 form shows which listed entities no longer exist and which a label selects
@@ -162,7 +174,7 @@ are disabled are marked. Long lists are cut after 100 lines.
 
 ## 5. Change settings later
 
-**Settings → Devices & services → Influx Picker → Configure.** A menu opens:
+**Settings → Devices & services → Series Picker → Configure.** A menu opens:
 
 - **Labels and interval:** labels, heartbeat interval, inheritance, snapshot.
 - **Manual list:** see [section 4](#4-select-entities).
@@ -175,7 +187,7 @@ reload every selected entity gets one snapshot again, depending on
 
 ### Change the connection (URL, token, …)
 
-**Settings → Devices & services → Influx Picker → ⋮ → Reconfigure.** Change
+**Settings → Devices & services → Series Picker → ⋮ → Reconfigure.** Change
 URL, organization, bucket, token or the certificate check. Leave the token
 empty to keep the current one. The new connection is checked with a real write
 request before it is saved; labels and data format stay as they are. If you
@@ -195,13 +207,14 @@ works, unless Home Assistant is restarted in between.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| Label: write on change | – | Entities with this label are written on every state or attribute change. |
-| Label: write on change and heartbeat | – | Like above, plus a heartbeat write when nothing was written during the interval. If an entity has both labels, heartbeat wins. |
+| Labels: write on change | – | Entities with one of these labels are written on every state or attribute change. |
+| Labels: write on change and heartbeat | – | Like above, plus a heartbeat write when nothing was written during the interval. If an entity has labels from both fields, heartbeat wins. |
 | Heartbeat interval | 15 min | 1 to 1440 minutes. Checked once per minute, so a heartbeat comes up to one minute late. |
 | Include labels of the device and area | on | Off: only labels on the entity itself count. |
 | Snapshot when Home Assistant starts | Current time, marked as heartbeat | See below. |
 
-At least one label is required. Both labels must be different.
+At least one label is required (or an entry in the manual list). A label can
+only be in one of the two fields.
 
 **Heartbeat and snapshot points** carry an extra field `_heartbeat=true`.
 Change points do not. Points marked like this are written:
@@ -297,7 +310,7 @@ working.
 2. Copy these values into **Data format** (setup step 4, or later via
    **Configure → Data format**):
 
-   | In your YAML | Field in Influx Picker |
+   | In your YAML | Field in Series Picker |
    |---|---|
    | `measurement_attr: …` | Measurement from |
    | `default_measurement: units` | Default measurement: `units` |
@@ -333,8 +346,8 @@ working.
 
 - **Compare with the core integration** (developers): `tools/compare_with_influx.py`
   compares, for given states, the points the core integration wrote with the
-  points Influx Picker would write (read-only).
-- **Logs:** Settings → System → Logs, search for `influx_picker`. Write errors
+  points Series Picker would write (read-only).
+- **Logs:** Settings → System → Logs, search for `series_picker`. Write errors
   are logged once, then only at debug level until writing works again.
 
 ## 9. Troubleshooting
@@ -348,18 +361,18 @@ working.
 | Points land in measurements named after the entity ID (`switch.kitchen`) | No **default measurement** set. If you came from the core integration, copy `default_measurement` ([section 7](#7-coming-from-the-core-influxdb-integration)). |
 | `friendly_name` is a field (`friendly_name_str`) instead of a tag | Add `friendly_name` to **Attributes written as tags**. |
 | An entity is not written | Does it have a unique ID (otherwise no labels)? Is it disabled? Is its state `unknown`/`unavailable`? Is the label on the entity, device or area, and is inheritance on for device/area labels? |
-| Options form shows a label as "Unknown item" | Seen once right after the labels were created while the page was open; the stored value was correct. Reload the page (Ctrl+F5). If it stays, please open an issue. |
+| Options form shows a label as "Unknown item" (up to 0.1.0) | A display problem of the single-label picker in the Home Assistant frontend; the stored value was correct. Since the label fields allow several labels, a different picker is used. If it still happens, reload the page (Ctrl+F5) and please open an issue. |
 | Every change appears twice | The core integration writes the same entities to the same bucket ([section 7](#7-coming-from-the-core-influxdb-integration), step 4). |
 
 ## 10. Remove
 
-1. **Settings → Devices & services → Influx Picker → ⋮ → Delete.**
-2. Remove it in HACS (or delete `custom_components/influx_picker`).
+1. **Settings → Devices & services → Series Picker → ⋮ → Delete.**
+2. Remove it in HACS (or delete `custom_components/series_picker`).
 3. Restart Home Assistant.
 4. Delete the labels if you no longer need them. Data already written stays in
    InfluxDB.
 
 ---
 
-InfluxDB® is a registered trademark of InfluxData Inc. This project is not
-affiliated with, endorsed by, or sponsored by InfluxData Inc.
+InfluxDB® and InfluxData® are trademarks registered by InfluxData Inc., which
+is not affiliated with, and does not endorse, this project.

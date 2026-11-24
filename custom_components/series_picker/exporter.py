@@ -98,7 +98,7 @@ class Exporter:
         """Start the writer task."""
         if self._task is None:
             self._task = asyncio.get_running_loop().create_task(
-                self._run(), name=f"influx_picker exporter {self._name}"
+                self._run(), name=f"series_picker exporter {self._name}"
             )
 
     async def stop(self, flush_timeout: float) -> None:

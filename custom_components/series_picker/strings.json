@@ -21,10 +21,10 @@
       },
       "selection": {
         "title": "Entity selection",
-        "description": "Entities with one of these labels are written. The heartbeat label also writes the current state again when nothing was written during the interval.",
+        "description": "Entities with one of these labels are written. Heartbeat labels also write the current state again when nothing was written during the interval.",
         "data": {
-          "label_change": "Label: write on change",
-          "label_heartbeat": "Label: write on change and heartbeat",
+          "label_change": "Labels: write on change",
+          "label_heartbeat": "Labels: write on change and heartbeat",
           "heartbeat_interval": "Heartbeat interval",
           "inherit_labels": "Include labels of the device and area",
           "startup_snapshot": "Snapshot when Home Assistant starts"
@@ -86,7 +86,7 @@
       "invalid_auth": "The token is invalid or has no write permission.",
       "not_found": "Organization or bucket not found.",
       "no_label": "Choose at least one label.",
-      "same_label": "Choose two different labels.",
+      "same_label": "A label can only be in one of the two fields.",
       "unknown": "Unexpected error.",
       "invalid_tags": "Use one key=value per line.",
       "invalid_component_config": "Expected a mapping to override_measurement (text) and/or ignore_attributes (list).",
@@ -112,10 +112,10 @@
       },
       "selection": {
         "title": "Entity selection",
-        "description": "Entities with one of these labels are written. The heartbeat label also writes the current state again when nothing was written during the interval.",
+        "description": "Entities with one of these labels are written. Heartbeat labels also write the current state again when nothing was written during the interval.",
         "data": {
-          "label_change": "Label: write on change",
-          "label_heartbeat": "Label: write on change and heartbeat",
+          "label_change": "Labels: write on change",
+          "label_heartbeat": "Labels: write on change and heartbeat",
           "heartbeat_interval": "Heartbeat interval",
           "inherit_labels": "Include labels of the device and area",
           "startup_snapshot": "Snapshot when Home Assistant starts"
@@ -166,7 +166,7 @@
     },
     "error": {
       "no_label": "Choose at least one label, or add entities to the manual list.",
-      "same_label": "Choose two different labels.",
+      "same_label": "A label can only be in one of the two fields.",
       "invalid_tags": "Use one key=value per line.",
       "invalid_component_config": "Expected a mapping to override_measurement (text) and/or ignore_attributes (list).",
       "invalid_measurement_attr": "Unknown choice.",
@@ -198,7 +198,7 @@
   },
   "issues": {
     "missing_manual_entities": {
-      "title": "Influx Picker: manually listed entities no longer exist",
+      "title": "Series Picker: manually listed entities no longer exist",
       "fix_flow": {
         "step": {
           "confirm": {

@@ -14,12 +14,12 @@ import os
 import aiohttp
 import pytest
 
-from custom_components.influx_picker.backends import (
+from custom_components.series_picker.backends import (
     BackendAuthError,
     BackendNotFoundError,
 )
-from custom_components.influx_picker.backends.v2 import InfluxDB2Backend
-from custom_components.influx_picker.schema import SchemaOptions, state_to_point
+from custom_components.series_picker.backends.v2 import InfluxDB2Backend
+from custom_components.series_picker.schema import SchemaOptions, state_to_point
 
 ENV = {
     "url": os.environ.get("INFLUXDB_V2_URL"),

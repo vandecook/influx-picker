@@ -9,14 +9,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import label_registry as lr
 import pytest
 
-from custom_components.influx_picker.point import Point
+from custom_components.series_picker.point import Point
 
-BACKEND = "custom_components.influx_picker.backends.v2.InfluxDB2Backend"
+BACKEND = "custom_components.series_picker.backends.v2.InfluxDB2Backend"
 
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations):
-    """Let Home Assistant load custom_components/influx_picker in every test."""
+    """Let Home Assistant load custom_components/series_picker in every test."""
     return
 
 

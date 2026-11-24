@@ -21,10 +21,10 @@
       },
       "selection": {
         "title": "Auswahl der Entitäten",
-        "description": "Entitäten mit einem dieser Labels werden geschrieben. Das Heartbeat-Label schreibt den aktuellen Zustand zusätzlich erneut, wenn im Intervall nichts geschrieben wurde.",
+        "description": "Entitäten mit einem dieser Labels werden geschrieben. Heartbeat-Labels schreiben den aktuellen Zustand zusätzlich erneut, wenn im Intervall nichts geschrieben wurde.",
         "data": {
-          "label_change": "Label: bei Änderung schreiben",
-          "label_heartbeat": "Label: bei Änderung und als Heartbeat schreiben",
+          "label_change": "Labels: bei Änderung schreiben",
+          "label_heartbeat": "Labels: bei Änderung und als Heartbeat schreiben",
           "heartbeat_interval": "Heartbeat-Intervall",
           "inherit_labels": "Labels von Gerät und Bereich einbeziehen",
           "startup_snapshot": "Startwert beim Start von Home Assistant"
@@ -86,7 +86,7 @@
       "invalid_auth": "Das Token ist ungültig oder hat keine Schreibrechte.",
       "not_found": "Organisation oder Bucket nicht gefunden.",
       "no_label": "Wähle mindestens ein Label.",
-      "same_label": "Wähle zwei verschiedene Labels.",
+      "same_label": "Ein Label darf nur in einem der beiden Felder stehen.",
       "unknown": "Unerwarteter Fehler.",
       "invalid_tags": "Ein Schlüssel=Wert pro Zeile.",
       "invalid_component_config": "Erwartet wird eine Zuordnung zu override_measurement (Text) und/oder ignore_attributes (Liste).",
@@ -112,10 +112,10 @@
       },
       "selection": {
         "title": "Auswahl der Entitäten",
-        "description": "Entitäten mit einem dieser Labels werden geschrieben. Das Heartbeat-Label schreibt den aktuellen Zustand zusätzlich erneut, wenn im Intervall nichts geschrieben wurde.",
+        "description": "Entitäten mit einem dieser Labels werden geschrieben. Heartbeat-Labels schreiben den aktuellen Zustand zusätzlich erneut, wenn im Intervall nichts geschrieben wurde.",
         "data": {
-          "label_change": "Label: bei Änderung schreiben",
-          "label_heartbeat": "Label: bei Änderung und als Heartbeat schreiben",
+          "label_change": "Labels: bei Änderung schreiben",
+          "label_heartbeat": "Labels: bei Änderung und als Heartbeat schreiben",
           "heartbeat_interval": "Heartbeat-Intervall",
           "inherit_labels": "Labels von Gerät und Bereich einbeziehen",
           "startup_snapshot": "Startwert beim Start von Home Assistant"
@@ -166,7 +166,7 @@
     },
     "error": {
       "no_label": "Wähle mindestens ein Label oder trage Entitäten in die manuelle Liste ein.",
-      "same_label": "Wähle zwei verschiedene Labels.",
+      "same_label": "Ein Label darf nur in einem der beiden Felder stehen.",
       "invalid_tags": "Ein Schlüssel=Wert pro Zeile.",
       "invalid_component_config": "Erwartet wird eine Zuordnung zu override_measurement (Text) und/oder ignore_attributes (Liste).",
       "invalid_measurement_attr": "Unbekannte Auswahl.",
@@ -198,7 +198,7 @@
   },
   "issues": {
     "missing_manual_entities": {
-      "title": "Influx Picker: manuell gelistete Entitäten gibt es nicht mehr",
+      "title": "Series Picker: manuell gelistete Entitäten gibt es nicht mehr",
       "fix_flow": {
         "step": {
           "confirm": {

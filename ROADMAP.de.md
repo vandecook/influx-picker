@@ -1,13 +1,13 @@
-# Roadmap: Influx Picker (`influx_picker`)
+# Roadmap: Series Picker (`series_picker`)
 
 [English](ROADMAP.en.md) · [README (Deutsch)](README.de.md)
 
-Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; ein erster Praxistest lief am 23.11.2026 (eine Installation, InfluxDB 2). Release v0.1.0 enthält M0, M1 und M2; M3 ist umgesetzt, aber noch nicht veröffentlicht. Projektname: **Influx Picker**, Domain `influx_picker`. Bei einer Veröffentlichung ist zuerst die Markenfrage zu prüfen (siehe Offene Fragen).
+Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt unten: umgesetzt und durch automatische Tests abgedeckt; ein erster Praxistest lief am 23.11.2026 (eine Installation, InfluxDB 2). Release v0.1.0 enthält M0, M1 und M2; M3 ist umgesetzt, aber noch nicht veröffentlicht. Projektname: **Series Picker**, Domain `series_picker` (am 24.11.2026 von „Influx Picker“ umbenannt, nach Prüfung der Markenrichtlinien von InfluxData, siehe Beschlossen). Series Picker ist ein freies, unabhängiges Projekt; sein Zweck ist, die Neustarts von Home Assistant überflüssig zu machen, die die native Integration bei jeder Änderung der zu schreibenden Entitäten braucht.
 
 ## Anforderungen (Stand 17.11.2026)
 
 1. Unterstützt InfluxDB **1.x, 2.x und 3.x**.
-2. Zuerst nur **InfluxDB 2** umsetzen. 1 und 3 kommen später über ein **Plugin-System** (Backends).
+2. Zuerst nur **InfluxDB 2** umsetzen. 1 und 3 kommen später über ein **Plugin-System** (Backends). Stand 24.11.2026: 1.x und 3.x bleiben geplant, werden aber derzeit nicht umgesetzt, weil der Maintainer sie nicht nutzt (siehe M5, M6).
 3. **Maximale Kompatibilität zur nativen HA-Integration** (Schema, Verhalten, Standardwerte), damit der Aufwand für Änderungen in Grafana gering bleibt.
 4. **Zwei Labels** (z. B. `influx` und `influx-heartbeat`). Änderungen wirken sofort, ohne Neustart.
 5. Für Entitäten, die keine Labels tragen können, eine **eigene Liste** im Config-/Options-Flow.
@@ -28,7 +28,7 @@ Arbeit begonnen am 17.11.2026 (Branch `m0-foundation`). „Erledigt“ heißt un
 
 ## M0 – Fundament
 
-- [x] **Projektname:** Influx Picker, Domain `influx_picker` (später nur mit Neueinrichtung änderbar).
+- [x] **Projektname:** Series Picker, Domain `series_picker` (später nur mit Neueinrichtung änderbar). Am 24.11.2026 von Influx Picker (`influx_picker`) umbenannt.
 - [x] **Projektstruktur:** HACS-fähiges Repository, Config-Entry-basiert (`runtime_data`), de/en-Übersetzungen.
 - [x] **Neutrales Datenmodell:** `Point` (measurement, tags, fields, timestamp), unabhängig von der Influx-Version.
 - [x] **Backend-Interface** und **Registry** (`v1`, `v2`, `v3`): `schema()`, `async validate()`, `async write(points)`, `async close()`. Neues Backend = eine Datei plus Registrierung.
@@ -47,14 +47,14 @@ Ziel: Grafana-Abfragen laufen unverändert weiter.
 - [x] **Native Optionen nachbilden:** im Schritt "Datenformat" des Config Flows einstellbar (bevor der erste Punkt geschrieben wird) und im Options Flow änderbar. Gleiche Namen und Standardwerte wie im nativen YAML; Einstellungen pro Entität werden in der UI als YAML eingegeben. `default_measurement`, `override_measurement`, `measurement_attr`, statische `tags`, `tags_attributes`, `ignore_attributes`, `component_config` (`_domain`, `_glob`).
 - [x] **Puffer-Standardwerte (beschlossen):** Flush nach 1 s Ruhe oder 100 Einträgen (wie nativ), Skip-Regeln für unknown/unavailable/leer, Verwerfen ungültiger Batches. Queue-Begrenzung nach Anzahl (Standard 50.000 Punkte, ca. 10 MB), bei Überlauf werden die ältesten verworfen, kein zusätzliches Alters-Limit. Wiederholung bei Fehler mit Backoff (5 s, steigend bis max. 60 s). Alles konfigurierbar (siehe M4).
 - [x] **Heartbeat-Markierung (beschlossen):** ein **Feld** `_heartbeat=true`, nur an Heartbeat-Punkten und am Startwert einer neu selektierten Entität. Kein Tag, damit Heartbeat-Punkte in derselben Series wie Änderungspunkte bleiben und bestehende Panels ihre durchgehenden Linien behalten. Änderungspunkte tragen kein Zusatzfeld. Ergebnis des Audits: noch keine bestehenden Panels, also nichts anzupassen; neue Panels sollten nach `_field` filtern. Optional später: umschaltbare Modi (Tag / aus).
-- [x] **Vergleichswerkzeug:** `tools/compare_with_influx.py` vergleicht die Punkte der nativen Integration mit den Punkten, die Influx Picker für dieselben Zustände schreiben würde (nur lesend), und kann das Ergebnis als Golden-Fixture speichern.
+- [x] **Vergleichswerkzeug:** `tools/compare_with_influx.py` vergleicht die Punkte der nativen Integration mit den Punkten, die Series Picker für dieselben Zustände schreiben würde (nur lesend), und kann das Ergebnis als Golden-Fixture speichern.
 
 Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebnis. Stand: keine bestehenden Abfragen; stattdessen ist das Schema gegen echte Daten der nativen Integration geprüft (Golden-Tests).
 
 ## M2 – InfluxDB-2-Backend und Selektion (erster nutzbarer Stand)
 
 - [x] **v2-Backend** als erstes Plugin (`/api/v2/write`, Token, Org, Bucket, SSL-Option, echte Prüfung von Token/Org/Bucket beim Einrichten).
-- [x] **Label-Selektion:** zwei Labels, in der UI mit dem Label-Selector von Home Assistant gewählt und über die **Label-ID** gespeichert, damit das Umbenennen eines Labels in Home Assistant die Auswahl nicht kaputt macht. Auflösung über die Label-Registry, Wirkung bei Registry-Änderung ohne Neustart.
+- [x] **Label-Selektion:** zwei Felder (bei Änderung / mit Heartbeat), jedes mit einem oder mehreren Labels (mehrere pro Feld seit 24.11.2026, auch weil die Einzel-Label-Auswahl des Frontends ein gültiges Label manchmal als „Unbekanntes Element“ zeigte), in der UI mit dem Label-Selector von Home Assistant gewählt und über die **Label-ID** gespeichert, damit das Umbenennen eines Labels in Home Assistant die Auswahl nicht kaputt macht. Auflösung über die Label-Registry, Wirkung bei Registry-Änderung ohne Neustart.
 - [x] **Vererbung** von Gerät und Bereich, abschaltbar.
 - [x] **Initialer Schreibvorgang** für neu gelabelte Entitäten.
 - [x] **Startwert nach einem Neustart von Home Assistant: einstellbar** (Option "Startwert beim Start von Home Assistant": aktuelle Zeit mit `_heartbeat` (Standard) / eigenes `last_updated` mit Feld `_startup=true` / aus). Hintergrund aus dem ersten Praxistest: Nach jedem Start und jedem Neuladen des Eintrags (zum Beispiel nach dem Speichern der Optionen) bekommt jede ausgewählte Entität einen Punkt mit der **aktuellen Uhrzeit** und `_heartbeat=true`. Das schließt die Lücke, die die native Integration bei Zuständen lässt, die während des Starts gesetzt werden, schreibt den Wert aber zum falschen Zeitpunkt und markiert ihn als Heartbeat. Alternativer Vorschlag: den Zustand mit seinem eigenen `last_updated` als Zeitstempel und **ohne** `_heartbeat` schreiben (ein vorhandener Punkt wird mit identischen Werten überschrieben, ein fehlender zum richtigen Zeitpunkt ergänzt). Kosten in beiden Fällen: ein Punkt pro ausgewählter Entität und Neustart/Neuladen. Entschieden am 2026-11-23: beides als Option, dazu "aus".
@@ -85,6 +85,8 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 
 ## M5 – InfluxDB 1.x Backend
 
+Geplant, ruht aber: Der Maintainer nutzt InfluxDB 1.x nicht, deshalb arbeitet derzeit niemand daran. Beiträge sind sehr willkommen. Ein Backend ist eine Datei plus Registrierung (siehe M0); bitte vorher ein Issue anlegen.
+
 - [ ] Endpoint `/write?db=&rp=&precision=`, Auth per Benutzer/Passwort oder ohne.
 - [ ] Felder: URL, Datenbank, Retention Policy, Benutzer, Passwort, SSL.
 - [ ] Feldtyp-Konflikte behandeln (InfluxDB 1 verweigert das Schreiben, wenn ein Feld seinen Typ wechselt).
@@ -92,6 +94,8 @@ Abnahme: Bestehende Grafana-Abfragen liefern mit den neuen Daten dasselbe Ergebn
 - [ ] Integrationstest gegen InfluxDB-1-Container.
 
 ## M6 – InfluxDB 3 Backend
+
+Geplant, ruht aus demselben Grund wie M5: Der Maintainer nutzt InfluxDB 3 nicht. Beiträge sind sehr willkommen.
 
 - [ ] Endpoint `/api/v3/write_lp?db=&precision=` mit Bearer-Token.
 - [ ] Felder: URL, Datenbank, Token, SSL.
@@ -133,7 +137,7 @@ Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was export
 1. **M0** und **M1** (Fundament und Kompatibilität). Das Schema muss feststehen, bevor produktiv Daten geschrieben werden.
 2. **M2** (erster nutzbarer Stand mit InfluxDB 2).
 3. **M3** (Verbindungsdaten ändern, manuelle Liste, Übersicht als Liste) und **M4** (Puffer, Diagnose).
-4. **M5**, **M6** (InfluxDB 1 und 3).
+4. **M5**, **M6** (InfluxDB 1 und 3): ruhen, bis jemand, der diese Versionen nutzt, sie beisteuert.
 5. **M7**, **M8** parallel nach Bedarf.
 6. **M9** (Panel) viel später, nach dem ersten Release.
 
@@ -144,7 +148,13 @@ Ziel: Entitäten einfach an- und abwählen und auf einen Blick sehen, was export
 - **Attribute:** wie in der nativen Integration (siehe M1).
 - **Heartbeat-Markierung:** Feld `_heartbeat`, kein Tag (siehe M1).
 - **Übersicht:** beginnt als Liste im Options-Flow (M3). Das eigene Panel kommt viel später (M9).
+- **Projektname (24.11.2026):** Die „Guidelines for Using InfluxData Trademarks“ erlauben InfluxData-Marken im Namen fremder Produkte nicht ohne Erlaubnis und sagen, dass die Plattform nicht zu „Influx“ verkürzt werden soll. Deshalb wurde das Projekt von Influx Picker in **Series Picker** umbenannt. InfluxDB® wird nur beschreibend genannt („für InfluxDB®“), und jede Seite, die es nennt, endet mit dem Markenhinweis, den die Richtlinien verlangen.
+- **InfluxDB 1.x und 3.x (24.11.2026):** geplant, ruhen, Beiträge willkommen (siehe M5, M6).
 
 ## Offene Fragen
 
-1. **Markenrisiko bei Veröffentlichung:** „Influx“ im Namen kann bei öffentlicher Nutzung Probleme mit den Markenrichtlinien von InfluxData machen. Vor dem Veröffentlichen prüfen, nur beschreibend verwenden und auf die fehlende Verbindung zu InfluxData hinweisen. Bei rein privater Nutzung unkritisch.
+Derzeit keine.
+
+---
+
+InfluxDB® und InfluxData® sind eingetragene Marken der InfluxData Inc., die mit diesem Projekt nicht verbunden ist und es nicht unterstützt.
