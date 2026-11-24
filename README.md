@@ -16,11 +16,14 @@ write are set in YAML, and every change needs a restart of Home Assistant.
 Series Picker removes these restarts: you pick entities with labels or a list
 in the UI, and the change applies at once.
 
-> **Status: v0.1, early version.** Covered by automated tests and tested in
-> one real installation, where the points matched those of the core
-> integration. The code is largely AI-generated (Claude by Anthropic) and
-> not thoroughly reviewed. It handles your InfluxDB token, so review it and
-> start with a test bucket. Bug reports and test results are very welcome.
+> **Status: v0.2, early version.** Covered by automated tests. Version 0.1 was
+> tested in one real installation, where the points matched those of the core
+> integration; the changes in 0.2 (new name, changing the connection, manual
+> list, overview, diagnostic sensors, several labels per field) are covered by
+> tests but not yet tested in a real installation. The code is largely
+> AI-generated (Claude by Anthropic) and not thoroughly reviewed. It handles
+> your InfluxDB token, so review it and start with a test bucket. Bug reports
+> and test results are very welcome.
 
 ## Features
 

@@ -1,13 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-11-24)
+
+**Upgrade note:** the project was renamed from Influx Picker to Series Picker
+(domain `series_picker`, repository `series-picker`), to follow InfluxData's
+trademark guidelines. Home Assistant treats it as a new integration: remove
+Influx Picker and set Series Picker up again; labels and data in InfluxDB
+stay. See the installation guide.
 
 - Integration icon (light and dark), shown in Home Assistant 2026.3 and
   later.
-- **Renamed from Influx Picker to Series Picker** (domain `series_picker`,
-  repository `series-picker`), to follow InfluxData's trademark guidelines.
-  Existing installations must remove Influx Picker and set Series Picker up
-  again; labels and data stay. See the installation guide.
 - Diagnostic sensors per entry: tracked entities, queued points, points
   written, dropped points, write errors, last successful write.
 - Each label field can now hold several labels. Entries saved with a single

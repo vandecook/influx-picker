@@ -17,12 +17,15 @@ von Home Assistant. Series Picker macht diese Neustarts überflüssig: Entitäte
 werden per Label oder Liste in der Oberfläche ausgewählt, die Änderung gilt
 sofort.
 
-> **Status: v0.1, frühe Version.** Mit automatischen Tests abgedeckt und in
-> einer echten Installation getestet; dort stimmten die Punkte mit denen der
-> nativen Integration überein. Der Code ist großteils KI-generiert (Claude von
-> Anthropic) und nicht gründlich geprüft. Er verwaltet deinen InfluxDB-Token,
-> also prüf ihn und fang mit einem Test-Bucket an. Fehlerberichte und
-> Testergebnisse sind sehr willkommen.
+> **Status: v0.2, frühe Version.** Mit automatischen Tests abgedeckt. Version
+> 0.1 wurde in einer echten Installation getestet; dort stimmten die Punkte
+> mit denen der nativen Integration überein. Die Änderungen in 0.2 (neuer
+> Name, Verbindung ändern, manuelle Liste, Übersicht, Diagnose-Sensoren,
+> mehrere Labels pro Feld) sind mit Tests abgedeckt, aber noch nicht in einer
+> echten Installation getestet. Der Code ist großteils KI-generiert (Claude
+> von Anthropic) und nicht gründlich geprüft. Er verwaltet deinen
+> InfluxDB-Token, also prüf ihn und fang mit einem Test-Bucket an.
+> Fehlerberichte und Testergebnisse sind sehr willkommen.
 
 ## Funktionen
 

@@ -2,7 +2,7 @@
 
 [Deutsch](ROADMAP.de.md) · [README](README.md)
 
-Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; a first real test ran on 2026-11-23 (one installation, InfluxDB 2). Release v0.1.0 contains M0, M1 and M2; M3 is implemented but not released yet. Project name: **Series Picker**, domain `series_picker` (renamed from "Influx Picker" on 2026-11-24 after checking InfluxData's trademark guidelines, see Decided). Series Picker is a free, independent project; its purpose is to remove the Home Assistant restarts that the core integration needs whenever the set of written entities changes.
+Work started on 2026-11-17 (branch `m0-foundation`). "Done" below means implemented and covered by automated tests; a first real test ran on 2026-11-23 (one installation, InfluxDB 2). Release v0.1.0 contains M0, M1 and M2; release v0.2.0 (2026-11-24) adds M3, the diagnostic sensors from M4, several labels per field and the new name (not yet tested in a real installation). Project name: **Series Picker**, domain `series_picker` (renamed from "Influx Picker" on 2026-11-24 after checking InfluxData's trademark guidelines, see Decided). Series Picker is a free, independent project; its purpose is to remove the Home Assistant restarts that the core integration needs whenever the set of written entities changes.
 
 ## Requirements (as of 2026-11-17)
 
